@@ -1,5 +1,4 @@
 <?php
-require 'include/config.php';
 // Create users table if not exists
 $pdo->exec("CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,

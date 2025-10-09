@@ -1,5 +1,13 @@
 <?php
 session_start();
+// Session timeout logic
+$timeout_duration = 1200;
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+  $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+  session_unset();
+  session_destroy();
+}
+$_SESSION['LAST_ACTIVITY'] = time();
 require 'include/config.php';
 $login_error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -12,14 +20,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($user && password_verify($password, $user['password'])) {
       $_SESSION['user_id'] = $user['id'];
       $_SESSION['user_name'] = $user['first_name'];
+      $redirect = $_SESSION['redirect_after_login'] ?? 'plans.php';
+      unset($_SESSION['redirect_after_login']);
       echo '<div id="successMessage" style="position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);z-index:99999;">
         <div style="background:#fff;padding:40px 32px;border-radius:16px;box-shadow:0 4px 32px rgba(125,42,232,0.12);text-align:center;max-width:350px;width:90%;">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style="margin-bottom:16px;"><circle cx="12" cy="12" r="12" fill="#e9fbe7"/><path d="M7 13l3 3 7-7" stroke="#34c759" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <h2 style="color:#34c759;font-size:1.5rem;margin-bottom:8px;">Login Successful!</h2>
-          <p style="color:#222;font-size:1.1rem;margin-bottom:16px;">Redirecting to dashboard...</p>
+          <p style="color:#222;font-size:1.1rem;margin-bottom:16px;">Redirecting...</p>
         </div>
       </div>';
-            echo '<script>setTimeout(function(){ window.location.href = "plans.php"; }, 2000);</script>';
+      echo '<script>setTimeout(function(){ window.location.href = "' . $redirect . '"; }, 2000);</script>';
       exit;
     } else {
       $login_error = 'Invalid email or password.';

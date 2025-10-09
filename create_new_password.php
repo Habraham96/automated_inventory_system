@@ -1,5 +1,24 @@
 <?php
 require 'include/config.php';
+
+// Set session timeout to 20 minutes
+$timeout_duration = 1200; // 20 minutes in seconds
+
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    // If the session has been inactive for too long, destroy it
+    session_unset();
+    session_destroy();
+    header("Location: index.php"); // Redirect to login page
+    exit();
+}
+$_SESSION['LAST_ACTIVITY'] = time(); // Update last activity timestamp
+
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php"); // Redirect to login page if not logged in
+    exit();
+}
+
 $success = '';
 $error = '';
 $show_form = true;

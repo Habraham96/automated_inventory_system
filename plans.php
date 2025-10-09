@@ -1,5 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+session_start();
+require 'include/config.php';
+
+// Session timeout logic
+$timeout_duration = 1200;
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+  $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+  session_unset();
+  session_destroy();
+  header("Location: index.php?timeout=1");
+  exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+
+// Create plans table if not exists
+$pdo->exec("CREATE TABLE IF NOT EXISTS plans (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  plan_name VARCHAR(50) NOT NULL,
+  selected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)");
+
+$redirect_map = [
+  'trial' => 'trialplan.php',
+  'basic' => 'basicplan.php',
+  'standard' => 'standardplan.php',
+  'premium' => 'premiumplan.php'
+];
+
+$error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
+  $plan = $_POST['plan'];
+  $user_id = $_SESSION['user_id'] ?? null;
+  if ($user_id && isset($redirect_map[$plan])) {
+    // Save selected plan
+    $stmt = $pdo->prepare('INSERT INTO plans (user_id, plan_name) VALUES (?, ?)');
+    $stmt->execute([$user_id, $plan]);
+    header('Location: ' . $redirect_map[$plan]);
+    exit;
+  } else {
+    $error = 'Invalid plan selection or user not logged in.';
+  }
+}
+?>
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -27,52 +70,59 @@
       </nav>
     </header>
     <section class="home">
-  <div style="width:100%;max-width:600px;margin:40px 50px auto;">
-    <h2 style="margin-bottom:32px;text-align:center;">Choose the best plan for your business</h2>
-            <p style="text-align:center;font-size:0.95rem;color:#555;max-width:480px;margin:0 auto 24px auto;">Thank you for choosing our Inventory and Sales Management System. To get started, please select a subscription plan that best suits your business needs.</p>
-    <div class="plan-table" style="display: flex; gap: 24px; justify-content: flex-start; align-items: flex-end; margin-top: 30px; margin-bottom: 32px; flex-wrap: wrap;">
-      <div class="plan-card" tabindex="0">
-        <h3>Free Trial</h3>
-        <div class="plan-price">Free / 14 days</div>
-        <div class="plan-desc">Try all features at no cost</div>
-        <button class="plan-detail-btn" data-plan="trial">View Detail</button>
+      <div style="width:100%;max-width:600px;margin:40px 50px auto;">
+        <h2 style="margin-bottom:32px;text-align:center;">Choose the best plan for your business</h2>
+        <p style="text-align:center;font-size:0.95rem;color:#555;max-width:480px;margin:0 auto 24px auto;">Thank you for choosing our Inventory and Sales Management System. To get started, please select a subscription plan that best suits your business needs.</p>
+        <?php if (!empty($error)): ?>
+          <div style="color:red; margin:16px 0; text-align:center; font-weight:500; font-size:1.1rem;">
+            <?= htmlspecialchars($error) ?>
+          </div>
+        <?php endif; ?>
+        <form action="" method="post">
+          <div class="plan-table" style="display: flex; gap: 24px; justify-content: flex-start; align-items: flex-end; margin-top: 30px; margin-bottom: 32px; flex-wrap: wrap;">
+            <div class="plan-card" tabindex="0">
+              <h3>Free Trial</h3>
+              <div class="plan-price">Free / 14 days</div>
+              <div class="plan-desc">Try all features at no cost</div>
+              <button class="plan-detail-btn" type="button" data-plan="trial">View Detail</button>
+              <input type="radio" name="plan" value="trial" style="margin-top:12px;" required>
+            </div>
+            <div class="plan-card" tabindex="0">
+              <h3>Basic Plan</h3>
+              <div class="plan-price">N5,000/month</div>
+              <div class="plan-desc">Ideal for small businesses</div>
+              <button class="plan-detail-btn" type="button" data-plan="basic">View Detail</button>
+              <input type="radio" name="plan" value="basic" style="margin-top:12px;">
+            </div>
+            <div class="plan-card" tabindex="0">
+              <h3>Standard Plan</h3>
+              <div class="plan-price">N10,000/month</div>
+              <div class="plan-desc">Perfect for growing businesses</div>
+              <button class="plan-detail-btn" type="button" data-plan="standard">View Detail</button>
+              <input type="radio" name="plan" value="standard" style="margin-top:12px;">
+            </div>
+            <div class="plan-card" tabindex="0" style="width:260px;min-width:260px;max-width:260px;">
+              <h3>Premium Plan</h3>
+              <div class="plan-price">N20,000/month</div>
+              <div class="plan-desc">Best for established businesses</div>
+              <button class="plan-detail-btn" type="button" data-plan="premium">View Detail</button>
+              <input type="radio" name="plan" value="premium" style="margin-top:12px;">
+            </div>
+          </div>
+          <button class="button" type="submit" style="align-self:flex-end;margin-left:auto;background:#7d2ae8;color:#fff;border:none;border-radius:24px;padding:16px 36px;font-size:1.2rem;font-weight:bold;box-shadow:0 4px 24px 0 rgba(125,42,232,0.18);">Proceed</button>
+        </form>
+        <!-- Modal for plan details -->
+        <div id="planModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.35);z-index:9999;align-items:center;justify-content:center;">
+          <div id="planModalContent" style="background:#fff;border-radius:16px;max-width:400px;width:90vw;padding:32px 24px;box-shadow:0 8px 32px 0 rgba(0,0,0,0.18);position:relative;">
+            <button id="closePlanModal" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#7d2ae8;">&times;</button>
+            <h3 id="modalPlanTitle" style="margin-bottom:12px;color:#7d2ae8;font-size:1.3rem;"></h3>
+            <div id="modalPlanPrice" style="font-size:1.1rem;margin-bottom:8px;font-weight:bold;"></div>
+            <div id="modalPlanDesc" style="font-size:1rem;color:#555;margin-bottom:16px;"></div>
+            <ul id="modalPlanFeatures" style="font-size:1rem;color:#333;padding-left:18px;margin-bottom:0;"></ul>
+          </div>
+        </div>
       </div>
-      <div class="plan-card" tabindex="0">
-        <h3>Basic Plan</h3>
-        <div class="plan-price">N5,000/month</div>
-        <div class="plan-desc">Ideal for small businesses</div>
-        <button class="plan-detail-btn" data-plan="basic">View Detail</button>
-      </div>
-      <div class="plan-card" tabindex="0">
-        <h3>Standard Plan</h3>
-        <div class="plan-price">N10,000/month</div>
-        <div class="plan-desc">Perfect for growing businesses</div>
-        <button class="plan-detail-btn" data-plan="standard">View Detail</button>
-      </div>
-  <div class="plan-card" tabindex="0" style="width:260px;min-width:260px;max-width:260px;">
-        <h3>Premium Plan</h3>
-        <div class="plan-price">N20,000/month</div>
-        <div class="plan-desc">Best for established businesses</div>
-        <button class="plan-detail-btn" data-plan="premium">View Detail</button>
-      </div>
-      <button id="proceedBtn" style="align-self:flex-end;margin-left:auto;background:#7d2ae8;color:#fff;border:none;border-radius:24px;padding:16px 36px;font-size:1.2rem;font-weight:bold;box-shadow:0 4px 24px 0 rgba(125,42,232,0.18);cursor:not-allowed;opacity:0.6;transition:opacity 0.2s,background 0.2s;" disabled>Proceed</button>
-    </div>
-      <!-- <div class="login_signup">Remembered your password? <a href="index.php">Login</a></div> -->
-    <!-- Modal for plan details -->
-    <div id="planModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.35);z-index:9999;align-items:center;justify-content:center;">
-      <div id="planModalContent" style="background:#fff;border-radius:16px;max-width:400px;width:90vw;padding:32px 24px;box-shadow:0 8px 32px 0 rgba(0,0,0,0.18);position:relative;">
-        <button id="closePlanModal" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#7d2ae8;">&times;</button>
-        <h3 id="modalPlanTitle" style="margin-bottom:12px;color:#7d2ae8;font-size:1.3rem;"></h3>
-        <div id="modalPlanPrice" style="font-size:1.1rem;margin-bottom:8px;font-weight:bold;"></div>
-        <div id="modalPlanDesc" style="font-size:1rem;color:#555;margin-bottom:16px;"></div>
-        <ul id="modalPlanFeatures" style="font-size:1rem;color:#333;padding-left:18px;margin-bottom:0;"></ul>
-      </div>
-    </div>
-    <!-- Proceed Button below plans -->
-    <div style="width:100%;max-width:600px;margin:0 auto;display:flex;justify-content:flex-end;">
-    </div>
-    </div>
-  </section>
+    </section>
     <style>
       .plan-card {
         flex: 1 1 200px;
