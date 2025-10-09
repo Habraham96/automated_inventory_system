@@ -1,3 +1,73 @@
+<?php
+require 'include/config.php';
+// Create users table if not exists
+$pdo->exec("CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  first_name VARCHAR(100) NOT NULL,
+  surname VARCHAR(100) NOT NULL,
+  other_names VARCHAR(100),
+  business_name VARCHAR(150) NOT NULL,
+  business_logo VARCHAR(255),
+  address VARCHAR(255) NOT NULL,
+  state VARCHAR(50) NOT NULL,
+  lga VARCHAR(50) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);");
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Simple validation
+    $first_name = $_POST['first_name'] ?? '';
+    $surname = $_POST['surname'] ?? '';
+    $other_names = $_POST['other_names'] ?? '';
+    $business_name = $_POST['business_name'] ?? '';
+    $address = $_POST['address'] ?? '';
+    $state = $_POST['state'] ?? '';
+    $lga = $_POST['lga'] ?? '';
+    $phone = $_POST['phone'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
+    $business_logo = '';
+
+    // Handle logo upload
+    if (isset($_FILES['business_logo']) && $_FILES['business_logo']['error'] === UPLOAD_ERR_OK) {
+        $target_dir = "uploads/";
+        if (!is_dir($target_dir)) mkdir($target_dir, 0777, true);
+        $target_file = $target_dir . basename($_FILES["business_logo"]["name"]);
+        if (move_uploaded_file($_FILES["business_logo"]["tmp_name"], $target_file)) {
+            $business_logo = $target_file;
+        }
+    }
+
+    // Password hash and basic validation
+    if ($password !== $confirm_password) {
+        $error = "Passwords do not match!";
+    } else {
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+        try {
+            $stmt = $pdo->prepare("INSERT INTO users (first_name, surname, other_names, business_name, business_logo, address, state, lga, phone, email, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$first_name, $surname, $other_names, $business_name, $business_logo, $address, $state, $lga, $phone, $email, $hash]);
+      echo '<div id="successMessage" style="position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);z-index:99999;">
+        <div style="background:#fff;padding:40px 32px;border-radius:16px;box-shadow:0 4px 32px rgba(125,42,232,0.12);text-align:center;max-width:350px;width:90%;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style="margin-bottom:16px;"><circle cx="12" cy="12" r="12" fill="#e9fbe7"/><path d="M7 13l3 3 7-7" stroke="#34c759" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <h2 style="color:#34c759;font-size:1.5rem;margin-bottom:8px;">Signup Successful!</h2>
+          <p style="color:#222;font-size:1.1rem;margin-bottom:16px;">You will be redirected to the login page shortly.</p>
+        </div>
+      </div>
+      <script>
+        setTimeout(function(){ window.location.href = "index.php"; }, 2500);
+      </script>';
+      exit;
+        } catch (PDOException $e) {
+            $error = "Signup failed: " . $e->getMessage();
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,107 +100,80 @@
     <section class="home">
       <div class="form_container">
           <h2 style="margin-top: 60px;">Signup</h2>
-        <form action="#">
+        <?php if (!empty($error)): ?>
+            <div style="color:red;"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        <form action="" method="post" enctype="multipart/form-data">
       <div class="signup-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px 32px; width: 95%; margin-bottom: 32px;">
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <input type="text" placeholder="First Name" required />
+          <input type="text" name="first_name" placeholder="First Name" required />
           <i class="uil uil-user"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <input type="text" placeholder="Surname" required />
+          <input type="text" name="surname" placeholder="Surname" required />
           <i class="uil uil-user"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <input type="text" placeholder="Other name(s)" />
+          <input type="text" name="other_names" placeholder="Other name(s)" />
           <i class="uil uil-user"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <input type="text" placeholder="Business Name" required />
+          <input type="text" name="business_name" placeholder="Business Name" required />
           <i class="uil uil-briefcase"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
           <label for="businessLogo" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#fff;border:1.5px solid #ececf6;border-radius:10px;cursor:pointer;position:relative;">
             <span id="logoPlaceholder" style="width:100%;text-align:center;color:#888;font-size:1.1rem;">Upload business logo</span>
-            <input id="businessLogo" type="file" accept="image/*" style="opacity:0;position:absolute;left:0;top:0;width:100%;height:100%;cursor:pointer;" />
+            <input id="businessLogo" name="business_logo" type="file" accept="image/*" style="opacity:0;position:absolute;left:0;top:0;width:100%;height:100%;cursor:pointer;" />
             <i class="uil uil-image" style="position:absolute;right:18px;top:50%;transform:translateY(-50%);"></i>
           </label>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <input type="text" placeholder="Address" required />
+          <input type="text" name="address" placeholder="Address" required />
           <i class="uil uil-location-point"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <select id="stateSelect" required style="height:100%;width:100%;border:none;outline:none;padding:0 30px;color:#222;font-size:1.25rem;font-weight:500;transition:all 0.2s ease;border-bottom:2.5px solid #7d2ae8;background:#f7f7fa;">
+          <select id="stateSelect" name="state" required style="height:100%;width:100%;border:none;outline:none;padding:0 30px;color:#222;font-size:1.25rem;font-weight:500;transition:all 0.2s ease;border-bottom:2.5px solid #7d2ae8;background:#f7f7fa;">
             <option value="">Select State</option>
-            <option value="Abia">Abia</option>
-            <option value="Adamawa">Adamawa</option>
-            <option value="Akwa Ibom">Akwa Ibom</option>
-            <option value="Anambra">Anambra</option>
-            <option value="Bauchi">Bauchi</option>
-            <option value="Bayelsa">Bayelsa</option>
-            <option value="Benue">Benue</option>
-            <option value="Borno">Borno</option>
-            <option value="Cross River">Cross River</option>
-            <option value="Delta">Delta</option>
-            <option value="Ebonyi">Ebonyi</option>
-            <option value="Edo">Edo</option>
-            <option value="Ekiti">Ekiti</option>
-            <option value="Enugu">Enugu</option>
-            <option value="FCT">FCT</option>
-            <option value="Gombe">Gombe</option>
-            <option value="Imo">Imo</option>
-            <option value="Jigawa">Jigawa</option>
-            <option value="Kaduna">Kaduna</option>
-            <option value="Kano">Kano</option>
-            <option value="Katsina">Katsina</option>
-            <option value="Kebbi">Kebbi</option>
-            <option value="Kogi">Kogi</option>
-            <option value="Kwara">Kwara</option>
-            <option value="Lagos">Lagos</option>
-            <option value="Nasarawa">Nasarawa</option>
-            <option value="Niger">Niger</option>
-            <option value="Ogun">Ogun</option>
-            <option value="Ondo">Ondo</option>
-            <option value="Osun">Osun</option>
-            <option value="Oyo">Oyo</option>
-            <option value="Plateau">Plateau</option>
-            <option value="Rivers">Rivers</option>
-            <option value="Sokoto">Sokoto</option>
-            <option value="Taraba">Taraba</option>
-            <option value="Yobe">Yobe</option>
-            <option value="Zamfara">Zamfara</option>
+            <?php
+            // PHP array of states
+            $states = ["Abia","Adamawa","Akwa Ibom","Anambra","Bauchi","Bayelsa","Benue","Borno","Cross River","Delta","Ebonyi","Edo","Ekiti","Enugu","FCT","Gombe","Imo","Jigawa","Kaduna","Kano","Katsina","Kebbi","Kogi","Kwara","Lagos","Nasarawa","Niger","Ogun","Ondo","Osun","Oyo","Plateau","Rivers","Sokoto","Taraba","Yobe","Zamfara"];
+            foreach ($states as $state) {
+                echo "<option value=\"$state\">$state</option>";
+            }
+            ?>
           </select>
           <i class="uil uil-map"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <select id="lgaSelect" required style="height:100%;width:100%;border:none;outline:none;padding:0 30px;color:#222;font-size:1.25rem;font-weight:500;transition:all 0.2s ease;border-bottom:2.5px solid #7d2ae8;background:#f7f7fa;">
+          <select id="lgaSelect" name="lga" required style="height:100%;width:100%;border:none;outline:none;padding:0 30px;color:#222;font-size:1.25rem;font-weight:500;transition:all 0.2s ease;border-bottom:2.5px solid #7d2ae8;background:#f7f7fa;">
             <option value="">Select Local Government Area</option>
           </select>
           <i class="uil uil-map-marker"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <input type="tel" placeholder="Phone number" required />
+          <input type="tel" name="phone" placeholder="Phone number" required />
           <i class="uil uil-phone"></i>
         </div>
       </div>
       <div class="input_box" style="max-width:830px;width:100%;">
-        <input type="email" placeholder="(Automatically fix the verified E-mail here)" required />
+        <input type="email" name="email" placeholder="(Automatically fix the verified E-mail here)" required />
         <i class="uil uil-envelope-alt email"></i>
       </div>
-  <div style="display:flex;gap:40px;width:100%;justify-content:flex-start;">
-  <div class="input_box" style="max-width:500px;width:100%;">
-          <input type="password" placeholder="Create password" required />
+      <div style="display:flex;gap:40px;width:100%;justify-content:flex-start;">
+        <div class="input_box" style="max-width:500px;width:100%;">
+          <input type="password" name="password" placeholder="Create password" required />
           <i class="uil uil-lock password"></i>
           <i class="uil uil-eye-slash pw_hide"></i>
         </div>
-  <div class="input_box" style="max-width:800px;width:90%;">
-          <input type="password" placeholder="Confirm password" required />
+        <div class="input_box" style="max-width:800px;width:90%;">
+          <input type="password" name="confirm_password" placeholder="Confirm password" required />
           <i class="uil uil-lock password"></i>
           <i class="uil uil-eye-slash pw_hide"></i>
         </div>
       </div>
       <div style="height:24px;"></div>
-  <button class="button" type="submit" id="signupSubmitBtn">Signup Now</button>
+      <button class="button" type="submit" id="signupSubmitBtn" name="sub">Signup Now</button>
     </form>
     <!-- <div class="login_signup">Already have an account? <a href="index.php" id="login">Login</a></div> -->
     </form>
@@ -150,17 +193,7 @@
       if (document.readyState === 'complete') hidePreloader(); else { window.addEventListener('load', hidePreloader); setTimeout(hidePreloader, 5000); }
     })();
 
-    // Redirect to plans.php after form submission
-    document.addEventListener('DOMContentLoaded', function() {
-      var signupForm = document.querySelector('.form_container form');
-      if(signupForm) {
-        signupForm.addEventListener('submit', function(e) {
-          e.preventDefault();
-          // Optionally, validate form here
-          window.location.href = 'plans.php';
-        });
-      }
-    });
+    // ...existing code...
         // Nigerian States and LGAs
         const stateLGAs = {
           "Abia": ["Aba North","Aba South","Arochukwu","Bende","Ikwuano","Isiala Ngwa North","Isiala Ngwa South","Isuikwuato","Obi Ngwa","Ohafia","Osisioma","Ugwunagbo","Ukwa East","Ukwa West","Umuahia North","Umuahia South","Umu Nneochi"],
@@ -221,7 +254,33 @@
           }
         });
 
-        // ...existing code...
+        // AJAX for LGAs
+    document.addEventListener('DOMContentLoaded', function() {
+      const stateSelect = document.getElementById('stateSelect');
+      const lgaSelect = document.getElementById('lgaSelect');
+      if(stateSelect && lgaSelect) {
+        stateSelect.addEventListener('change', function() {
+          const state = this.value;
+          lgaSelect.innerHTML = '<option value="">Loading...</option>';
+          if(state) {
+            fetch('get_lgas.php?state=' + encodeURIComponent(state))
+              .then(res => res.json())
+              .then(lgas => {
+                lgaSelect.innerHTML = '<option value="">Select Local Government Area</option>';
+                lgas.forEach(function(lga) {
+                  const opt = document.createElement('option');
+                  opt.value = lga;
+                  opt.textContent = lga;
+                  lgaSelect.appendChild(opt);
+                });
+              });
+          } else {
+            lgaSelect.innerHTML = '<option value="">Select Local Government Area</option>';
+          }
+        });
+      }
+    });
+
         const home = document.querySelector(".home");
         const formContainer = document.querySelector(".form_container");
         const formOpenBtn = document.getElementById('form-open');

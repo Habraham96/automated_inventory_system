@@ -1,3 +1,34 @@
+<?php
+session_start();
+require 'include/config.php';
+$login_error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $email = $_POST['email'] ?? '';
+  $password = $_POST['password'] ?? '';
+  if ($email && $password) {
+    $stmt = $pdo->prepare('SELECT * FROM users WHERE email = ?');
+    $stmt->execute([$email]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($user && password_verify($password, $user['password'])) {
+      $_SESSION['user_id'] = $user['id'];
+      $_SESSION['user_name'] = $user['first_name'];
+      echo '<div id="successMessage" style="position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);z-index:99999;">
+        <div style="background:#fff;padding:40px 32px;border-radius:16px;box-shadow:0 4px 32px rgba(125,42,232,0.12);text-align:center;max-width:350px;width:90%;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style="margin-bottom:16px;"><circle cx="12" cy="12" r="12" fill="#e9fbe7"/><path d="M7 13l3 3 7-7" stroke="#34c759" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <h2 style="color:#34c759;font-size:1.5rem;margin-bottom:8px;">Login Successful!</h2>
+          <p style="color:#222;font-size:1.1rem;margin-bottom:16px;">Redirecting to dashboard...</p>
+        </div>
+      </div>';
+            echo '<script>setTimeout(function(){ window.location.href = "plans.php"; }, 2000);</script>';
+      exit;
+    } else {
+      $login_error = 'Invalid email or password.';
+    }
+  } else {
+    $login_error = 'Please enter both email and password.';
+  }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,14 +63,19 @@
     <div class="form_container" style="position:relative;overflow:hidden;">
       <!-- Login Form -->
       <div class="form login_form">
-        <form action="#" style="width:100%;">
+  <form action="" method="post" style="width:100%;">
           <h2>Login</h2>
+          <?php if (!empty($login_error)): ?>
+            <div style="color:red; margin-bottom:16px; font-weight:500; font-size:1.1rem; text-align:center;">
+                <?= htmlspecialchars($login_error) ?>
+            </div>
+          <?php endif; ?>
           <div class="input_box">
-            <input type="email" placeholder="Enter your email" required />
+            <input type="email" name="email" placeholder="Enter your email" required />
             <i class="uil uil-envelope-alt email"></i>
           </div>
           <div class="input_box">
-            <input type="password" placeholder="Enter your password" required />
+            <input type="password" name="password" placeholder="Enter your password" required />
             <i class="uil uil-lock password"></i>
             <i class="uil uil-eye-slash pw_hide"></i>
           </div>
@@ -50,7 +86,7 @@
             </span>
             <a href="forgotten_password.php" class="forgot_pw">Forgot password?</a>
           </div>
-          <button class="button">Login Now</button>
+          <button class="button" type="submit">Login Now</button>
     <div class="login_signup">Don't have an account? <a href="sign_up.php">Signup</a></div>
         </form>
       </div>

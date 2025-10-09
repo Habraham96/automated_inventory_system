@@ -1,3 +1,35 @@
+<?php
+require 'include/config.php';
+$success = '';
+$error = '';
+$show_form = true;
+$token = $_GET['token'] ?? '';
+if ($token) {
+  $stmt = $pdo->prepare('SELECT * FROM users WHERE reset_token = ? AND reset_expires > NOW()');
+  $stmt->execute([$token]);
+  $user = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$user) {
+    $error = 'Invalid or expired reset link.';
+    $show_form = false;
+  } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $password = $_POST['password'] ?? '';
+    $confirm = $_POST['confirm_password'] ?? '';
+    if (!$password || !$confirm) {
+      $error = 'Please enter and confirm your new password.';
+    } elseif ($password !== $confirm) {
+      $error = 'Passwords do not match.';
+    } else {
+      $hash = password_hash($password, PASSWORD_DEFAULT);
+      $pdo->prepare('UPDATE users SET password = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?')->execute([$hash, $user['id']]);
+      $success = 'Password reset successful! You can now log in.';
+      $show_form = false;
+    }
+  }
+} else {
+  $error = 'No reset token provided.';
+  $show_form = false;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,29 +63,43 @@
     <div class="form_container" style="position:relative;overflow:hidden;">
       <!-- Login Form -->
       <div class="form login_form">
-        <form action="#" style="width:100%;">
+        <?php if (!empty($success)): ?>
+          <div id="successMessage" style="position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);z-index:99999;">
+              <div style="background:#fff;padding:40px 32px;border-radius:16px;box-shadow:0 4px 32px rgba(125,42,232,0.12);text-align:center;max-width:350px;width:90%;">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style="margin-bottom:16px;"><circle cx="12" cy="12" r="12" fill="#e9fbe7"/><path d="M7 13l3 3 7-7" stroke="#34c759" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <h2 style="color:#34c759;font-size:1.5rem;margin-bottom:8px;">Password Reset Successful!</h2>
+                  <p style="color:#222;font-size:1.1rem;margin-bottom:16px;">You can now log in with your new password.</p>
+                  <a href="index.php" style="display:inline-block;margin-top:12px;padding:10px 28px;background:#7d2ae8;color:#fff;border-radius:8px;text-decoration:none;font-weight:500;">Go to Login</a>
+              </div>
+          </div>
+        <?php elseif ($show_form): ?>
+        <form action="?token=<?= htmlspecialchars($token) ?>" method="post" style="width:100%;">
           <h2>Create New Password</h2>
-          <div class="input_box">
-            <input type="password" placeholder="New Password" required />
-            <i class="uil uil-lock password"></i>
-            <i class="uil uil-eye-slash pw_hide"></i>
-          </div>
-          <div class="input_box">
-            <input type="password" placeholder="Confirm Password" required />
-            <i class="uil uil-lock password"></i>
-            <i class="uil uil-eye-slash pw_hide"></i>
-          </div>
-          <button class="button" id="setPasswordBtn">Set Password</button>
-          <!-- Modal Flash Message -->
-          <div id="flashModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.25);z-index:9999;align-items:center;justify-content:center;">
-            <div style="background:#fff;border-radius:12px;max-width:340px;width:90vw;padding:32px 18px;box-shadow:0 8px 32px 0 rgba(0,0,0,0.18);position:relative;display:flex;flex-direction:column;align-items:center;">
-              <span style="font-size:2.5rem;color:#198754;margin-bottom:8px;">&#10003;</span>
-              <span style="font-size:1.2rem;color:#198754;font-weight:600;text-align:center;">Password Reset Succesfull<br>Login with new password</br></span>
-              <button id="flashOkBtn" style="margin-top:18px;padding:8px 28px;font-size:1rem;background:#7d2ae8;color:#fff;border:none;border-radius:8px;cursor:pointer;">OK</button>
+          <?php if (!empty($error)): ?>
+            <div style="color:red; margin-bottom:16px; font-weight:500; font-size:1.1rem; text-align:center;">
+                <?= htmlspecialchars($error) ?>
             </div>
+          <?php endif; ?>
+          <div class="input_box">
+            <input type="password" name="password" placeholder="New Password" required />
+            <i class="uil uil-lock password"></i>
+            <i class="uil uil-eye-slash pw_hide"></i>
           </div>
+          <div class="input_box">
+            <input type="password" name="confirm_password" placeholder="Confirm Password" required />
+            <i class="uil uil-lock password"></i>
+            <i class="uil uil-eye-slash pw_hide"></i>
+          </div>
+          <button class="button" type="submit">Set Password</button>
           <div class="login_signup">Return to <a href="index.php">Login</a></div>
         </form>
+        <?php else: ?>
+          <div style="color:red; margin-bottom:16px; font-weight:500; font-size:1.1rem; text-align:center;">
+            <?= htmlspecialchars($error) ?>
+          </div>
+          <div class="login_signup">Return to <a href="index.php">Login</a></div>
+        <?php endif; ?>
+         
       </div>
     </div>
   </div>
