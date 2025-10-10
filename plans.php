@@ -21,11 +21,12 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS plans (
   selected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )");
 
+
 $redirect_map = [
-  'trial' => 'trialplan.php',
-  'basic' => 'basicplan.php',
-  'standard' => 'standardplan.php',
-  'premium' => 'premiumplan.php'
+  'trial' => 'payment_options.php',
+  'basic' => 'payment_options.php',
+  'standard' => 'payment_options.php',
+  'premium' => 'payment_options.php'
 ];
 
 $error = '';
