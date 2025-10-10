@@ -1,4 +1,23 @@
 <?php
+require 'include/config.php';
+$token = $_GET['token'] ?? '';
+$show_form = true;
+$error = '';
+if ($token) {
+  $stmt = $pdo->prepare('SELECT * FROM signup_requests WHERE token = ?');
+  $stmt->execute([$token]);
+  $signup = $stmt->fetch(PDO::FETCH_ASSOC);
+  if ($signup && !$signup['verified']) {
+    // Mark as verified
+    $pdo->prepare('UPDATE signup_requests SET verified = 1 WHERE id = ?')->execute([$signup['id']]);
+    $show_form = true;
+  } elseif ($signup && $signup['verified']) {
+    $show_form = true;
+  } else {
+    $error = 'Invalid or expired registration link.';
+    $show_form = false;
+  }
+}
 // Create users table if not exists
 $pdo->exec("CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -17,20 +36,27 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS users (
 );");
 
 // Handle form submission
+if ($show_form && $token) {
+  // Fetch email from signup_requests
+  $stmt = $pdo->prepare('SELECT email FROM signup_requests WHERE token = ?');
+  $stmt->execute([$token]);
+  $signup_email = $stmt->fetchColumn();
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Simple validation
-    $first_name = $_POST['first_name'] ?? '';
-    $surname = $_POST['surname'] ?? '';
-    $other_names = $_POST['other_names'] ?? '';
-    $business_name = $_POST['business_name'] ?? '';
-    $address = $_POST['address'] ?? '';
-    $state = $_POST['state'] ?? '';
-    $lga = $_POST['lga'] ?? '';
-    $phone = $_POST['phone'] ?? '';
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
-    $confirm_password = $_POST['confirm_password'] ?? '';
-    $business_logo = '';
+  // Simple validation
+  $first_name = $_POST['first_name'] ?? '';
+  $surname = $_POST['surname'] ?? '';
+  $other_names = $_POST['other_names'] ?? '';
+  $business_name = $_POST['business_name'] ?? '';
+  $address = $_POST['address'] ?? '';
+  $state = $_POST['state'] ?? '';
+  $lga = $_POST['lga'] ?? '';
+  $phone = $_POST['phone'] ?? '';
+  $email = $signup_email ?? ($_POST['email'] ?? '');
+  $password = $_POST['password'] ?? '';
+  $confirm_password = $_POST['confirm_password'] ?? '';
+  $business_logo = '';
 
     // Handle logo upload
     if (isset($_FILES['business_logo']) && $_FILES['business_logo']['error'] === UPLOAD_ERR_OK) {
@@ -70,16 +96,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inventory | Sales</title>
-    <link rel="stylesheet" href="style.css" />
-    <!-- Unicons -->
-    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
-    <link rel="stylesheet" href="asset/css/sign_up_form.css" />
-  </head>
-  <body>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory | Sales</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Unicons -->
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+  <link rel="stylesheet" href="asset/css/sign_up_form.css" />
+</head>
+<body>
+<?php if (!$show_form): ?>
+  <div style="max-width:400px;margin:60px auto;padding:32px;background:#fff;border-radius:16px;box-shadow:0 4px 32px rgba(125,42,232,0.12);text-align:center;">
+    <h2 style="color:#e53935;">Registration Link Error</h2>
+    <p><?= htmlspecialchars($error) ?></p>
+    <a href="sign_up.php" style="display:inline-block;margin-top:18px;padding:10px 28px;background:#7d2ae8;color:#fff;border-radius:8px;text-decoration:none;font-weight:500;">Go to Sign Up</a>
+  </div>
+<?php endif; ?>
+<?php if ($show_form): ?>
+<!-- ...existing registration form code... -->
+<?php endif; ?>
     <!-- Preloader -->
     <div id="preloader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;z-index:99999;transition:opacity 0.35s ease;">
       <div class="spinner" style="width:72px;height:72px;border-radius:50%;border:8px solid rgba(125,42,232,0.12);border-top-color:#7d2ae8;animation:spin 1s linear infinite;"></div>
@@ -156,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
       </div>
       <div class="input_box" style="max-width:830px;width:100%;">
-        <input type="email" name="email" placeholder="(Automatically fix the verified E-mail here)" required />
+        <input type="email" name="email" value="<?= htmlspecialchars($signup_email ?? '') ?>" placeholder="Verified E-mail" required readonly />
         <i class="uil uil-envelope-alt email"></i>
       </div>
       <div style="display:flex;gap:40px;width:100%;justify-content:flex-start;">

@@ -1,3 +1,64 @@
+<?php
+session_start();
+require 'include/config.php';
+require 'vendor/autoload.php'; // Add PHPMailer autoload
+require 'include/email_config.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+// Create signup_requests table if not exists
+$pdo->exec("CREATE TABLE IF NOT EXISTS signup_requests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  token VARCHAR(255) NOT NULL,
+  requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  verified TINYINT(1) DEFAULT 0
+)");
+
+$success = '';
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $email = trim($_POST['email'] ?? '');
+  if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    // Generate token
+    $token = bin2hex(random_bytes(32));
+    // Save request
+    try {
+      $stmt = $pdo->prepare('INSERT INTO signup_requests (email, token) VALUES (?, ?)');
+      $stmt->execute([$email, $token]);
+      // Build verification link
+      $link = "http://" . $_SERVER['HTTP_HOST'] . rtrim(dirname($_SERVER['REQUEST_URI']), '/\\') . "/sign_up_form.php?token=$token";
+      // Send email using PHPMailer
+      $mail = new PHPMailer(true);
+      try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com'; // Change to your SMTP server
+        $mail->SMTPAuth = true;
+        $mail->Username = 'tobestic53@gmail.com'; // Your email
+        $mail->Password = 'rfiilpgolskxqgjs'; // Your app password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+        $mail->setFrom('tobestic53@gmail.com', 'SalesPilot');
+        $mail->addAddress($email);
+        $mail->isHTML(true);
+        $mail->Subject = 'Complete Your Registration';
+        $mail->Body = "<h2>Complete Your Registration</h2><p>Hello,</p><p>Click the link below to complete your registration:</p><a href='$link' style='background-color: #7d2ae8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;'>Complete Registration</a><p>If you didn't request this, please ignore this email.</p><hr><p><small>Link: $link</small></p>";
+        $mail->AltBody = "Hello,\n\nClick the link below to complete your registration:\n$link\n\nIf you didn't request this, please ignore this email.";
+        $mail->send();
+        $success = "A registration link has been sent to your email.";
+      } catch (Exception $e) {
+        $error = "Failed to send email. Please try again later. Error: " . $mail->ErrorInfo;
+      }
+    } catch (PDOException $e) {
+      $error = "This email is already registered or pending verification.";
+    }
+  } else {
+    $error = "Please enter a valid email address.";
+  }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +70,7 @@
     <!-- Unicons -->
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
     <link rel="stylesheet" href="asset/css/signup.css" />
-  </head>
+</head>
   <body>
     <!-- Preloader -->
     <div id="preloader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;z-index:99999;transition:opacity 0.35s ease;">
@@ -30,10 +91,20 @@
     <div class="form_container" style="position:relative;overflow:hidden;">
       <!-- Login Form -->
       <div class="form login_form">
-        <form action="#" style="width:100%;">
-          <h3 style="text-align:center;margin-bottom:18px 18px;">Input a valid E-mail</h3>
-          <div class="input_box">
-            <input type="email" placeholder="Enter your email" required />
+    <?php if (!empty($success)): ?>
+      <div style="color:#34c759;font-weight:500;text-align:center;margin-bottom:16px;">
+        <?= $success ?>
+      </div>
+    <?php endif; ?>
+    <?php if (!empty($error)): ?>
+      <div style="color:red;font-weight:500;text-align:center;margin-bottom:16px;">
+        <?= htmlspecialchars($error) ?>
+      </div>
+    <?php endif; ?>
+    <form action="" method="post" style="width:100%;">
+      <h3 style="text-align:center;margin-bottom:18px;">Input a valid E-mail</h3>
+      <div class="input_box">
+      <input type="email" name="email" placeholder="Enter your email" required />
             <i class="uil uil-envelope-alt email"></i>
           </div>
           <button class="button" id="proceedEmailBtn">Proceed</button>
@@ -79,7 +150,7 @@
           flashOkBtn.addEventListener('click', function() {
             flashModal.style.display = 'none';
             setTimeout(function() {
-              window.location.href = 'sign_up_form.php';
+              window.location.href = 'sign_up.php';
             }, 150);
           });
         }
