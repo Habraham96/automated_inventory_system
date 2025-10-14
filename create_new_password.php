@@ -1,254 +1,54 @@
-<style>
-/* Using system Comic Sans family — no external import needed */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+<?php
+require 'include/config.php';
+
+// Set session timeout to 20 minutes
+$timeout_duration = 1200; // 20 minutes in seconds
+
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+    // If the session has been inactive for too long, destroy it
+    session_unset();
+    session_destroy();
+    header("Location: index.php"); // Redirect to login page
+    exit();
 }
-a {
-  text-decoration: none;
-}
-.header {
-  position: fixed;
-  height: 80px;
-  width: 100%;
-  z-index: 100;
-  padding: 0 20px;
-  background: #fff;
-  border-bottom: 2px solid #e0e0e0;
-}
-.nav {
-  max-width: 1100px;
-  width: 100%;
-  margin: 0 auto;
-}
-.nav,
-.nav_item {
-  display: flex;
-  height: 100%;
-  align-items: center;
-  justify-content: space-between;
-}
-.nav_logo,
-.nav_link,
-.button {
-  color: #fff;
+$_SESSION['LAST_ACTIVITY'] = time(); // Update last activity timestamp
+
+// Check if the user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php"); // Redirect to login page if not logged in
+    exit();
 }
 
-.nav_logo.active {
-  color: red !important;
+$success = '';
+$error = '';
+$show_form = true;
+$token = $_GET['token'] ?? '';
+if ($token) {
+  $stmt = $pdo->prepare('SELECT * FROM users WHERE reset_token = ? AND reset_expires > NOW()');
+  $stmt->execute([$token]);
+  $user = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$user) {
+    $error = 'Invalid or expired reset link.';
+    $show_form = false;
+  } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $password = $_POST['password'] ?? '';
+    $confirm = $_POST['confirm_password'] ?? '';
+    if (!$password || !$confirm) {
+      $error = 'Please enter and confirm your new password.';
+    } elseif ($password !== $confirm) {
+      $error = 'Passwords do not match.';
+    } else {
+      $hash = password_hash($password, PASSWORD_DEFAULT);
+      $pdo->prepare('UPDATE users SET password = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?')->execute([$hash, $user['id']]);
+      $success = 'Password reset successful! You can now log in.';
+      $show_form = false;
+    }
+  }
+} else {
+  $error = 'No reset token provided.';
+  $show_form = false;
 }
-
-#form-open.button {
-  color: red !important;
-  border-color: red !important;
-}
-.nav_logo {
-  font-size: 25px;
-}
-.nav_item {
-  column-gap: 25px;
-}
-.nav_link:hover {
-  color: #007bff;
-}
-.nav_link.active {
-  color: #007bff;
-  font-weight: bold;
-  border-bottom: 3px solid #007bff;
-}
-.button {
-  padding: 6px 24px;
-  border: 2px solid #fff;
-  background: transparent;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.button:active {
-  transform: scale(0.98);
-}
-/* Home */
-.home {
-  position: relative;
-  height: 100vh;
-  width: 100%;
-  background-image: url("website-forms-bg.jpg");
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-top: 100px;
-}
-/* .home::before and .home.show::before removed to prevent overlay hiding form */
-/* From */
-.form_container {
-    max-width: 500px;
-  min-width: 400px;
-  width: 100%;
-  min-height: 60vh;
-  background: rgba(255,255,255,0.98);
-  padding: 40px 32px;
-  border-radius: 24px;
-  box-shadow: 0 8px 48px 0 rgba(0,0,0,0.25), 0 1.5px 8px 0 rgba(0,0,0,0.10);
-  opacity: 1;
-  pointer-events: auto;
-  transition: all 0.4s ease-out;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-}
-/* .home.show .form_container not needed */
-.signup_form {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: #fff;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(100%);
-  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.4s;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-.form_container.active .signup_form {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-}
-.login_form {
-  position: relative;
-  z-index: 1;
-  transition: opacity 0.4s;
-  opacity: 1;
-}
-.form_container.active .login_form {
-  opacity: 1;
-}
-.form_close {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  color: #0b0217;
-  font-size: 22px;
-  opacity: 0.7;
-  cursor: pointer;
-}
-.form_container h2 {
-  font-size: 2.5rem;
-  color: #0b0217;
-  text-align: center;
-  font-weight: bold;
-  margin-bottom: 32px;
-}
-.input_box {
-  position: relative;
-  margin-top: 30px;
-  width: 100%;
-  height: 40px;
-}
-.input_box input {
-  height: 100%;
-  width: 100%;
-  border: none;
-  outline: none;
-  padding: 0 30px;
-  color: #222;
-  font-size: 1.25rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  border-bottom: 2.5px solid #7d2ae8;
-  background: #fff;
-  border: 1.5px solid #ececf6;
-  border-radius: 10px;
-  outline: none;
-  padding: 0 54px 0 64px; /* Increase right padding for icon spacing */
-  color: #222;
-  font-size: 1.25rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-.input_box input:focus {
-  border-color: #7d2ae8;
-  box-shadow: 0 0 8px 2px #a084e8, 0 0 0 4px rgba(125,42,232,0.10);
-  outline: none;
-  transition: box-shadow 0.3s, border-color 0.3s;
-}
-.input_box i {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 20px;
-  color: #707070;
-}
-.input_box i.email,
-.input_box i.password {
-  left: 18px;
-}
-.input_box input:focus ~ i.email,
-.input_box input:focus ~ i.password {
-  color: #7d2ae8;
-}
-.input_box i.pw_hide {
-  right: 14px; /* Add space from right border */
-  font-size: 18px;
-  cursor: pointer;
-}
-.option_field {
-  margin-top: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.form_container a {
-  color: #7d2ae8;
-  font-size: 12px;
-}
-.form_container a:hover {
-  text-decoration: underline;
-}
-.checkbox {
-  display: flex;
-  column-gap: 8px;
-  white-space: nowrap;
-}
-.checkbox input {
-  accent-color: #7d2ae8;
-}
-.checkbox label {
-  font-size: 12px;
-  cursor: pointer;
-  user-select: none;
-  color: #0b0217;
-}
-.form_container .button {
-  background: #7d2ae8;
-  margin-top: 40px;
-  width: 60%;
-  padding: 10px 0;
-  border-radius: 10px;
-  font-size: 1rem;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  font-weight: bold;
-  letter-spacing: 1px;
-  box-shadow: 0 2px 12px 0 rgba(125,42,232,0.15);
-}
-.login_signup {
-  font-size: 12px;
-  text-align: center;
-  margin-top: 15px;
-}
-</style>
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -259,6 +59,7 @@ a {
     <link rel="stylesheet" href="style.css" />
     <!-- Unicons -->
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+    <link rel="stylesheet" href="asset/css/create_new_pass.css" />
   </head>
   <body>
     <!-- Preloader -->
@@ -281,29 +82,43 @@ a {
     <div class="form_container" style="position:relative;overflow:hidden;">
       <!-- Login Form -->
       <div class="form login_form">
-        <form action="#" style="width:100%;">
+        <?php if (!empty($success)): ?>
+          <div id="successMessage" style="position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);z-index:99999;">
+              <div style="background:#fff;padding:40px 32px;border-radius:16px;box-shadow:0 4px 32px rgba(125,42,232,0.12);text-align:center;max-width:350px;width:90%;">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style="margin-bottom:16px;"><circle cx="12" cy="12" r="12" fill="#e9fbe7"/><path d="M7 13l3 3 7-7" stroke="#34c759" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <h2 style="color:#34c759;font-size:1.5rem;margin-bottom:8px;">Password Reset Successful!</h2>
+                  <p style="color:#222;font-size:1.1rem;margin-bottom:16px;">You can now log in with your new password.</p>
+                  <a href="index.php" style="display:inline-block;margin-top:12px;padding:10px 28px;background:#7d2ae8;color:#fff;border-radius:8px;text-decoration:none;font-weight:500;">Go to Login</a>
+              </div>
+          </div>
+        <?php elseif ($show_form): ?>
+        <form action="?token=<?= htmlspecialchars($token) ?>" method="post" style="width:100%;">
           <h2>Create New Password</h2>
-          <div class="input_box">
-            <input type="password" placeholder="New Password" required />
-            <i class="uil uil-lock password"></i>
-            <i class="uil uil-eye-slash pw_hide"></i>
-          </div>
-          <div class="input_box">
-            <input type="password" placeholder="Confirm Password" required />
-            <i class="uil uil-lock password"></i>
-            <i class="uil uil-eye-slash pw_hide"></i>
-          </div>
-          <button class="button" id="setPasswordBtn">Set Password</button>
-          <!-- Modal Flash Message -->
-          <div id="flashModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.25);z-index:9999;align-items:center;justify-content:center;">
-            <div style="background:#fff;border-radius:12px;max-width:340px;width:90vw;padding:32px 18px;box-shadow:0 8px 32px 0 rgba(0,0,0,0.18);position:relative;display:flex;flex-direction:column;align-items:center;">
-              <span style="font-size:2.5rem;color:#198754;margin-bottom:8px;">&#10003;</span>
-              <span style="font-size:1.2rem;color:#198754;font-weight:600;text-align:center;">Password Reset Succesfull<br>Login with new password</br></span>
-              <button id="flashOkBtn" style="margin-top:18px;padding:8px 28px;font-size:1rem;background:#7d2ae8;color:#fff;border:none;border-radius:8px;cursor:pointer;">OK</button>
+          <?php if (!empty($error)): ?>
+            <div style="color:red; margin-bottom:16px; font-weight:500; font-size:1.1rem; text-align:center;">
+                <?= htmlspecialchars($error) ?>
             </div>
+          <?php endif; ?>
+          <div class="input_box">
+            <input type="password" name="password" placeholder="New Password" required />
+            <i class="uil uil-lock password"></i>
+            <i class="uil uil-eye-slash pw_hide"></i>
           </div>
+          <div class="input_box">
+            <input type="password" name="confirm_password" placeholder="Confirm Password" required />
+            <i class="uil uil-lock password"></i>
+            <i class="uil uil-eye-slash pw_hide"></i>
+          </div>
+          <button class="button" type="submit">Set Password</button>
           <div class="login_signup">Return to <a href="index.php">Login</a></div>
         </form>
+        <?php else: ?>
+          <div style="color:red; margin-bottom:16px; font-weight:500; font-size:1.1rem; text-align:center;">
+            <?= htmlspecialchars($error) ?>
+          </div>
+          <div class="login_signup">Return to <a href="index.php">Login</a></div>
+        <?php endif; ?>
+         
       </div>
     </div>
   </div>

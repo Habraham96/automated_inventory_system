@@ -1,263 +1,121 @@
-<style>
-/* Using system Comic Sans family — no external import needed */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+<?php
+require 'include/config.php';
+$token = $_GET['token'] ?? '';
+$show_form = true;
+$error = '';
+if ($token) {
+  $stmt = $pdo->prepare('SELECT * FROM signup_requests WHERE token = ?');
+  $stmt->execute([$token]);
+  $signup = $stmt->fetch(PDO::FETCH_ASSOC);
+  if ($signup && !$signup['verified']) {
+    // Mark as verified
+    $pdo->prepare('UPDATE signup_requests SET verified = 1 WHERE id = ?')->execute([$signup['id']]);
+    $show_form = true;
+  } elseif ($signup && $signup['verified']) {
+    $show_form = true;
+  } else {
+    $error = 'Invalid or expired registration link.';
+    $show_form = false;
+  }
 }
-a {
-  text-decoration: none;
-}
-.header {
-  position: fixed;
-  height: 80px;
-  width: 100%;
-  z-index: 100;
-  padding: 0 20px;
-  background: #fff;
-  border-bottom: 2px solid #e0e0e0;
-}
-.nav {
-  max-width: 1100px;
-  width: 100%;
-  margin: 0 auto;
-}
-.nav,
-.nav_item {
-  display: flex;
-  height: 100%;
-  align-items: center;
-  justify-content: space-between;
-}
-.nav_logo,
-.nav_link,
-.button {
-  color: #fff;
+// Create users table if not exists
+$pdo->exec("CREATE TABLE IF NOT EXISTS users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  first_name VARCHAR(100) NOT NULL,
+  surname VARCHAR(100) NOT NULL,
+  other_names VARCHAR(100),
+  business_name VARCHAR(150) NOT NULL,
+  business_logo VARCHAR(255),
+  address VARCHAR(255) NOT NULL,
+  state VARCHAR(50) NOT NULL,
+  lga VARCHAR(50) NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);");
+
+// Handle form submission
+if ($show_form && $token) {
+  // Fetch email from signup_requests
+  $stmt = $pdo->prepare('SELECT email FROM signup_requests WHERE token = ?');
+  $stmt->execute([$token]);
+  $signup_email = $stmt->fetchColumn();
 }
 
-.nav_logo.active {
-  color: red !important;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  // Simple validation
+  $first_name = $_POST['first_name'] ?? '';
+  $surname = $_POST['surname'] ?? '';
+  $other_names = $_POST['other_names'] ?? '';
+  $business_name = $_POST['business_name'] ?? '';
+  $address = $_POST['address'] ?? '';
+  $state = $_POST['state'] ?? '';
+  $lga = $_POST['lga'] ?? '';
+  $phone = $_POST['phone'] ?? '';
+  $email = $signup_email ?? ($_POST['email'] ?? '');
+  $password = $_POST['password'] ?? '';
+  $confirm_password = $_POST['confirm_password'] ?? '';
+  $business_logo = '';
+
+    // Handle logo upload
+    if (isset($_FILES['business_logo']) && $_FILES['business_logo']['error'] === UPLOAD_ERR_OK) {
+        $target_dir = "uploads/";
+        if (!is_dir($target_dir)) mkdir($target_dir, 0777, true);
+        $target_file = $target_dir . basename($_FILES["business_logo"]["name"]);
+        if (move_uploaded_file($_FILES["business_logo"]["tmp_name"], $target_file)) {
+            $business_logo = $target_file;
+        }
+    }
+
+    // Password hash and basic validation
+    if ($password !== $confirm_password) {
+        $error = "Passwords do not match!";
+    } else {
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+        try {
+            $stmt = $pdo->prepare("INSERT INTO users (first_name, surname, other_names, business_name, business_logo, address, state, lga, phone, email, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$first_name, $surname, $other_names, $business_name, $business_logo, $address, $state, $lga, $phone, $email, $hash]);
+      echo '<div id="successMessage" style="position:fixed;top:0;left:0;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);z-index:99999;">
+        <div style="background:#fff;padding:40px 32px;border-radius:16px;box-shadow:0 4px 32px rgba(125,42,232,0.12);text-align:center;max-width:350px;width:90%;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style="margin-bottom:16px;"><circle cx="12" cy="12" r="12" fill="#e9fbe7"/><path d="M7 13l3 3 7-7" stroke="#34c759" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <h2 style="color:#34c759;font-size:1.5rem;margin-bottom:8px;">Signup Successful!</h2>
+          <p style="color:#222;font-size:1.1rem;margin-bottom:16px;">You will be redirected to the login page shortly.</p>
+        </div>
+      </div>
+      <script>
+        setTimeout(function(){ window.location.href = "index.php"; }, 2500);
+      </script>';
+      exit;
+        } catch (PDOException $e) {
+            $error = "Signup failed: " . $e->getMessage();
+        }
+    }
 }
-.nav_logo {
-  font-size: 25px;
-}
-.nav_item {
-  column-gap: 25px;
-}
-.nav_link:hover {
-  color: #007bff;
-}
-.nav_link.active {
-  color: #007bff;
-  font-weight: bold;
-  border-bottom: 3px solid #007bff;
-}
-.button {
-  padding: 6px 24px;
-  border: 2px solid #fff;
-  background: transparent;
-  border-radius: 6px;
-  cursor: pointer;
-}
-#form-open.button {
-  color: red !important;
-  border-color: red !important;
-}
-.button:active {
-  transform: scale(0.98);
-}
-/* Home */
-.home {
-  position: relative;
-  min-height: 100vh;
-  width: 100%;
-  background-image: url("website-forms-bg.jpg");
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-top: 100px;
-}
-/* .home::before and .home.show::before removed to prevent overlay hiding form */
-/* From */
-.form_container {
-  width: 100%;
-  max-width: 900px;
-  min-height: 0;
-  height: auto;
-  background: rgba(255,255,255,0.98);
-  padding: 0 0 32px 0; /* add bottom padding so content (button) doesn't touch border */
-  /* Add margin-top to push the form below the fixed header */
-  border-radius: 24px;
-  box-shadow: 0 8px 48px 0 rgba(0,0,0,0.25), 0 1.5px 8px 0 rgba(0,0,0,0.10);
-  opacity: 1;
-  pointer-events: auto;
-  transition: all 0.4s ease-out;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-  overflow: initial;
-  margin-top: 100px;
-}
-/* .home.show .form_container not needed */
-.signup_form {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: #fff;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(100%);
-  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.4s;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-.form_container.active .signup_form {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-}
-.form_close {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  color: #0b0217;
-  font-size: 22px;
-  opacity: 0.7;
-  cursor: pointer;
-}
-.form_container h2 {
-  font-size: 2.5rem;
-  color: #0b0217;
-  text-align: center;
-  font-weight: bold;
-  margin-bottom: 32px;
-}
-.input_box {
-  position: relative;
-  margin-top: 30px;
-  width: 100%;
-  height: 40px;
-}
-.input_box input {
-  height: 100%;
-  width: 100%;
-  border: none;
-  outline: none;
-  padding: 0 30px;
-  color: #222;
-  font-size: 1.25rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  border-bottom: 2.5px solid #7d2ae8;
-  background: #fff;
-  border: 1.5px solid #ececf6;
-  border-radius: 10px;
-  outline: none;
-  padding: 0 38px 0 64px;
-  color: #222;
-  font-size: 1.25rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-.input_box input:focus {
-  border-color: #7d2ae8;
-  box-shadow: 0 0 8px 2px #a084e8, 0 0 0 4px rgba(125,42,232,0.10);
-  outline: none;
-  transition: box-shadow 0.3s, border-color 0.3s;
-}
-.input_box i {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 20px;
-  color: #707070;
-}
-.input_box i.email,
-.input_box i.password {
-  left: 18px;
-}
-.input_box input:focus ~ i.email,
-.input_box input:focus ~ i.password {
-  color: #7d2ae8;
-}
-.input_box i.pw_hide {
-  right: 18px;
-  font-size: 18px;
-  cursor: pointer;
-}
-.option_field {
-  margin-top: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.form_container a {
-  color: #7d2ae8;
-  font-size: 12px;
-}
-.form_container a:hover {
-  text-decoration: underline;
-}
-.checkbox {
-  display: flex;
-  column-gap: 8px;
-  white-space: nowrap;
-}
-.checkbox input {
-  accent-color: #7d2ae8;
-}
-.checkbox label {
-  font-size: 12px;
-  cursor: pointer;
-  user-select: none;
-  color: #0b0217;
-}
-.form_container .button {
-  background: #7d2ae8 !important;
-  color: #fff !important;
-  margin: 16px auto 16px auto; /* add bottom margin so button isn't flush to container bottom */
-  width: 60%;
-  max-width: 360px;
-  padding: 10px 0;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: bold;
-  letter-spacing: 1px;
-  box-shadow: 0 2px 12px 0 rgba(125,42,232,0.15);
-  border: none;
-  display: block;
-  position: static;
-  transition: box-shadow 0.3s, border-color 0.3s;
-  outline: none;
-}
-.login_signup {
-  font-size: 12px;
-  text-align: center;
-  margin-top: 15px;
-}
-</style>
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inventory | Sales</title>
-    <link rel="stylesheet" href="style.css" />
-    <!-- Unicons -->
-    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
-  </head>
-  <body>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory | Sales</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Unicons -->
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+  <link rel="stylesheet" href="asset/css/sign_up_form.css" />
+</head>
+<body>
+<?php if (!$show_form): ?>
+  <div style="max-width:400px;margin:60px auto;padding:32px;background:#fff;border-radius:16px;box-shadow:0 4px 32px rgba(125,42,232,0.12);text-align:center;">
+    <h2 style="color:#e53935;">Registration Link Error</h2>
+    <p><?= htmlspecialchars($error) ?></p>
+    <a href="sign_up.php" style="display:inline-block;margin-top:18px;padding:10px 28px;background:#7d2ae8;color:#fff;border-radius:8px;text-decoration:none;font-weight:500;">Go to Sign Up</a>
+  </div>
+<?php endif; ?>
+<?php if ($show_form): ?>
+<!-- ...existing registration form code... -->
+<?php endif; ?>
     <!-- Preloader -->
     <div id="preloader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;z-index:99999;transition:opacity 0.35s ease;">
       <div class="spinner" style="width:72px;height:72px;border-radius:50%;border:8px solid rgba(125,42,232,0.12);border-top-color:#7d2ae8;animation:spin 1s linear infinite;"></div>
@@ -277,107 +135,80 @@ a {
     <section class="home">
       <div class="form_container">
           <h2 style="margin-top: 60px;">Signup</h2>
-        <form action="#">
+        <?php if (!empty($error)): ?>
+            <div style="color:red;"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        <form action="" method="post" enctype="multipart/form-data">
       <div class="signup-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px 32px; width: 95%; margin-bottom: 32px;">
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <input type="text" placeholder="First Name" required />
+          <input type="text" name="first_name" placeholder="First Name" required />
           <i class="uil uil-user"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <input type="text" placeholder="Surname" required />
+          <input type="text" name="surname" placeholder="Surname" required />
           <i class="uil uil-user"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <input type="text" placeholder="Other name(s)" />
+          <input type="text" name="other_names" placeholder="Other name(s)" />
           <i class="uil uil-user"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <input type="text" placeholder="Business Name" required />
+          <input type="text" name="business_name" placeholder="Business Name" required />
           <i class="uil uil-briefcase"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
           <label for="businessLogo" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#fff;border:1.5px solid #ececf6;border-radius:10px;cursor:pointer;position:relative;">
             <span id="logoPlaceholder" style="width:100%;text-align:center;color:#888;font-size:1.1rem;">Upload business logo</span>
-            <input id="businessLogo" type="file" accept="image/*" style="opacity:0;position:absolute;left:0;top:0;width:100%;height:100%;cursor:pointer;" />
+            <input id="businessLogo" name="business_logo" type="file" accept="image/*" style="opacity:0;position:absolute;left:0;top:0;width:100%;height:100%;cursor:pointer;" />
             <i class="uil uil-image" style="position:absolute;right:18px;top:50%;transform:translateY(-50%);"></i>
           </label>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <input type="text" placeholder="Address" required />
+          <input type="text" name="address" placeholder="Address" required />
           <i class="uil uil-location-point"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <select id="stateSelect" required style="height:100%;width:100%;border:none;outline:none;padding:0 30px;color:#222;font-size:1.25rem;font-weight:500;transition:all 0.2s ease;border-bottom:2.5px solid #7d2ae8;background:#f7f7fa;">
+          <select id="stateSelect" name="state" required style="height:100%;width:100%;border:none;outline:none;padding:0 30px;color:#222;font-size:1.25rem;font-weight:500;transition:all 0.2s ease;border-bottom:2.5px solid #7d2ae8;background:#f7f7fa;">
             <option value="">Select State</option>
-            <option value="Abia">Abia</option>
-            <option value="Adamawa">Adamawa</option>
-            <option value="Akwa Ibom">Akwa Ibom</option>
-            <option value="Anambra">Anambra</option>
-            <option value="Bauchi">Bauchi</option>
-            <option value="Bayelsa">Bayelsa</option>
-            <option value="Benue">Benue</option>
-            <option value="Borno">Borno</option>
-            <option value="Cross River">Cross River</option>
-            <option value="Delta">Delta</option>
-            <option value="Ebonyi">Ebonyi</option>
-            <option value="Edo">Edo</option>
-            <option value="Ekiti">Ekiti</option>
-            <option value="Enugu">Enugu</option>
-            <option value="FCT">FCT</option>
-            <option value="Gombe">Gombe</option>
-            <option value="Imo">Imo</option>
-            <option value="Jigawa">Jigawa</option>
-            <option value="Kaduna">Kaduna</option>
-            <option value="Kano">Kano</option>
-            <option value="Katsina">Katsina</option>
-            <option value="Kebbi">Kebbi</option>
-            <option value="Kogi">Kogi</option>
-            <option value="Kwara">Kwara</option>
-            <option value="Lagos">Lagos</option>
-            <option value="Nasarawa">Nasarawa</option>
-            <option value="Niger">Niger</option>
-            <option value="Ogun">Ogun</option>
-            <option value="Ondo">Ondo</option>
-            <option value="Osun">Osun</option>
-            <option value="Oyo">Oyo</option>
-            <option value="Plateau">Plateau</option>
-            <option value="Rivers">Rivers</option>
-            <option value="Sokoto">Sokoto</option>
-            <option value="Taraba">Taraba</option>
-            <option value="Yobe">Yobe</option>
-            <option value="Zamfara">Zamfara</option>
+            <?php
+            // PHP array of states
+            $states = ["Abia","Adamawa","Akwa Ibom","Anambra","Bauchi","Bayelsa","Benue","Borno","Cross River","Delta","Ebonyi","Edo","Ekiti","Enugu","FCT","Gombe","Imo","Jigawa","Kaduna","Kano","Katsina","Kebbi","Kogi","Kwara","Lagos","Nasarawa","Niger","Ogun","Ondo","Osun","Oyo","Plateau","Rivers","Sokoto","Taraba","Yobe","Zamfara"];
+            foreach ($states as $state) {
+                echo "<option value=\"$state\">$state</option>";
+            }
+            ?>
           </select>
           <i class="uil uil-map"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <select id="lgaSelect" required style="height:100%;width:100%;border:none;outline:none;padding:0 30px;color:#222;font-size:1.25rem;font-weight:500;transition:all 0.2s ease;border-bottom:2.5px solid #7d2ae8;background:#f7f7fa;">
+          <select id="lgaSelect" name="lga" required style="height:100%;width:100%;border:none;outline:none;padding:0 30px;color:#222;font-size:1.25rem;font-weight:500;transition:all 0.2s ease;border-bottom:2.5px solid #7d2ae8;background:#f7f7fa;">
             <option value="">Select Local Government Area</option>
           </select>
           <i class="uil uil-map-marker"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <input type="tel" placeholder="Phone number" required />
+          <input type="tel" name="phone" placeholder="Phone number" required />
           <i class="uil uil-phone"></i>
         </div>
       </div>
       <div class="input_box" style="max-width:830px;width:100%;">
-        <input type="email" placeholder="(Automatically fix the verified E-mail here)" required />
+        <input type="email" name="email" value="<?= htmlspecialchars($signup_email ?? '') ?>" placeholder="Verified E-mail" required readonly />
         <i class="uil uil-envelope-alt email"></i>
       </div>
-  <div style="display:flex;gap:40px;width:100%;justify-content:flex-start;">
-  <div class="input_box" style="max-width:500px;width:100%;">
-          <input type="password" placeholder="Create password" required />
+      <div style="display:flex;gap:40px;width:100%;justify-content:flex-start;">
+        <div class="input_box" style="max-width:500px;width:100%;">
+          <input type="password" name="password" placeholder="Create password" required />
           <i class="uil uil-lock password"></i>
           <i class="uil uil-eye-slash pw_hide"></i>
         </div>
-  <div class="input_box" style="max-width:800px;width:90%;">
-          <input type="password" placeholder="Confirm password" required />
+        <div class="input_box" style="max-width:800px;width:90%;">
+          <input type="password" name="confirm_password" placeholder="Confirm password" required />
           <i class="uil uil-lock password"></i>
           <i class="uil uil-eye-slash pw_hide"></i>
         </div>
       </div>
       <div style="height:24px;"></div>
-  <button class="button" type="submit" id="signupSubmitBtn">Signup Now</button>
+      <button class="button" type="submit" id="signupSubmitBtn" name="sub">Signup Now</button>
     </form>
     <!-- <div class="login_signup">Already have an account? <a href="index.php" id="login">Login</a></div> -->
     </form>
@@ -397,17 +228,7 @@ a {
       if (document.readyState === 'complete') hidePreloader(); else { window.addEventListener('load', hidePreloader); setTimeout(hidePreloader, 5000); }
     })();
 
-    // Redirect to plans.php after form submission
-    document.addEventListener('DOMContentLoaded', function() {
-      var signupForm = document.querySelector('.form_container form');
-      if(signupForm) {
-        signupForm.addEventListener('submit', function(e) {
-          e.preventDefault();
-          // Optionally, validate form here
-          window.location.href = 'plans.php';
-        });
-      }
-    });
+    // ...existing code...
         // Nigerian States and LGAs
         const stateLGAs = {
           "Abia": ["Aba North","Aba South","Arochukwu","Bende","Ikwuano","Isiala Ngwa North","Isiala Ngwa South","Isuikwuato","Obi Ngwa","Ohafia","Osisioma","Ugwunagbo","Ukwa East","Ukwa West","Umuahia North","Umuahia South","Umu Nneochi"],
@@ -468,7 +289,33 @@ a {
           }
         });
 
-        // ...existing code...
+        // AJAX for LGAs
+    document.addEventListener('DOMContentLoaded', function() {
+      const stateSelect = document.getElementById('stateSelect');
+      const lgaSelect = document.getElementById('lgaSelect');
+      if(stateSelect && lgaSelect) {
+        stateSelect.addEventListener('change', function() {
+          const state = this.value;
+          lgaSelect.innerHTML = '<option value="">Loading...</option>';
+          if(state) {
+            fetch('get_lgas.php?state=' + encodeURIComponent(state))
+              .then(res => res.json())
+              .then(lgas => {
+                lgaSelect.innerHTML = '<option value="">Select Local Government Area</option>';
+                lgas.forEach(function(lga) {
+                  const opt = document.createElement('option');
+                  opt.value = lga;
+                  opt.textContent = lga;
+                  lgaSelect.appendChild(opt);
+                });
+              });
+          } else {
+            lgaSelect.innerHTML = '<option value="">Select Local Government Area</option>';
+          }
+        });
+      }
+    });
+
         const home = document.querySelector(".home");
         const formContainer = document.querySelector(".form_container");
         const formOpenBtn = document.getElementById('form-open');

@@ -1,256 +1,48 @@
-<style>
-/* Using system Comic Sans family — no external import needed */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Comic Sans MS', 'Comic Sans', cursive;
-}
-a {
-  text-decoration: none;
-}
-.header {
-  position: fixed;
-  height: 80px;
-  width: 100%;
-  z-index: 100;
-  padding: 0 20px;
-  background: #fff;
-  border-bottom: 2px solid #e0e0e0;
-}
-.nav {
-  max-width: 1100px;
-  width: 100%;
-  margin: 0 auto;
-}
-.nav,
-.nav_item {
-  display: flex;
-  height: 100%;
-  align-items: center;
-  justify-content: space-between;
-}
-.nav_logo,
-.nav_link,
-.button {
-  color: #fff;
-}
+<?php
+session_start();
+require 'include/config.php';
 
-.nav_logo.active {
-  color: red !important;
+// Session timeout logic
+$timeout_duration = 1200;
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+  $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+  session_unset();
+  session_destroy();
+  header("Location: index.php?timeout=1");
+  exit;
 }
+$_SESSION['LAST_ACTIVITY'] = time();
 
-#form-open.button {
-  color: red !important;
-  border-color: red !important;
+// Create plans table if not exists
+$pdo->exec("CREATE TABLE IF NOT EXISTS plans (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  plan_name VARCHAR(50) NOT NULL,
+  selected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)");
+
+$redirect_map = [
+  'trial' => 'trialplan.php',
+  'basic' => 'basicplan.php',
+  'standard' => 'standardplan.php',
+  'premium' => 'premiumplan.php'
+];
+
+$error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
+  $plan = $_POST['plan'];
+  $user_id = $_SESSION['user_id'] ?? null;
+  if ($user_id && isset($redirect_map[$plan])) {
+    // Save selected plan
+    $stmt = $pdo->prepare('INSERT INTO plans (user_id, plan_name) VALUES (?, ?)');
+    $stmt->execute([$user_id, $plan]);
+    header('Location: ' . $redirect_map[$plan]);
+    exit;
+  } else {
+    $error = 'Invalid plan selection or user not logged in.';
+  }
 }
-.nav_logo {
-  font-size: 25px;
-}
-.nav_item {
-  column-gap: 25px;
-}
-.nav_link:hover {
-  color: #007bff;
-}
-.nav_link.active {
-  color: #007bff;
-  font-weight: bold;
-  border-bottom: 3px solid #007bff;
-}
-.button {
-  padding: 6px 24px;
-  border: 2px solid #fff;
-  background: transparent;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.button:active {
-  transform: scale(0.98);
-}
-/* Home */
-.home {
-  position: relative;
-  height: 100vh;
-  width: 100%;
-  background-image: url("website-forms-bg.jpg");
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-top: 100px;
-}
-/* .home::before and .home.show::before removed to prevent overlay hiding form */
-/* From */
-.form_container {
-    max-width: 500px;
-  min-width: 400px;
-  width: 100%;
-  min-height: 60vh;
-  background: rgba(255,255,255,0.98);
-  padding: 40px 32px;
-  border-radius: 24px;
-  box-shadow: 0 8px 48px 0 rgba(0,0,0,0.25), 0 1.5px 8px 0 rgba(0,0,0,0.10);
-  opacity: 1;
-  pointer-events: auto;
-  transition: all 0.4s ease-out;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-}
-/* .home.show .form_container not needed */
-.signup_form {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: #fff;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(100%);
-  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.4s;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-.form_container.active .signup_form {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-}
-.login_form {
-  position: relative;
-  z-index: 1;
-  transition: opacity 0.4s;
-  opacity: 1;
-}
-.form_container.active .login_form {
-  opacity: 1;
-}
-.form_close {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  color: #0b0217;
-  font-size: 22px;
-  opacity: 0.7;
-  cursor: pointer;
-}
-.form_container h2 {
-  font-size: 2.5rem;
-  color: #0b0217;
-  text-align: center;
-  font-weight: bold;
-  margin-bottom: 32px;
-}
-.input_box {
-  position: relative;
-  margin-top: 30px;
-  width: 100%;
-  height: 40px;
-}
-.input_box input {
-  height: 100%;
-  width: 100%;
-  border: none;
-  outline: none;
-  padding: 0 30px;
-  color: #222;
-  font-size: 1.25rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  border-bottom: 2.5px solid #7d2ae8;
-  background: #fff;
-  border: 1.5px solid #ececf6;
-  border-radius: 10px;
-  outline: none;
-  padding: 0 54px 0 64px; /* Increase right padding for icon spacing */
-  color: #222;
-  font-size: 1.25rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-.input_box input:focus {
-  border-color: #7d2ae8;
-  box-shadow: 0 0 8px 2px #a084e8, 0 0 0 4px rgba(125,42,232,0.10);
-  outline: none;
-  transition: box-shadow 0.3s, border-color 0.3s;
-}
-.input_box i {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 20px;
-  color: #707070;
-}
-.input_box i.email,
-.input_box i.password {
-  left: 18px;
-}
-.input_box input:focus ~ i.email,
-.input_box input:focus ~ i.password {
-  color: #7d2ae8;
-}
-.input_box i.pw_hide {
-  right: 14px; /* Add space from right border */
-  font-size: 18px;
-  cursor: pointer;
-}
-.option_field {
-  margin-top: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.form_container a {
-  color: #7d2ae8;
-  font-size: 12px;
-}
-.form_container a:hover {
-  text-decoration: underline;
-}
-.checkbox {
-  display: flex;
-  column-gap: 8px;
-  white-space: nowrap;
-}
-.checkbox input {
-  accent-color: #7d2ae8;
-}
-.checkbox label {
-  font-size: 12px;
-  cursor: pointer;
-  user-select: none;
-  color: #0b0217;
-}
-.form_container .button {
-  background: #7d2ae8;
-  margin-top: 40px;
-  width: 60%;
-  padding: 10px 0;
-  border-radius: 10px;
-  font-size: 1rem;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  font-weight: bold;
-  letter-spacing: 1px;
-  box-shadow: 0 2px 12px 0 rgba(125,42,232,0.15);
-}
-.login_signup {
-  font-size: 12px;
-  text-align: center;
-  margin-top: 15px;
-}
-</style>
-<!DOCTYPE html>
-<html lang="en">
+?>
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -259,6 +51,7 @@ a {
     <link rel="stylesheet" href="style.css" />
     <!-- Unicons -->
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+    <link rel="stylesheet" href="asset/css/plan.css" />
   </head>
   <body>
     <!-- Preloader -->
@@ -277,52 +70,59 @@ a {
       </nav>
     </header>
     <section class="home">
-  <div style="width:100%;max-width:600px;margin:40px 50px auto;">
-    <h2 style="margin-bottom:32px;text-align:center;">Choose the best plan for your business</h2>
-            <p style="text-align:center;font-size:0.95rem;color:#555;max-width:480px;margin:0 auto 24px auto;">Thank you for choosing our Inventory and Sales Management System. To get started, please select a subscription plan that best suits your business needs.</p>
-    <div class="plan-table" style="display: flex; gap: 24px; justify-content: flex-start; align-items: flex-end; margin-top: 30px; margin-bottom: 32px; flex-wrap: wrap;">
-      <div class="plan-card" tabindex="0">
-        <h3>Free Trial</h3>
-        <div class="plan-price">Free / 14 days</div>
-        <div class="plan-desc">Try all features at no cost</div>
-        <button class="plan-detail-btn" data-plan="trial">View Detail</button>
+      <div style="width:100%;max-width:600px;margin:40px 50px auto;">
+        <h2 style="margin-bottom:32px;text-align:center;">Choose the best plan for your business</h2>
+        <p style="text-align:center;font-size:0.95rem;color:#555;max-width:480px;margin:0 auto 24px auto;">Thank you for choosing our Inventory and Sales Management System. To get started, please select a subscription plan that best suits your business needs.</p>
+        <?php if (!empty($error)): ?>
+          <div style="color:red; margin:16px 0; text-align:center; font-weight:500; font-size:1.1rem;">
+            <?= htmlspecialchars($error) ?>
+          </div>
+        <?php endif; ?>
+        <form action="" method="post">
+          <div class="plan-table" style="display: flex; gap: 24px; justify-content: flex-start; align-items: flex-end; margin-top: 30px; margin-bottom: 32px; flex-wrap: wrap;">
+            <div class="plan-card" tabindex="0">
+              <h3>Free Trial</h3>
+              <div class="plan-price">Free / 14 days</div>
+              <div class="plan-desc">Try all features at no cost</div>
+              <button class="plan-detail-btn" type="button" data-plan="trial">View Detail</button>
+              <input type="radio" name="plan" value="trial" style="margin-top:12px;" required>
+            </div>
+            <div class="plan-card" tabindex="0">
+              <h3>Basic Plan</h3>
+              <div class="plan-price">N5,000/month</div>
+              <div class="plan-desc">Ideal for small businesses</div>
+              <button class="plan-detail-btn" type="button" data-plan="basic">View Detail</button>
+              <input type="radio" name="plan" value="basic" style="margin-top:12px;">
+            </div>
+            <div class="plan-card" tabindex="0">
+              <h3>Standard Plan</h3>
+              <div class="plan-price">N10,000/month</div>
+              <div class="plan-desc">Perfect for growing businesses</div>
+              <button class="plan-detail-btn" type="button" data-plan="standard">View Detail</button>
+              <input type="radio" name="plan" value="standard" style="margin-top:12px;">
+            </div>
+            <div class="plan-card" tabindex="0" style="width:260px;min-width:260px;max-width:260px;">
+              <h3>Premium Plan</h3>
+              <div class="plan-price">N20,000/month</div>
+              <div class="plan-desc">Best for established businesses</div>
+              <button class="plan-detail-btn" type="button" data-plan="premium">View Detail</button>
+              <input type="radio" name="plan" value="premium" style="margin-top:12px;">
+            </div>
+          </div>
+          <button class="button" type="submit" style="align-self:flex-end;margin-left:auto;background:#7d2ae8;color:#fff;border:none;border-radius:24px;padding:16px 36px;font-size:1.2rem;font-weight:bold;box-shadow:0 4px 24px 0 rgba(125,42,232,0.18);">Proceed</button>
+        </form>
+        <!-- Modal for plan details -->
+        <div id="planModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.35);z-index:9999;align-items:center;justify-content:center;">
+          <div id="planModalContent" style="background:#fff;border-radius:16px;max-width:400px;width:90vw;padding:32px 24px;box-shadow:0 8px 32px 0 rgba(0,0,0,0.18);position:relative;">
+            <button id="closePlanModal" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#7d2ae8;">&times;</button>
+            <h3 id="modalPlanTitle" style="margin-bottom:12px;color:#7d2ae8;font-size:1.3rem;"></h3>
+            <div id="modalPlanPrice" style="font-size:1.1rem;margin-bottom:8px;font-weight:bold;"></div>
+            <div id="modalPlanDesc" style="font-size:1rem;color:#555;margin-bottom:16px;"></div>
+            <ul id="modalPlanFeatures" style="font-size:1rem;color:#333;padding-left:18px;margin-bottom:0;"></ul>
+          </div>
+        </div>
       </div>
-      <div class="plan-card" tabindex="0">
-        <h3>Basic Plan</h3>
-        <div class="plan-price">N5,000/month</div>
-        <div class="plan-desc">Ideal for small businesses</div>
-        <button class="plan-detail-btn" data-plan="basic">View Detail</button>
-      </div>
-      <div class="plan-card" tabindex="0">
-        <h3>Standard Plan</h3>
-        <div class="plan-price">N10,000/month</div>
-        <div class="plan-desc">Perfect for growing businesses</div>
-        <button class="plan-detail-btn" data-plan="standard">View Detail</button>
-      </div>
-  <div class="plan-card" tabindex="0" style="width:260px;min-width:260px;max-width:260px;">
-        <h3>Premium Plan</h3>
-        <div class="plan-price">N20,000/month</div>
-        <div class="plan-desc">Best for established businesses</div>
-        <button class="plan-detail-btn" data-plan="premium">View Detail</button>
-      </div>
-      <button id="proceedBtn" style="align-self:flex-end;margin-left:auto;background:#7d2ae8;color:#fff;border:none;border-radius:24px;padding:16px 36px;font-size:1.2rem;font-weight:bold;box-shadow:0 4px 24px 0 rgba(125,42,232,0.18);cursor:not-allowed;opacity:0.6;transition:opacity 0.2s,background 0.2s;" disabled>Proceed</button>
-    </div>
-      <!-- <div class="login_signup">Remembered your password? <a href="index.php">Login</a></div> -->
-    <!-- Modal for plan details -->
-    <div id="planModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.35);z-index:9999;align-items:center;justify-content:center;">
-      <div id="planModalContent" style="background:#fff;border-radius:16px;max-width:400px;width:90vw;padding:32px 24px;box-shadow:0 8px 32px 0 rgba(0,0,0,0.18);position:relative;">
-        <button id="closePlanModal" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#7d2ae8;">&times;</button>
-        <h3 id="modalPlanTitle" style="margin-bottom:12px;color:#7d2ae8;font-size:1.3rem;"></h3>
-        <div id="modalPlanPrice" style="font-size:1.1rem;margin-bottom:8px;font-weight:bold;"></div>
-        <div id="modalPlanDesc" style="font-size:1rem;color:#555;margin-bottom:16px;"></div>
-        <ul id="modalPlanFeatures" style="font-size:1rem;color:#333;padding-left:18px;margin-bottom:0;"></ul>
-      </div>
-    </div>
-    <!-- Proceed Button below plans -->
-    <div style="width:100%;max-width:600px;margin:0 auto;display:flex;justify-content:flex-end;">
-    </div>
-    </div>
-  </section>
+    </section>
     <style>
       .plan-card {
         flex: 1 1 200px;
