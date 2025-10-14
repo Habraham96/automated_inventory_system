@@ -36,11 +36,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com'; // Change to your SMTP server
         $mail->SMTPAuth = true;
+<<<<<<< HEAD
         $mail->Username = 'tobestic53@gmail.com'; // Your email
         $mail->Password = 'rfiilpgolskxqgjs'; // Your app password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
         $mail->setFrom('tobestic53@gmail.com', 'SalesPilot');
+=======
+        $mail->Username = 'daramolaadewunmi@gmail.com'; // Your email
+        $mail->Password = 'oqtx msyp adid agmt'; // Your app password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+        $mail->setFrom('daramolaadewunmi@gmail.com', 'SalesPilot');
+>>>>>>> Temporary
         $mail->addAddress($email);
         $mail->isHTML(true);
         $mail->Subject = 'Complete Your Registration';

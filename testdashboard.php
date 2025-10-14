@@ -78,7 +78,7 @@ if (isset($_POST['submit'])) { // Check if the form is submitted
 
         if (empty($product_name) || empty($model) || empty($description) || $qty <= 0 || $unit_price <= 0) {
             $all_valid = false;
-            $error_message = 'Please fill all required fields correctly for all items.';
+            $error_message = 'Please fill all required fields correctly for all_items.';
             break;
         }
 
