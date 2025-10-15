@@ -13,6 +13,15 @@ if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) >
 }
 $_SESSION['LAST_ACTIVITY'] = time();
 
+// Fetch plan amounts
+// Fetch all plan amounts (assuming plans_amount table has columns for Basic, Standard, Premium)
+$plan_amount = "SELECT * FROM plans_amount";
+// Fetch plan amounts
+$stmt = $pdo->prepare($plan_amount);
+$stmt->execute();
+$plan_amounts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
 // Create plans table if not exists
 $pdo->exec("CREATE TABLE IF NOT EXISTS plans (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -28,6 +37,7 @@ $redirect_map = [
   'standard' => 'payment_options.php',
   'premium' => 'payment_options.php'
 ];
+
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
@@ -81,34 +91,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
         <?php endif; ?>
         <form action="" method="post">
           <div class="plan-table" style="display: flex; gap: 24px; justify-content: flex-start; align-items: flex-end; margin-top: 30px; margin-bottom: 32px; flex-wrap: wrap;">
-            <div class="plan-card" tabindex="0">
-              <h3>Free Trial</h3>
-              <div class="plan-price">Free / 14 days</div>
-              <div class="plan-desc">Try all features at no cost</div>
-              <button class="plan-detail-btn" type="button" data-plan="trial">View Detail</button>
-              <input type="radio" name="plan" value="trial" style="margin-top:12px;" required>
-            </div>
-            <div class="plan-card" tabindex="0">
-              <h3>Basic Plan</h3>
-              <div class="plan-price">N5,000/month</div>
-              <div class="plan-desc">Ideal for small businesses</div>
-              <button class="plan-detail-btn" type="button" data-plan="basic">View Detail</button>
-              <input type="radio" name="plan" value="basic" style="margin-top:12px;">
-            </div>
-            <div class="plan-card" tabindex="0">
-              <h3>Standard Plan</h3>
-              <div class="plan-price">N10,000/month</div>
-              <div class="plan-desc">Perfect for growing businesses</div>
-              <button class="plan-detail-btn" type="button" data-plan="standard">View Detail</button>
-              <input type="radio" name="plan" value="standard" style="margin-top:12px;">
-            </div>
-            <div class="plan-card" tabindex="0" style="width:260px;min-width:260px;max-width:260px;">
-              <h3>Premium Plan</h3>
-              <div class="plan-price">N20,000/month</div>
-              <div class="plan-desc">Best for established businesses</div>
-              <button class="plan-detail-btn" type="button" data-plan="premium">View Detail</button>
-              <input type="radio" name="plan" value="premium" style="margin-top:12px;">
-            </div>
+            <?php foreach ($plan_amounts as $plan): ?>
+              <div class="plan-card" tabindex="0">
+                <h3><?php echo isset($plan['name']) ? htmlspecialchars($plan['name']) : 'Plan'; ?></h3>
+                <div class="plan-price">
+                  <?php echo isset($plan['amount']) ? htmlspecialchars($plan['amount']) : 'N/A'; ?>
+                </div>
+                <div class="plan-desc">
+                  <?php echo isset($plan['description']) ? htmlspecialchars($plan['description']) : 'No description'; ?>
+                </div>
+                <button class="plan-detail-btn" type="button" data-plan="<?php echo strtolower($plan['name']); ?>">View Detail</button>
+                <input type="radio" name="plan" value="<?php echo strtolower($plan['name']); ?>" style="margin-top:12px;" required data-name="<?php echo isset($plan['name']) ? htmlspecialchars($plan['name']) : 'Plan'; ?>" data-price="<?php echo isset($plan['amount']) ? htmlspecialchars($plan['amount']) : 'N/A'; ?>" data-desc="<?php echo isset($plan['description']) ? htmlspecialchars($plan['description']) : 'No description'; ?>">
+              </div>
+            <?php endforeach; ?>
           </div>
           <button class="button" type="submit" style="align-self:flex-end;margin-left:auto;background:#7d2ae8;color:#fff;border:none;border-radius:24px;padding:16px 36px;font-size:1.2rem;font-weight:bold;box-shadow:0 4px 24px 0 rgba(125,42,232,0.18);">Proceed</button>
         </form>
@@ -194,6 +189,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
 
       // Highlight plan card on click
       document.addEventListener('DOMContentLoaded', function() {
+        // Add plan_name getter for AJAX verification
+        window.getSelectedPlanName = function() {
+          var checked = document.querySelector('input[type=radio][name=plan]:checked');
+          return checked ? checked.getAttribute('data-name') : '';
+        };
         const planCards = document.querySelectorAll('.plan-card');
         planCards.forEach(card => {
           card.addEventListener('click', function(e) {

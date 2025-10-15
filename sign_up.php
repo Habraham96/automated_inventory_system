@@ -5,6 +5,7 @@ require 'vendor/autoload.php'; // Add PHPMailer autoload
 require 'include/email_config.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 // Create signup_requests table if not exists
@@ -41,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
         $mail->setFrom('tobestic53@gmail.com', 'SalesPilot');
-        $mail->addAddress($email);
+        $mail->addAddress($email); // Send to user's email
         $mail->isHTML(true);
         $mail->Subject = 'Complete Your Registration';
         $mail->Body = "<h2>Complete Your Registration</h2><p>Hello,</p><p>Click the link below to complete your registration:</p><a href='$link' style='background-color: #7d2ae8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;'>Complete Registration</a><p>If you didn't request this, please ignore this email.</p><hr><p><small>Link: $link</small></p>";

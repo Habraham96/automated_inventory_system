@@ -1,3 +1,25 @@
+<?php
+session_start();
+require 'include/config.php';
+
+// Session timeout logic
+$timeout_duration = 1200;
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) {
+  $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
+  session_unset();
+  session_destroy();
+  header("Location: index.php?timeout=1");
+  exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit();
+}
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,8 +84,15 @@
       <div style="font-size:1.1rem;margin-bottom:8px;font-weight:bold;">Bank: <span style="color:#0b0217;">Wema Bank</span></div>
       <div style="font-size:1.1rem;margin-bottom:8px;font-weight:bold;">Account Name: <span style="color:#0b0217;">Paystack Technologies</span></div>
       <div style="font-size:1.1rem;margin-bottom:16px;font-weight:bold;">Account Number: <span id="accountNumber" style="color:#0b0217;letter-spacing:2px;">1234567890</span></div>
-      <button id="copyAccountBtn" style="margin-top:8px;padding:8px 28px;font-size:1rem;background:#7d2ae8;color:#fff;border:none;border-radius:8px;cursor:pointer;">Copy Account Number</button>
+      <button id="copyAccountBtn" style="margin-top:8px;padding:8px 28px;font-size:1rem;background:#7d2ae8;color:#fff;border:none;border-radius:8px;cursor:pointer;transition:background 0.2s, box-shadow 0.2s;">Copy Account Number</button>
+
       <div id="copyMsg" style="display:none;color:#198754;font-size:0.95rem;margin-top:8px;">Copied!</div>
+
+      <div id="paymentNameBox" style="display:none;margin-top:18px;">
+        <input type="text" id="paymentNameInput" placeholder="Enter name used for payment" style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #ececf6;font-size:1rem;box-sizing:border-box;" />
+        <button id="validatePaymentNameBtn" style="margin-top:10px;padding:8px 28px;font-size:1rem;background:#7d2ae8;color:#fff;border:none;border-radius:8px;cursor:pointer;">Validate Name</button>
+        <div id="paymentNameMsg" style="display:none;margin-top:8px;font-size:1rem;"></div>
+      </div>
     </div>
       <!-- <div class="login_signup">Remembered your password? <a href="index.php">Login</a></div> -->
   <!-- Payment option actions can go here if needed -->
@@ -124,10 +153,60 @@
       } 
     </style>
     <script>
+      // AJAX logic to verify payment name and update payment info
+      function verifyAndUpdatePayment(name, amount) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'verify_payment_name.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4) {
+            var paymentNameMsg = document.getElementById('paymentNameMsg');
+            if (xhr.status === 200) {
+              var resp = {};
+              try { resp = JSON.parse(xhr.responseText); } catch (e) {}
+              if (resp.success) {
+                paymentNameMsg.style.display = 'block';
+                paymentNameMsg.style.color = '#34c759';
+                paymentNameMsg.textContent = 'Payment verified and updated.';
+              } else {
+                paymentNameMsg.style.display = 'block';
+                paymentNameMsg.style.color = 'red';
+                paymentNameMsg.textContent = resp.message || 'Name verification failed.';
+                // Debug output for troubleshooting
+                paymentNameMsg.textContent += '\nDebug: name=' + name + ', amount=' + amount + ', plan_name=' + (window.getSelectedPlanName ? window.getSelectedPlanName() : '');
+              }
+            } else {
+              paymentNameMsg.style.display = 'block';
+              paymentNameMsg.style.color = 'red';
+              paymentNameMsg.textContent = 'Server error. Please try again.';
+            }
+          }
+        };
+        var plan_name = '';
+        if (window.getSelectedPlanName) {
+          plan_name = window.getSelectedPlanName();
+        }
+        if (!plan_name) {
+          var checked = document.querySelector('input[type=radio][name=plan]:checked');
+          if (checked) {
+            plan_name = checked.getAttribute('data-name');
+          }
+        }
+        var paymentNameMsg = document.getElementById('paymentNameMsg');
+        if (!plan_name) {
+          paymentNameMsg.style.display = 'block';
+          paymentNameMsg.style.color = 'red';
+          paymentNameMsg.textContent = 'Please select a plan before submitting payment.';
+          return;
+        }
+        xhr.send('name=' + encodeURIComponent(name) + '&amount=' + encodeURIComponent(amount) + '&plan_name=' + encodeURIComponent(plan_name));
+      }
       // Inject spinner keyframes for inline usage
       (function(){
+        // This function injects CSS for the loading spinner animation
         var css = '@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}';
         var s = document.createElement('style'); s.appendChild(document.createTextNode(css)); document.head.appendChild(s);
+        // Hide the preloader after page load or timeout
         function hidePreloader(){
           var p = document.getElementById('preloader');
           if(!p) return;
@@ -137,41 +216,104 @@
         if (document.readyState === 'complete') hidePreloader(); else { window.addEventListener('load', hidePreloader); setTimeout(hidePreloader, 5000); }
       })();
 
-      // Payment option logic
+      // Payment option logic and UI interactivity
       document.addEventListener('DOMContentLoaded', function() {
+        // Get references to all relevant DOM elements
         var bankBtn = document.getElementById('bankTransferBtn');
         var atmBtn = document.getElementById('atmBtn');
         var paystackBox = document.getElementById('paystackAccountBox');
         var copyBtn = document.getElementById('copyAccountBtn');
         var copyMsg = document.getElementById('copyMsg');
         var accountNumber = document.getElementById('accountNumber');
-          var atmCardBox = document.getElementById('atmCardBox');
-          // Show bank transfer info, hide ATM card by default
-          if (bankBtn && paystackBox && atmCardBox) {
-            bankBtn.addEventListener('click', function() {
-              paystackBox.style.display = 'block';
-              atmCardBox.style.display = 'none';
-              bankBtn.style.background = '#5a1bbf';
-              bankBtn.style.color = '#fff';
-              atmBtn.style.background = '#fff';
-              atmBtn.style.color = '#7d2ae8';
-            });
-          }
-          if (atmBtn && paystackBox && atmCardBox) {
-            atmBtn.addEventListener('click', function() {
-              paystackBox.style.display = 'none';
-              atmCardBox.style.display = 'block';
-              atmBtn.style.background = '#5a1bbf';
-              atmBtn.style.color = '#fff';
-              bankBtn.style.background = '#fff';
-              bankBtn.style.color = '#7d2ae8';
-            });
-          }
+        var atmCardBox = document.getElementById('atmCardBox');
+        var paymentNameBox = document.getElementById('paymentNameBox');
+        var paymentNameInput = document.getElementById('paymentNameInput');
+        var validatePaymentNameBtn = document.getElementById('validatePaymentNameBtn');
+        var paymentNameMsg = document.getElementById('paymentNameMsg');
+        // Registration name from session (assume stored as first_name + ' ' + surname)
+        var regName = "<?= isset($_SESSION['user_name']) ? addslashes($_SESSION['user_name']) : '' ?>";
+
+        // Toggle between Bank Transfer and Debit Card views
+        if (bankBtn && paystackBox && atmCardBox) {
+          bankBtn.addEventListener('click', function() {
+            paystackBox.style.display = 'block'; // Show bank transfer info
+            atmCardBox.style.display = 'none';   // Hide debit card info
+            bankBtn.style.background = '#5a1bbf';
+            bankBtn.style.color = '#fff';
+            atmBtn.style.background = '#fff';
+            atmBtn.style.color = '#7d2ae8';
+          });
+        }
+        if (atmBtn && paystackBox && atmCardBox) {
+          atmBtn.addEventListener('click', function() {
+            paystackBox.style.display = 'none';  // Hide bank transfer info
+            atmCardBox.style.display = 'block';  // Show debit card info
+            atmBtn.style.background = '#5a1bbf';
+            atmBtn.style.color = '#fff';
+            bankBtn.style.background = '#fff';
+            bankBtn.style.color = '#7d2ae8';
+          });
+        }
+
+        // Handle copy account number button click
         if (copyBtn && accountNumber) {
           copyBtn.addEventListener('click', function() {
-            navigator.clipboard.writeText(accountNumber.textContent.trim());
-            copyMsg.style.display = 'block';
-            setTimeout(function(){ copyMsg.style.display = 'none'; }, 1200);
+            // Visually indicate button was clicked and copying
+            copyBtn.style.background = '#5a1bbf';
+            copyBtn.style.boxShadow = '0 0 0 2px #7d2ae8';
+            copyBtn.textContent = 'Copied!';
+            // Helper to show payment name box after copy message
+            var showPaymentBox = function() {
+              setTimeout(function(){
+                copyMsg.style.display = 'none';
+                copyBtn.style.background = '#7d2ae8';
+                copyBtn.style.boxShadow = '';
+                copyBtn.textContent = 'Copy Account Number';
+                if (paymentNameBox) {
+                  paymentNameBox.style.display = 'block'; // Show name input
+                  paymentNameInput.disabled = false;
+                  paymentNameInput.focus(); // Focus input for user
+                }
+              }, 1200);
+            };
+            // Try to copy account number to clipboard
+            try {
+              navigator.clipboard.writeText(accountNumber.textContent.trim()).then(function() {
+                copyMsg.style.display = 'block'; // Show copied message
+                showPaymentBox();
+              }, function() {
+                copyMsg.style.display = 'block'; // Show copied message even if clipboard fails
+                showPaymentBox();
+              });
+            } catch (e) {
+              copyMsg.style.display = 'block'; // Fallback for older browsers
+              showPaymentBox();
+            }
+          });
+        }
+
+        // Validate payment name matches registration name
+        if (validatePaymentNameBtn) {
+          validatePaymentNameBtn.addEventListener('click', function() {
+            var entered = paymentNameInput.value.trim();
+            var amount = 0;
+            // You may want to fetch the amount from the selected plan or user input
+            // For now, prompt for amount
+            amount = prompt('Enter amount paid:');
+            if (!entered) {
+              paymentNameMsg.style.display = 'block';
+              paymentNameMsg.style.color = 'red';
+              paymentNameMsg.textContent = 'Please enter the name used for payment.';
+              return;
+            }
+            if (!amount || isNaN(amount) || Number(amount) <= 0) {
+              paymentNameMsg.style.display = 'block';
+              paymentNameMsg.style.color = 'red';
+              paymentNameMsg.textContent = 'Please enter a valid amount.';
+              return;
+            }
+            // Call AJAX to verify and update
+            verifyAndUpdatePayment(entered, amount);
           });
         }
       });
