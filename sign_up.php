@@ -33,22 +33,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       // Send email using PHPMailer
       $mail = new PHPMailer(true);
       try {
-        $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com'; // Change to your SMTP server
-        $mail->SMTPAuth = true;
-<<<<<<< HEAD
-        $mail->Username = 'tobestic53@gmail.com'; // Your email
-        $mail->Password = 'rfiilpgolskxqgjs'; // Your app password
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
-        $mail->setFrom('tobestic53@gmail.com', 'SalesPilot');
-=======
-        $mail->Username = 'daramolaadewunmi@gmail.com'; // Your email
-        $mail->Password = 'oqtx msyp adid agmt'; // Your app password
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
-        $mail->setFrom('daramolaadewunmi@gmail.com', 'SalesPilot');
->>>>>>> Temporary
+  $mail->isSMTP();
+  $mail->Host = 'smtp.gmail.com'; // Change to your SMTP server
+  $mail->SMTPAuth = true;
+  // NOTE: move credentials to environment variables or include/email_config.php to avoid committing secrets
+  $mail->Username = 'tobestic53@gmail.com'; // Your email
+  $mail->Password = 'rfiilpgolskxqgjs'; // Your app password
+  $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+  $mail->Port = 587;
+  $mail->setFrom('tobestic53@gmail.com', 'SalesPilot');
         $mail->addAddress($email);
         $mail->isHTML(true);
         $mail->Subject = 'Complete Your Registration';
