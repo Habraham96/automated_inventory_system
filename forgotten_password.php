@@ -4,6 +4,7 @@ require 'vendor/autoload.php'; // Add PHPMailer autoload
 require 'include/email_config.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 $success = '';
