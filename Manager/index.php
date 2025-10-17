@@ -1,4 +1,31 @@
-<!DOCTYPE html>
+<?php
+// Start session early so CSRF token can be created and persisted reliably.
+// This must happen before any HTML output.
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
+// Ensure CSRF token exists in session and cookie early so headers can be sent
+if (empty($_SESSION['csrf_add_staff'])) {
+  $_SESSION['csrf_add_staff'] = bin2hex(random_bytes(24));
+}
+// Set cookie for the token; do this early before any HTML output to ensure
+// the Set-Cookie header is actually sent. Cookie is non-HttpOnly by design
+// to support double-submit verification from JS/AJAX.
+if (empty($_COOKIE['csrf_add_staff']) || $_COOKIE['csrf_add_staff'] !== $_SESSION['csrf_add_staff']) {
+  @setcookie('csrf_add_staff', $_SESSION['csrf_add_staff'], 0, '/');
+}
+// Debug: record that we initialized/ensured CSRF token and whether cookie is present
+$dbgFile = __DIR__ . '/components/logs/csrf_debug.log';
+try {
+  $hdrs = @headers_list();
+  $hdrsStr = is_array($hdrs) ? json_encode(array_slice($hdrs,0,10)) : '';
+  $logLine = date('Y-m-d H:i:s') . " TOKEN_INIT | ip=" . ($_SERVER['REMOTE_ADDR'] ?? 'unknown')
+    . " | session=" . substr($_SESSION['csrf_add_staff'] ?? '',0,20)
+    . " | have_cookie=" . (isset($_COOKIE['csrf_add_staff']) ? '1' : '0')
+    . " | headers=" . substr($hdrsStr,0,200) . "\n";
+  @file_put_contents($dbgFile, $logLine, FILE_APPEND | LOCK_EX);
+} catch (Throwable $e) { /* ignore logging errors */ }
+?><!DOCTYPE html>
 <html lang="en">
   <head>
     <!-- Required meta tags -->
@@ -46,25 +73,7 @@
     <link rel="shortcut icon" href="assets/images/favicon.png" />
   </head>
   <body class="with-welcome-text">
-    <div class="container-scroller">
-      <!-- <div class="row p-0 m-0 proBanner" id="proBanner"> -->
-        <!-- <div class="col-md-12 p-0 m-0"> -->
-          <!-- <div class="card-body card-body-padding px-3 d-flex align-items-center justify-content-between">
-            <div class="ps-lg-3">
-              <div class="d-flex align-items-center justify-content-between">
-                <p class="mb-0 fw-medium me-3 buy-now-text">Free 24/7 customer support, updates, and more with this template!</p>
-                <a href="https://www.bootstrapdash.com/product/star-admin-pro/" target="_blank" class="btn me-2 buy-now-btn border-0">Buy Now</a>
-              </div> -->
-            </div>
-            <div class="d-flex align-items-center justify-content-between">
-              <a href="https://www.bootstrapdash.com/product/star-admin-pro/"><i class="ti-home me-3 text-white"></i></a>
-              <button id="bannerClose" class="btn border-0 p-0">
-                <i class="ti-close text-white"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+
       <!-- partial:partials/_navbar.html -->
       <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-top flex-row">
         <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
@@ -251,7 +260,7 @@
             </li>
            
           </ul>
-          <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-bs-toggle="offcanvas">
+         <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-bs-toggle="offcanvas">
             <span class="mdi mdi-menu"></span>
           </button>
         </div>
@@ -369,6 +378,52 @@
         </nav>
         <!-- partial -->
         <div class="main-panel">
+      <?php
+      // Load DB config and fetch roles for the modal's role select.
+      // If the role_table is missing or the query fails we fall back to
+      // a small set of sensible defaults so the UI still works.
+      try {
+        require_once __DIR__ . '/../include/config.php';
+        $roles = [];
+        $stmt = $pdo->query('SELECT id, name FROM role_table ORDER BY name');
+        $f = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($f) $roles = $f;
+      } catch (Throwable $e) {
+        // Fallback roles when DB/table is not available
+        $roles = [
+          ['id' => 'admin', 'name' => 'Admin'],
+          ['id' => 'manager', 'name' => 'Manager'],
+          ['id' => 'staff', 'name' => 'Staff']
+        ];
+      }
+
+      // Generate a CSRF token for the add-staff form. Store it in session
+      // and also set a cookie with the same token (double-submit cookie
+      // pattern). The cookie is not httponly so client-side JS can read it
+      // if needed; this helps AJAX submissions when session cookie isn't
+      // preserved by the client's environment.
+      if (empty($_SESSION['csrf_add_staff'])) {
+        $_SESSION['csrf_add_staff'] = bin2hex(random_bytes(24));
+        // Set cookie for the token; expires at end of session, path=/.
+        // Note: in production consider setting 'Secure' => true and
+        // proper SameSite attributes via setcookie options when available.
+        @setcookie('csrf_add_staff', $_SESSION['csrf_add_staff'], 0, '/');
+      } else {
+        // Ensure cookie exists for existing session token as well.
+        if (empty($_COOKIE['csrf_add_staff'])) {
+          @setcookie('csrf_add_staff', $_SESSION['csrf_add_staff'], 0, '/');
+        }
+      }
+        // CSRF token is initialized at the top of the file. It is included
+        // below as a hidden input inside the add-staff modal form.
+
+      // Show flash message from add_staff redirect (non-AJAX fallback).
+      if (isset($_GET['msg'])) {
+        $ok = isset($_GET['ok']) && $_GET['ok'] === '1';
+        $msg = htmlspecialchars($_GET['msg']);
+        echo '<div class="alert ' . ($ok ? 'alert-success' : 'alert-danger') . ' text-center m-3">' . $msg . '</div>';
+      }
+      ?>
           <div class="content-wrapper">
             <div class="row">
               <div class="col-sm-12">
@@ -378,26 +433,80 @@
                       <li class="nav-item">
                         <a class="nav-link active ps-0" id="home-tab" data-bs-toggle="tab" href="#overview" role="tab" aria-controls="overview" aria-selected="true">Overview</a>
                       </li>
-                      <!-- <li class="nav-item">
-                        <a class="nav-link" id="profile-tab" data-bs-toggle="tab" href="#audiences" role="tab" aria-selected="false">Audiences</a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="nav-link" id="contact-tab" data-bs-toggle="tab" href="#demographics" role="tab" aria-selected="false">Demographics</a>
-                      </li>
-                      <li class="nav-item">
-                        <a class="nav-link border-0" id="more-tab" data-bs-toggle="tab" href="#more" role="tab" aria-selected="false">More</a>
-                      </li> -->
                     </ul>
                     <div>
                       <div class="btn-wrapper">
                         <a href="pages/sales_summary.html" class="btn btn-otline-dark align-items-center"><i class="bi bi-file-earmark-text"></i> View all reports</a>
-                        <a href="#" class="btn btn-primary text-white me-0"><i class="bi bi-person-fill-add"></i> Add staff</a>
-                        <a href="#" class="btn btn-primary text-white me-0"><i class="bi bi-plus"></i> Add item</a>
-                         <!-- <a href="#" class="btn btn-primary text-white me-0"><i class="icon-download"></i> Export</a> -->
+                        <button type="button" class="btn btn-primary text-white me-0 bi bi-person-fill-add" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo"> Add staff</button>
+                        <button type="button" class="btn btn-primary text-white me-0 bi bi-person-fill-add" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@fat"> Add item</button>
                       </div>
                     </div>
                   </div>
+
+
+        <!--Modal for adding staff-->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Add New Staff</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          
+                          <div class="modal-body">
+                            <form id="addStaffForm" action="components/add_staff.php" method="POST">
+                              <div class="row">
+                                <div class="col-md-6 mb-3">
+                                  <label for="fullname" class="col-form-label">Full Name:</label>
+                                  <input type="text" class="form-control" id="fullname" placeholder="Enter Fullname" name="fullname">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                  <label for="username" class="col-form-label">Username:</label>
+                                  <input type="text" class="form-control" id="username" placeholder="Enter Username" name="username">
+                                </div>
+                              </div>
+
+                              <div class="row">
+                                <div class="col-md-6 mb-3">
+                                  <label for="email" class="col-form-label">Email:</label>
+                                  <input type="email" class="form-control" id="email" placeholder="Enter Email" name="email">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                  <label for="phone" class="col-form-label">Phone:</label>
+                                  <input type="text" class="form-control" id="phone" placeholder="Enter Phone Number" name="phone">
+                                </div>
+                              </div>
+
+                              <div class="row">
+                                <div class="col-md-6 mb-3">
+                                  <label for="password" class="col-form-label">Password:</label>
+                                  <input type="password" class="form-control" id="password" placeholder="Enter Password" name="password">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                  <label for="role" class="col-form-label">Role:</label>
+                                  <select class="form-control" id="role" name="role">
+                                    <?php foreach ($roles as $r): ?>
+                                      <option value="<?= htmlspecialchars($r['id']) ?>"><?= htmlspecialchars($r['name']) ?></option>
+                                    <?php endforeach; ?>
+                                  </select>
+                                </div>
+                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_add_staff']) ?>">
+                              </div>
+                 <button type="submit" id="addStaffBtn" class="btn btn-primary text-white">Add Staff</button>
+                            </form>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Close</button>
+                           
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+        <!-- end of adding modal for staff-->
+
                   <div class="tab-content tab-content-basic">
+                    <!-- overview tab -->
                     <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview">
                       <div class="row">
                         <div class="col-sm-12">
@@ -435,49 +544,8 @@
                           </div>
                         </div>
                       </div>
-                      <div class="row">
-                        <div class="col-lg-8 d-flex flex-column">
-                          <div class="row flex-grow">
-                            <div class="col-12 grid-margin stretch-card">
-                              <div class="card card-rounded">
-                                <div class="card-body">
-                                  <div class="d-sm-flex justify-content-between align-items-start">
-                                    <div>
-                                      <!-- <h4 class="card-title card-title-dash">Market Overview</h4>
-                                      <p class="card-subtitle card-subtitle-dash">Lorem ipsum dolor sit amet consectetur adipisicing elit</p>
-                                    </div>
-                                    <div>
-                                      <div class="dropdown">
-                                        <button class="btn btn-light dropdown-toggle toggle-dark btn-lg mb-0 me-0" type="button" id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> This month </button>
-                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
-                                          <h6 class="dropdown-header">Settings</h6>
-                                          <a class="dropdown-item" href="#">Action</a>
-                                          <a class="dropdown-item" href="#">Another action</a>
-                                          <a class="dropdown-item" href="#">Something else here</a>
-                                          <div class="dropdown-divider"></div>
-                                          <a class="dropdown-item" href="#">Separated link</a>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div class="d-sm-flex align-items-center mt-1 justify-content-between">
-                                    <div class="d-sm-flex align-items-center mt-4 justify-content-between">
-                                      <h2 class="me-2 fw-bold">$36,2531.00</h2>
-                                      <h4 class="me-2">USD</h4>
-                                      <h4 class="text-success">(+1.37%)</h4>
-                                    </div>
-                                    <div class="me-3">
-                                      <div id="marketingOverview-legend"></div>
-                                    </div>
-                                  </div>
-                                  <div class="chartjs-bar-wrapper mt-3">
-                                    <canvas id="marketingOverview"></canvas>
-                                  </div> -->
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="row flex-grow">
+                   
+                          <div class="row flex-grow"><!-- pending requests table -->
                             <div class="col-12 grid-margin stretch-card">
                               <div class="card card-rounded">
                                 <div class="card-body">
@@ -688,8 +756,10 @@
                                 </div>
                               </div>
                             </div>
-                          </div>
+                          </div> <!-- end of pending requests table -->
                         </div>
+                      
+                        <!-- end of overview tab -->
                         <div class="col-lg-4 d-flex flex-column">
                           <div class="row flex-grow">
                             <div class="col-12 grid-margin stretch-card">
@@ -892,5 +962,65 @@
     <script src="assets/js/dashboard.js"></script>
     <!-- <script src="assets/js/Chart.roundedBarCharts.js"></script> -->
     <!-- End custom js for this page-->
+    <!-- Toast container for AJAX responses -->
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+      <div id="globalToast" class="toast-container position-fixed top-0 end-0 p-3" style="z-index:99999;"></div>
+    </div>
+    <script>
+      // AJAX submit for Add Staff modal
+      (function(){
+        var form = document.getElementById('addStaffForm');
+        if (!form) return;
+        var addBtn = document.getElementById('addStaffBtn');
+        form.addEventListener('submit', function(e){
+          e.preventDefault();
+          if (addBtn) { addBtn.disabled = true; addBtn.textContent = 'Saving...'; }
+          var data = new FormData(form);
+          // include credentials and CSRF header explicitly to ensure session cookie
+          var csrfVal = data.get('csrf_token');
+          fetch(form.action, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json', 'X-CSRF-Token': csrfVal },
+            body: data
+          }).then(function(resp){ return resp.json(); }).then(function(json){
+            showToast(json.message || (json.success ? 'Saved' : 'Error'), json.success);
+            // If server provided email status, show it as an informational toast
+            if (json.email_message) {
+              setTimeout(function(){ showToast(json.email_message, !!json.email_sent); }, 250);
+            }
+            if (json.success) {
+              // close modal
+              var modalEl = document.getElementById('exampleModal');
+              if (modalEl) {
+                var bsModal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                bsModal.hide();
+              }
+              // reset form
+              form.reset();
+            }
+          }).catch(function(err){
+            showToast('Server error. See console.', false);
+            console.error(err);
+          }).finally(function(){ if (addBtn) { addBtn.disabled = false; addBtn.textContent = 'Add Staff'; } });
+        });
+
+        function showToast(message, success) {
+          var container = document.getElementById('globalToast');
+          if (!container) return;
+          var toast = document.createElement('div');
+          toast.className = 'toast';
+          toast.role = 'alert';
+          toast.ariaLive = 'assertive';
+          toast.ariaAtomic = 'true';
+          toast.innerHTML = '<div class="toast-header ' + (success ? 'text-success' : 'text-danger') + '"><strong class="me-auto">' + (success ? 'Success' : 'Error') + '</strong><button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button></div><div class="toast-body">' + message + '</div>';
+          container.appendChild(toast);
+          var bs = new bootstrap.Toast(toast, { delay: 5000 });
+          bs.show();
+          // remove after hidden
+          toast.addEventListener('hidden.bs.toast', function(){ toast.remove(); });
+        }
+      })();
+    </script>
   </body>
 </html>

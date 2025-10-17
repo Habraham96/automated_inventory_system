@@ -1,0 +1,28 @@
+# CSRF debug log
+# Created: 2025-10-17 00:00:00
+# Entries appended here by add_staff.php when CSRF mismatches occur.
+
+2025-10-17 13:34:11 CSRF_MISMATCH | ip=127.0.0.1 | posted=3ab087f501b21056c6ef
+2025-10-17 13:34:18 CSRF_MISMATCH | ip=127.0.0.1 | posted=3ab087f501b21056c6ef
+2025-10-17 13:36:38 CSRF_MISMATCH | ip=127.0.0.1 | posted=109df0680aad49c9cede
+2025-10-17 13:43:08 CSRF_MISMATCH | ip=127.0.0.1 | posted=c4323468ceeeefb8b1e5
+2025-10-17 13:52:06 CSRF_MISMATCH | ip=127.0.0.1 | posted=e1226d757a0c412eb101 | session=
+2025-10-17 13:53:35 CSRF_MISMATCH | ip=127.0.0.1 | posted=e1226d757a0c412eb101 | session=
+2025-10-17 13:56:42 CSRF_MISMATCH | ip=127.0.0.1 | posted=e2bcb94501a2b35c753a | session= | cookie=
+2025-10-17 14:00:53 TOKEN_INIT | ip=127.0.0.1 | session=7e0d6187f81d107a4c98 | have_cookie=0 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache","Set-Cookie: csrf_add_staff=7e0d6187f81d107a4c98c52b1686da
+2025-10-17 14:02:07 TOKEN_INIT | ip=127.0.0.1 | session=7e0d6187f81d107a4c98 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
+2025-10-17 14:04:47 TOKEN_INIT | ip=127.0.0.1 | session=7e0d6187f81d107a4c98 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
+2025-10-17 14:05:16 TOKEN_INIT | ip=127.0.0.1 | session=7e0d6187f81d107a4c98 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
+2025-10-17 14:05:37 TOKEN_INIT | ip=127.0.0.1 | session=7e0d6187f81d107a4c98 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
+2025-10-17 14:06:30 TOKEN_INIT | ip=127.0.0.1 | session=7e0d6187f81d107a4c98 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
+2025-10-17 14:07:48 TOKEN_INIT | ip=127.0.0.1 | session=7e0d6187f81d107a4c98 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
+2025-10-17 14:08:08 TOKEN_INIT | ip=127.0.0.1 | session=7e0d6187f81d107a4c98 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
+2025-10-17 14:08:20 TOKEN_INIT | ip=127.0.0.1 | session=7e0d6187f81d107a4c98 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
+2025-10-17 14:09:01 TOKEN_INIT | ip=127.0.0.1 | session=7e0d6187f81d107a4c98 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
+2025-10-17 14:09:30 TOKEN_INIT | ip=127.0.0.1 | session=7e0d6187f81d107a4c98 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
+2025-10-17 14:10:09 TOKEN_INIT | ip=127.0.0.1 | session=7e0d6187f81d107a4c98 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
+2025-10-17 14:10:58 TOKEN_INIT | ip=127.0.0.1 | session=698a0343544b7195e529 | have_cookie=0 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache","Set-Cookie: csrf_add_staff=698a0343544b7195e52962316a83ff
+2025-10-17 14:11:02 TOKEN_INIT | ip=127.0.0.1 | session=698a0343544b7195e529 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
+2025-10-17 14:12:15 TOKEN_INIT | ip=127.0.0.1 | session=698a0343544b7195e529 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
+2025-10-17 14:21:19 TOKEN_INIT | ip=127.0.0.1 | session=7e0d6187f81d107a4c98 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
+2025-10-17 14:21:32 TOKEN_INIT | ip=127.0.0.1 | session=698a0343544b7195e529 | have_cookie=1 | headers=["X-Powered-By: PHP\/8.2.12","Expires: Thu, 19 Nov 1981 08:52:00 GMT","Cache-Control: no-store, no-cache, must-revalidate","Pragma: no-cache"]
