@@ -36,22 +36,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mail->isSMTP();
                 $mail->Host = 'smtp.gmail.com'; // Change to your SMTP server
                 $mail->SMTPAuth = true;
-<<<<<<< HEAD
-                $mail->Username = 'tobestic53@gmail.com'; // Your email
-                $mail->Password = 'rfiilpgolskxqgjs'; // Your app password
-=======
-                $mail->Username = 'daramolaadewunmi@gmail.com'; // Your email
-                $mail->Password = 'oqtx msyp adid agmt'; // Your app password
->>>>>>> Temporary
+                // Use credentials from include/email_config.php
+                $mail->Username = SMTP_USER;
+                $mail->Password = SMTP_PASS;
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port = 587;
                 
                 // Recipients
-<<<<<<< HEAD
-                $mail->setFrom('tobestic53@gmail.com', 'SalesPilot'); // Change to your from email
-=======
-                $mail->setFrom('daramolaadewunmi@gmail.com', 'SalesPilot'); // Change to your from email
->>>>>>> Temporary
+                $mail->setFrom(SMTP_FROM_EMAIL, SMTP_FROM_NAME);
                 $mail->addAddress($email);
                 
                 // Content
@@ -104,9 +96,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <header class="header">
         <nav class="nav">
-            <a href="#" class="nav_logo active">LOGO</a>
+            <a href="#" class="nav_logo active"><img src="asset/images/salespilot%20logo2.png" alt="SalesPilot Logo" style="height:36px;display:block;object-fit:contain;"></a>
             <ul class="nav_items" style="width:100%;display:flex;justify-content:center;align-items:center;">
-                <h2 style="margin:0 auto;text-align:center;font-size:1.7rem;font-weight:600;color:#7d2ae8;">Inventory And Sales Management Made Easy</h2>
+                <h2 style="margin:0 auto;text-align:center;font-size:1.7rem;font-weight:600;color:#7d2ae8;">Sales Pilot</h2>
             </ul>
         </nav>
     </header>

@@ -34,36 +34,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       // Send email using PHPMailer
       $mail = new PHPMailer(true);
       try {
-<<<<<<< HEAD
-  $mail->isSMTP();
-  $mail->Host = 'smtp.gmail.com'; // Change to your SMTP server
-  $mail->SMTPAuth = true;
-  // NOTE: move credentials to environment variables or include/email_config.php to avoid committing secrets
-  $mail->Username = 'tobestic53@gmail.com'; // Your email
-  $mail->Password = 'rfiilpgolskxqgjs'; // Your app password
-  $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-  $mail->Port = 587;
-  $mail->setFrom('tobestic53@gmail.com', 'SalesPilot');
-        $mail->addAddress($email);
-=======
+        // Use configured constants from include/email_config.php
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com'; // Change to your SMTP server
+        $mail->Host = defined('SMTP_HOST') ? SMTP_HOST : 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'tobestic53@gmail.com'; // Your email
-        $mail->Password = 'rfiilpgolskxqgjs'; // Your app password
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
-        $mail->setFrom('tobestic53@gmail.com', 'SalesPilot');
+        $mail->Username = defined('SMTP_USER') ? SMTP_USER : '';
+        $mail->Password = defined('SMTP_PASS') ? SMTP_PASS : '';
+        // Port & encryption from config (fallback to TLS/587)
+        $mail->Port = defined('SMTP_PORT') ? SMTP_PORT : 587;
+        $secure = defined('SMTP_SECURE') ? SMTP_SECURE : 'tls';
+        if (strtolower($secure) === 'ssl') {
+          $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        } else {
+          $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        }
+
+        // Helpful for debugging on local dev. Write debug output to error_log.
+        $mail->SMTPDebug = SMTP::DEBUG_OFF; // change to DEBUG_SERVER (or DEBUG_CONNECTION) while debugging
+        $mail->Debugoutput = function($str, $level) {
+          error_log("PHPMailer debug level $level; message: $str");
+        };
+
+        // Allow self-signed certs for local dev if configured
+        if (defined('SMTP_ALLOW_SELF_SIGNED') && SMTP_ALLOW_SELF_SIGNED) {
+          $mail->SMTPOptions = [
+            'ssl' => [
+              'verify_peer' => false,
+              'verify_peer_name' => false,
+              'allow_self_signed' => true
+            ]
+          ];
+        }
+
+        $mail->setFrom(defined('SMTP_FROM_EMAIL') ? SMTP_FROM_EMAIL : $mail->Username, defined('SMTP_FROM_NAME') ? SMTP_FROM_NAME : 'NoReply');
         $mail->addAddress($email); // Send to user's email
->>>>>>> 2bc2c3526d8c09b488b465cfb5d5eca3fe56f766
         $mail->isHTML(true);
         $mail->Subject = 'Complete Your Registration';
         $mail->Body = "<h2>Complete Your Registration</h2><p>Hello,</p><p>Click the link below to complete your registration:</p><a href='$link' style='background-color: #7d2ae8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;'>Complete Registration</a><p>If you didn't request this, please ignore this email.</p><hr><p><small>Link: $link</small></p>";
         $mail->AltBody = "Hello,\n\nClick the link below to complete your registration:\n$link\n\nIf you didn't request this, please ignore this email.";
-        $mail->send();
-        $success = "A registration link has been sent to your email.";
+
+        // Attempt to send
+        if ($mail->send()) {
+          $success = "A registration link has been sent to your email.";
+        } else {
+          // PHPMailer usually throws exceptions, but handle the false return too
+          $error = "Failed to send email. Please try again later.";
+          error_log('PHPMailer failure: ' . $mail->ErrorInfo);
+        }
       } catch (Exception $e) {
-        $error = "Failed to send email. Please try again later. Error: " . $mail->ErrorInfo;
+        // Avoid leaking SMTP credentials in the UI; log details for dev
+        error_log('PHPMailer exception: ' . $e->getMessage());
+        $error = "Failed to send email. Please try again later. (See server logs for details.)";
       }
     } catch (PDOException $e) {
       $error = "This email is already registered or pending verification.";
@@ -93,9 +114,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <header class="header">
       <nav class="nav">
-        <a href="#" class="nav_logo active">LOGO</a>
+        <a href="#" class="nav_logo active"><img src="asset/images/salespilot%20logo2.png" alt="SalesPilot Logo" style="height:36px;display:block;object-fit:contain;"></a>
         <ul class="nav_items" style="width:100%;display:flex;justify-content:center;align-items:center;">
-          <h2 style="margin:0 auto;text-align:center;font-size:1.7rem;font-weight:600;color:#7d2ae8;">Inventory And Sales Management Made Easy</h2>
+          <h2 style="margin:0 auto;text-align:center;font-size:1.7rem;font-weight:600;color:#7d2ae8;">Sales Pilot</h2>
         </ul>
         <!-- <button class="button" id="form-open">Login</button> -->
       </nav>

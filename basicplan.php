@@ -41,9 +41,9 @@ if (!isset($_SESSION['user_id'])) {
     <!-- Header -->
     <header class="header">
       <nav class="nav">
-        <a href="#" class="nav_logo active">LOGO</a>
+        <a href="#" class="nav_logo active"><img src="asset/images/salespilot%20logo2.png" alt="SalesPilot Logo" style="height:36px;display:block;object-fit:contain;"></a>
         <ul class="nav_items" style="width:100%;display:flex;justify-content:center;align-items:center;">
-          <h2 style="margin:0 auto;text-align:center;font-size:1.7rem;font-weight:600;color:#7d2ae8;">Inventory And Sales Management Made Easy</h2>
+          <h2 style="margin:0 auto;text-align:center;font-size:1.7rem;font-weight:600;color:#7d2ae8;">Sales Pilot</h2>
         </ul>
         <!-- <button class="button" id="form-open">Login</button> -->
       </nav>
