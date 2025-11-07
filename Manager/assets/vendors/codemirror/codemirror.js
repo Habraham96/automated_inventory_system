@@ -1506,7 +1506,7 @@
   function extraRight(marker) { return marker.inclusiveRight ? 1 : 0 }
 
   // Returns a number indicating which of two overlapping collapsed
-  // spans is larger (and thus includes the other). Falls back to
+  // spans is larger (and thus layouts the other). Falls back to
   // comparing ids when the spans cover exactly the same range.
   function compareCollapsedMarkers(a, b) {
     var lenDiff = a.lines.length - b.lines.length;
@@ -2587,14 +2587,14 @@
     cm.display.lineNumChars = null;
   }
 
-  function pageScrollX(doc) {
+  function viewscrollX(doc) {
     // Work around https://bugs.chromium.org/p/chromium/issues/detail?id=489206
     // which causes page_Offset and bounding client rects to use
     // different reference viewports and invalidate our calculations.
     if (chrome && android) { return -(doc.body.getBoundingClientRect().left - parseInt(getComputedStyle(doc.body).marginLeft)) }
     return doc.defaultView.pageXOffset || (doc.documentElement || doc.body).scrollLeft
   }
-  function pageScrollY(doc) {
+  function viewscrollY(doc) {
     if (chrome && android) { return -(doc.body.getBoundingClientRect().top - parseInt(getComputedStyle(doc.body).marginTop)) }
     return doc.defaultView.pageYOffset || (doc.documentElement || doc.body).scrollTop
   }
@@ -2624,8 +2624,8 @@
     else { yOff -= cm.display.viewOffset; }
     if (context == "page" || context == "window") {
       var lOff = cm.display.lineSpace.getBoundingClientRect();
-      yOff += lOff.top + (context == "window" ? 0 : pageScrollY(doc(cm)));
-      var xOff = lOff.left + (context == "window" ? 0 : pageScrollX(doc(cm)));
+      yOff += lOff.top + (context == "window" ? 0 : viewscrollY(doc(cm)));
+      var xOff = lOff.left + (context == "window" ? 0 : viewscrollX(doc(cm)));
       rect.left += xOff; rect.right += xOff;
     }
     rect.top += yOff; rect.bottom += yOff;
@@ -2639,8 +2639,8 @@
     var left = coords.left, top = coords.top;
     // First move into "page" coordinate system
     if (context == "page") {
-      left -= pageScrollX(doc(cm));
-      top -= pageScrollY(doc(cm));
+      left -= viewscrollX(doc(cm));
+      top -= viewscrollY(doc(cm));
     } else if (context == "local" || !context) {
       var localBox = cm.display.sizer.getBoundingClientRect();
       left += localBox.left;
@@ -8808,8 +8808,8 @@
   function findPosV(cm, pos, dir, unit) {
     var doc = cm.doc, x = pos.left, y;
     if (unit == "page") {
-      var pageSize = Math.min(cm.display.wrapper.clientHeight, win(cm).innerHeight || doc(cm).documentElement.clientHeight);
-      var moveAmount = Math.max(pageSize - .5 * textHeight(cm.display), 3);
+      var viewsize = Math.min(cm.display.wrapper.clientHeight, win(cm).innerHeight || doc(cm).documentElement.clientHeight);
+      var moveAmount = Math.max(viewsize - .5 * textHeight(cm.display), 3);
       y = (dir > 0 ? pos.bottom : pos.top) + dir * moveAmount;
 
     } else if (unit == "line") {

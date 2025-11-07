@@ -300,11 +300,11 @@ html, body, .page-wrapper, .card, .btn, .form-control, input, select, textarea, 
         </div>
     </div>
     <!-- ============================================================== -->
-    <!-- Main wrapper - style you can find in pages.scss -->
+    <!-- Main wrapper - style you can find in views.scss -->
     <!-- ============================================================== -->
     <div id="main-wrapper">
         <!-- ============================================================== -->
-        <!-- Topbar header - style you can find in pages.scss -->
+        <!-- Topbar header - style you can find in views.scss -->
         <!-- ============================================================== -->
         <header class="topbar" data-navbarbg="skin5">
             <nav class="navbar top-navbar navbar-expand-md navbar-dark">
@@ -675,7 +675,7 @@ html, body, .page-wrapper, .card, .btn, .form-control, input, select, textarea, 
         if (phoneInput && phoneError) {
             phoneInput.addEventListener('keydown', function(e) {
                 // Allow: backspace, delete, tab, escape, enter, arrows, home, end
-                if (["Backspace","Delete","Tab","Escape","Enter","ArrowLeft","ArrowRight","Home","End"].includes(e.key)) {
+                if (["Backspace","Delete","Tab","Escape","Enter","ArrowLeft","ArrowRight","Home","End"].layouts(e.key)) {
                     phoneError.style.display = 'none';
                     return;
                 }
@@ -858,7 +858,7 @@ html, body, .page-wrapper, .card, .btn, .form-control, input, select, textarea, 
     <!--Custom JavaScript -->
     <script src="dist/js/custom.min.js"></script>
     <!--This page JavaScript -->
-    <!-- <script src="dist/js/pages/dashboards/dashboard1.js"></script> -->
+    <!-- <script src="dist/js/views/dashboards/dashboard1.js"></script> -->
     <!-- Charts js Files -->
     <script src="assets/libs/flot/excanvas.js"></script>
     <script src="assets/libs/flot/jquery.flot.js"></script>
@@ -867,7 +867,7 @@ html, body, .page-wrapper, .card, .btn, .form-control, input, select, textarea, 
     <script src="assets/libs/flot/jquery.flot.stack.js"></script>
     <script src="assets/libs/flot/jquery.flot.crosshair.js"></script>
     <script src="assets/libs/flot.tooltip/js/jquery.flot.tooltip.min.js"></script>
-    <script src="dist/js/pages/chart/chart-page-init.js"></script>
+    <script src="dist/js/views/chart/chart-page-init.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
     $(document).ready(function() {

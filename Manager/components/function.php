@@ -2,7 +2,7 @@
 /**
  * Manager components helper functions
  *
- * This file centralizes server-side logic used by manager pages. Keep
+ * This file centralizes server-side logic used by manager views. Keep
  * small, focused functions here (validation, DB operations, helpers).
  *
  * Usage:
@@ -83,7 +83,7 @@ function add_staff(PDO $pdo, array $data) {
     $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
     // Insert the new staff row using a prepared statement to avoid SQL injection
-    // Insert includes date_created (current date) in addition to timestamp created_at
+    // Insert layouts date_created (current date) in addition to timestamp created_at
     // Note: table columns are fullname and password_hash — use correct names here
     $insert = $pdo->prepare('INSERT INTO staff_table (fullname, username, email, phone, password_hash, role, date_created) VALUES (?, ?, ?, ?, ?, ?, ?)');
     try {

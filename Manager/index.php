@@ -1,39 +1,11 @@
-<?php
-// Start session early so CSRF token can be created and persisted reliably.
-// This must happen before any HTML output.
-if (session_status() === PHP_SESSION_NONE) {
-  session_start();
-}
-// Ensure CSRF token exists in session and cookie early so headers can be sent
-if (empty($_SESSION['csrf_add_staff'])) {
-  $_SESSION['csrf_add_staff'] = bin2hex(random_bytes(24));
-}
-// Set cookie for the token; do this early before any HTML output to ensure
-// the Set-Cookie header is actually sent. Cookie is non-HttpOnly by design
-// to support double-submit verification from JS/AJAX.
-if (empty($_COOKIE['csrf_add_staff']) || $_COOKIE['csrf_add_staff'] !== $_SESSION['csrf_add_staff']) {
-  @setcookie('csrf_add_staff', $_SESSION['csrf_add_staff'], 0, '/');
-}
-// Debug: record that we initialized/ensured CSRF token and whether cookie is present
-$dbgFile = __DIR__ . '/components/logs/csrf_debug.log';
-try {
-  $hdrs = @headers_list();
-  $hdrsStr = is_array($hdrs) ? json_encode(array_slice($hdrs,0,10)) : '';
-  $logLine = date('Y-m-d H:i:s') . " TOKEN_INIT | ip=" . ($_SERVER['REMOTE_ADDR'] ?? 'unknown')
-    . " | session=" . substr($_SESSION['csrf_add_staff'] ?? '',0,20)
-    . " | have_cookie=" . (isset($_COOKIE['csrf_add_staff']) ? '1' : '0')
-    . " | headers=" . substr($hdrsStr,0,200) . "\n";
-  @file_put_contents($dbgFile, $logLine, FILE_APPEND | LOCK_EX);
-} catch (Throwable $e) { /* ignore logging errors */ }
-?><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>SalesPilot </title>
+    <title>SalesPilot - Dashboard</title>
     <!-- plugins:css -->
-    <img src="/assets/icons/bootstrap.svg" alt="Bootstrap" width="32" height="32">
     <link rel="stylesheet" href="assets/vendors/feather/feather.css">
     <link rel="stylesheet" href="assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="assets/vendors/ti-icons/css/themify-icons.css">
@@ -41,986 +13,823 @@ try {
     <link rel="stylesheet" href="assets/vendors/typicons/typicons.css">
     <link rel="stylesheet" href="assets/vendors/simple-line-icons/css/simple-line-icons.css">
     <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
-    <link rel="stylesheet" href="assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css">
     <!-- endinject -->
-    <!-- Plugin css for this page -->
-    <link rel="stylesheet" href="assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css">
-    <link rel="stylesheet" type="text/css" href="assets/js/select.dataTables.min.css">
-    <!-- End plugin css for this page -->
     <!-- inject:css -->
     <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+    <!-- Include Sidebar Styles -->
+    <?php include 'layouts/sidebar_styles.php'; ?>
     <style>
-    /* Sidebar collapse/expand toggle styles (minimal, local overrides) */
-    .sidebar{transition:width .2s ease;}
-    .main-panel, .page-body-wrapper{transition:margin-left .2s ease;}
-    body.sidebar-collapsed .sidebar{
-      width:70px !important;
-      overflow:hidden;
+    /* Main panel positioning to avoid sidebar overlap (match completed_sales.php) */
+    .main-panel {
+      margin-left: 280px !important;
+      transition: margin-left 0.2s ease !important;
+      will-change: margin-left !important;
+      backface-visibility: hidden !important;
+      transform: translateZ(0) !important;
     }
-    body.sidebar-collapsed .sidebar .menu-title,
-    body.sidebar-collapsed .sidebar .menu-arrow{
-      display:none !important;
+    body.sidebar-collapsed .main-panel {
+      margin-left: 70px !important;
     }
-    body.sidebar-collapsed .sidebar .menu-icon{
-      margin-right:0 !important;
-      text-align:center;
-      width:100%;
+    .content-wrapper {
+      background: #f4f5f7;
+      padding: 2rem;
+      min-height: calc(100vh - 70px);
+      position: relative !important;
+      transform: translateZ(0) !important;
     }
-    body.sidebar-collapsed .main-panel{margin-left:70px !important}
+    /* Sidebar menu arrow spacing (match completed_sales.php) */
+    .menu-arrow {
+      margin-left: auto !important;
+      margin-right: 0.5rem !important;
+      font-size: 1rem !important;
+    }
+    /* Sidebar nav item spacing (match completed_sales.php) */
+    .sidebar .nav-item {
+      margin-bottom: 0.25rem !important;
+    }
+    
+    /* Modal styles for better visibility */
+    .modal-backdrop {
+      background-color: rgba(0, 0, 0, 0.7) !important;
+      z-index: 1050 !important;
+    }
+    .modal {
+      z-index: 1055 !important;
+    }
+    .modal-content {
+      border-radius: 15px !important;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4) !important;
+      border: none !important;
+      overflow: hidden !important;
+    }
+    .modal-header {
+      border-bottom: none !important;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      padding: 1.5rem 2rem !important;
+    }
+    .modal-footer {
+      border-top: 1px solid #dee2e6 !important;
+      background-color: #f8f9fa !important;
+      padding: 1.5rem 2rem !important;
+    }
+    .modal-body {
+      padding: 2rem !important;
+      background-color: #ffffff !important;
+    }
+    
+    /* Item option styling */
+    .item-option {
+      transition: all 0.3s ease !important;
+      cursor: pointer !important;
+      border: 2px solid transparent !important;
+      margin-bottom: 0.75rem !important;
+      border-radius: 10px !important;
+    }
+    .item-option:hover {
+      background-color: #f8f9fa !important;
+      transform: translateX(5px) !important;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+    }
+    .item-option.active {
+      background-color: #e3f2fd !important;
+      box-shadow: 0 3px 15px rgba(0,123,255,0.2) !important;
+    }
+    .item-option.active[data-type="standard"] {
+      border-color: #007bff !important;
+      background-color: #e3f2fd !important;
+    }
+    .item-option.active[data-type="variant"] {
+      border-color: #28a745 !important;
+      background-color: #d4edda !important;
+    }
+    .item-option.active[data-type="bundled"] {
+      border-color: #ffc107 !important;
+      background-color: #fff3cd !important;
+    }
+    
+    /* Item details animation */
+    .item-details {
+      opacity: 0 !important;
+      transition: opacity 0.3s ease !important;
+      display: none !important;
+    }
+    .item-details.active {
+      opacity: 1 !important;
+      display: block !important;
+    }
+    
+    /* Modal buttons */
+    .modal .btn {
+      border-radius: 8px !important;
+      font-weight: 500 !important;
+      transition: all 0.3s ease !important;
+    }
+    .modal .btn:hover {
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    }
+    .sidebar .nav-link {
+      padding: 0.75rem 1.25rem 0.75rem 1.5rem !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 0.75rem !important;
+    }
+    /* Dashboard cards */
+    .dashboard-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.08);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      transition: transform 0.2s ease;
+    }
+    .dashboard-card:hover {
+      transform: translateY(-2px);
+    }
+    .stat-card {
+      text-align: center;
+      padding: 1.25rem 0.75rem;
+    }
+    .stat-icon {
+      font-size: 2.2rem;
+      margin-bottom: 0.75rem;
+      color: #007bff;
+    }
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 0.25rem;
+    }
+    .stat-label {
+      color: #6c757d;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    /* Quick action buttons */
+    .quick-action-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+      transition: all 0.3s ease;
+      margin-bottom: 1rem;
+    }
+    .quick-action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      color: white;
+    }
+    /* Welcome section */
+    .welcome-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 3rem 2rem;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .welcome-title {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 300;
+    }
+    .welcome-subtitle {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
     </style>
     <!-- endinject -->
     <link rel="shortcut icon" href="assets/images/favicon.png" />
   </head>
   <body class="with-welcome-text">
-
-      <!-- partial:partials/_navbar.html -->
-      <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-top flex-row">
-        <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
-          <div class="me-3">
-            <!-- Hamburger: clicking this will toggle the sidebar collapsed state -->
-            <button id="sidebarToggle" class="navbar-toggler navbar-toggler align-self-center" type="button" aria-label="Toggle sidebar" title="Toggle sidebar">
-              <span class="icon-menu"></span>
-            </button>
-          </div>
-          <div>
-        <script>
-          (function(){
-            var toggle = document.getElementById('sidebarToggle');
-            var body = document.body;
-            var storageKey = 'sidebarCollapsed';
-
-            function setCollapsed(collapsed, save){
-              if(collapsed) body.classList.add('sidebar-collapsed');
-              else body.classList.remove('sidebar-collapsed');
-              if(save) localStorage.setItem(storageKey, collapsed ? '1' : '0');
-            }
-
-            // restore state on load
-            try{
-              var saved = localStorage.getItem(storageKey);
-              if(saved === '1') setCollapsed(true, false);
-            }catch(e){/* ignore storage errors */}
-
-            if(toggle){
-              toggle.addEventListener('click', function(e){
-                e.preventDefault();
-                var collapsed = body.classList.contains('sidebar-collapsed');
-                setCollapsed(!collapsed, true);
-              });
-              // make keyboard accessible
-              toggle.addEventListener('keydown', function(e){
-                if(e.key === 'Enter' || e.key === ' '){
-                  e.preventDefault();
-                  toggle.click();
-                }
-              });
-            }
-          })();
-        </script>
-            <a href="#" class="nav_logo active"><img src="../asset/images/salespilot%20logo2.png" alt="SalesPilot Logo" style="height:36px;display:block;object-fit:contain;"></a>
-        <!-- <script src="assets/vendors/js/vendor.bundle.base.js"></script>
-              <img src="assets/images/logo-mini.svg" alt="logo" />
-            </a> -->
-          </div>
-        </div>
-        
-        <div class="navbar-menu-wrapper d-flex align-items-top">
-          <ul class="navbar-nav">
-            <li class="nav-item fw-semibold d-none d-lg-block ms-0">
-              <!-- <h1 class="welcome-text">Good Morning, <span class="text-black fw-bold">John Doe</span></h1>
-              <h3 class="welcome-sub-text">Your performance summary this week </h3> -->
-            </li>
-          </ul>
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item dropdown d-none d-lg-block">
-              <a class="nav-link dropdown-bordered dropdown-toggle dropdown-toggle-split" id="messageDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false"> Select Category </a>
-              <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list pb-0" aria-labelledby="messageDropdown">
-                <a class="dropdown-item py-3">
-                  <p class="mb-0 fw-medium float-start">Select category</p>
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item preview-item">
-                  <div class="preview-item-content flex-grow py-2">
-                    <p class="preview-subject ellipsis fw-medium text-dark">Bootstrap Bundle </p>
-                    <p class="fw-light small-text mb-0">This is a Bundle featuring 16 unique dashboards</p>
-                  </div>
-                </a>
-                <a class="dropdown-item preview-item">
-                  <div class="preview-item-content flex-grow py-2">
-                    <p class="preview-subject ellipsis fw-medium text-dark">Angular Bundle</p>
-                    <p class="fw-light small-text mb-0">Everything you’ll ever need for your Angular projects</p>
-                  </div>
-                </a>
-                <a class="dropdown-item preview-item">
-                  <div class="preview-item-content flex-grow py-2">
-                    <p class="preview-subject ellipsis fw-medium text-dark">VUE Bundle</p>
-                    <p class="fw-light small-text mb-0">Bundle of 6 Premium Vue Admin Dashboard</p>
-                  </div>
-                </a>
-                <a class="dropdown-item preview-item">
-                  <div class="preview-item-content flex-grow py-2">
-                    <p class="preview-subject ellipsis fw-medium text-dark">React Bundle</p>
-                    <p class="fw-light small-text mb-0">Bundle of 8 Premium React Admin Dashboard</p>
-                  </div>
-                </a>
-              </div>
-            </li>
-            <li class="nav-item d-none d-lg-block">
-              <div id="datepicker-popup" class="input-group date datepicker navbar-date-picker">
-                <span class="input-group-addon input-group-prepend border-right">
-                  <span class="icon-calendar input-group-text calendar-icon"></span>
-                </span>
-                <input type="text" class="form-control">
-              </div>
-            </li>
-            <li class="nav-item">
-              <form class="search-form" action="#">
-                <i class="icon-search"></i>
-                <input type="search" class="form-control" placeholder="Search Here" title="Search here">
-              </form>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link count-indicator" id="notificationDropdown" href="#" data-bs-toggle="dropdown">
-                <i class="icon-bell"></i>
-                <span class="count"></span>
-              </a>
-              <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list pb-0" aria-labelledby="notificationDropdown">
-                <a class="dropdown-item py-3 border-bottom">
-                  <p class="mb-0 fw-medium float-start">You have 4 new notifications </p>
-                  <span class="badge badge-pill badge-primary float-end">View all</span>
-                </a>
-                <a class="dropdown-item preview-item py-3">
-                  <div class="preview-thumbnail">
-                    <i class="mdi mdi-alert m-auto text-primary"></i>
-                  </div>
-                  <div class="preview-item-content">
-                    <h6 class="preview-subject fw-normal text-dark mb-1">Application Error</h6>
-                    <p class="fw-light small-text mb-0"> Just now </p>
-                  </div>
-                </a>
-                <a class="dropdown-item preview-item py-3">
-                  <div class="preview-thumbnail">
-                    <i class="mdi mdi-lock-outline m-auto text-primary"></i>
-                  </div>
-                  <div class="preview-item-content">
-                    <h6 class="preview-subject fw-normal text-dark mb-1">Settings</h6>
-                    <p class="fw-light small-text mb-0"> Private message </p>
-                  </div>
-                </a>
-                <a class="dropdown-item preview-item py-3">
-                  <div class="preview-thumbnail">
-                    <i class="mdi mdi-airballoon m-auto text-primary"></i>
-                  </div>
-                  <div class="preview-item-content">
-                    <h6 class="preview-subject fw-normal text-dark mb-1">New user registration</h6>
-                    <p class="fw-light small-text mb-0"> 2 days ago </p>
-                  </div>
-                </a>
-              </div>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link count-indicator" id="countDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="icon-mail icon-lg"></i>
-              </a>
-              <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list pb-0" aria-labelledby="countDropdown">
-                <a class="dropdown-item py-3">
-                  <p class="mb-0 fw-medium float-start">You have 7 unread mails </p>
-                  <span class="badge badge-pill badge-primary float-end">View all</span>
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item preview-item">
-                  <div class="preview-thumbnail">
-                    <img src="assets/images/faces/face10.jpg" alt="image" class="img-sm profile-pic">
-                  </div>
-                  <div class="preview-item-content flex-grow py-2">
-                    <p class="preview-subject ellipsis fw-medium text-dark">Marian Garner </p>
-                    <p class="fw-light small-text mb-0"> The meeting is cancelled </p>
-                  </div>
-                </a>
-                <a class="dropdown-item preview-item">
-                  <div class="preview-thumbnail">
-                    <img src="assets/images/faces/face12.jpg" alt="image" class="img-sm profile-pic">
-                  </div>
-                  <div class="preview-item-content flex-grow py-2">
-                    <p class="preview-subject ellipsis fw-medium text-dark">David Grey </p>
-                    <p class="fw-light small-text mb-0"> The meeting is cancelled </p>
-                  </div>
-                </a>
-                <a class="dropdown-item preview-item">
-                  <div class="preview-thumbnail">
-                    <img src="assets/images/faces/face1.jpg" alt="image" class="img-sm profile-pic">
-                  </div>
-                  <div class="preview-item-content flex-grow py-2">
-                    <p class="preview-subject ellipsis fw-medium text-dark">Travis Jenkins </p>
-                    <p class="fw-light small-text mb-0"> The meeting is cancelled </p>
-                  </div>
-                </a>
-              </div>
-            </li>
-           
-          </ul>
-         <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-bs-toggle="offcanvas">
-            <span class="mdi mdi-menu"></span>
-          </button>
-        </div>
-      </nav>
-      <!-- partial -->
+    
+    <div class="container-scroller">
       <div class="container-fluid page-body-wrapper">
-        <!-- partial:partials/_sidebar.html -->
-        <nav class="sidebar sidebar-offcanvas" id="sidebar">
-          <ul class="nav">
-            <li class="nav-item">
-              <a class="nav-link" href="index.html">
-                <i class="menu-icon bi bi-house-door-fill"></i>
-                <span class="menu-title">Home</span>
-              </a>
-            </li>
-            <li class="nav-item nav-category">Dropdown</li>
-            <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-                <!-- <i class="menu-icon mdi mdi-floor-plan"></i> -->
-                <i class="menu-icon bi bi-wallet-fill"></i>
-                <span class="menu-title">Sales</span>
-                <i class="menu-arrow"></i>
-              </a>
-              <div class="collapse" id="ui-basic">
-                <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="pages/completed_sales.html">Completed Sales</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="pages/saved_carts.html">Saved Carts</a></li>
-                  <!-- <li class="nav-item"> <a class="nav-link" href="pages/ui-features/typography.html">Typography</a></li> -->
-                </ul>
-              </div>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="collapse" href="#form-elements" aria-expanded="false" aria-controls="form-elements">
-                <i class="menu-icon mdi mdi-card-text-outline"></i>
-                <span class="menu-title">Reports</span>
-                <i class="menu-arrow"></i>
-              </a>
-              <div class="collapse" id="form-elements">
-                <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"><a class="nav-link" href="pages/sales_summary.html">Sales Summary</a></li>
-                  <li class="nav-item"><a class="nav-link" href="pages/sales_by_staff.html">Sales by Staff</a></li>
-                  <li class="nav-item"><a class="nav-link" href="pages/sales_by_item.html">Sales by Item</a></li>
-                  <li class="nav-item"><a class="nav-link" href="pages/sales_by_category.html">Sales by Category</a></li>
-                  <li class="nav-item"><a class="nav-link" href="pages/inventory_valuation.html">Inventory Valuation</a></li>
-                  <li class="nav-item"><a class="nav-link" href="pages/taxes.html">Taxes</a></li>
-                  <li class="nav-item"><a class="nav-link" href="pages/discount.html">Discount</a></li>
-                </ul>
-              </div>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="pages/customers.html">
-                <i class="menu-icon bi bi-people-fill"></i>
-                <span class="menu-title">Customers</span>
-              </a>
-              
-             <li class="nav-item">
-              <a class="nav-link" href="pages/staffs.html">
-                <i class="menu-icon bi bi-person-workspace"></i>
-                <span class="menu-title">Staffs</span>
-              </a>
-
-              <li class="nav-item">
-              <a class="nav-link" href="pages/activity_logs.html">
-                <i class="menu-icon bi bi-activity"></i>
-                <span class="menu-title">Activity Logs</span>
-              </a>
-
-            <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="collapse" href="#icons" aria-expanded="false" aria-controls="icons">
-               <i class="menu-icon bi bi-shop-window"></i>
-                <span class="menu-title">Inventory</span>
-                <i class="menu-arrow"></i>
-              </a>
-              <div class="collapse" id="icons">
-                <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="pages/all_items.html">All items</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="pages/categories.html">Categories</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="pages/stock_history.html">Stock History</a></li>
-                </ul>
-              </div>
-            
-            <li class="nav-item">
-              <a class="nav-link" href="pages/suppliers.html">
-                <i class="menu-icon bi bi-truck"></i>
-                <span class="menu-title">Suppliers</span>
-              </a>
-              <li class="nav-item">
-              <a class="nav-link" href="pages/settings.html">
-               <i class="menu-icon bi bi-gear-wide"></i>
-                <span class="menu-title">Settings</span>
-              </a>
-            </li>
-              <li class="nav-item dropdown d-none d-lg-block user-dropdown">
-              <a class="nav-link" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                <img class="img-xs rounded-circle" src="assets/images/faces/face8.jpg" alt="Profile image"> </a>
-              <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
-                <div class="dropdown-header text-center">
-                  <img class="img-md rounded-circle" src="assets/images/faces/face8.jpg" alt="Profile image">
-                  <p class="mb-1 mt-3 fw-semibold">Allen Moreno</p>
-                  <p class="fw-light text-muted mb-0">allenmoreno@gmail.com</p>
-                </div>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> My Profile <span class="badge badge-pill badge-danger">1</span></a>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-message-text-outline text-primary me-2"></i> Messages</a>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-calendar-check-outline text-primary me-2"></i> Activity</a>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-help-circle-outline text-primary me-2"></i> FAQ</a>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-power text-primary me-2"></i>Sign Out</a>
-              </div>
-            </li>
-            
-                <!-- <i class="menu-icon mdi mdi-file-document"></i>
-                <span class="menu-title">Documentation</span> -->
-              </a>
-            </li>
-          </ul>
-        </nav>
-        <!-- partial -->
+        <!-- Include Sidebar Content -->
+        <?php include 'layouts/sidebar_content.php'; ?>
+        
+        <!-- Main Dashboard Content Area -->
         <div class="main-panel">
-      <?php
-      // Load DB config and fetch roles for the modal's role select.
-      // If the role_table is missing or the query fails we fall back to
-      // a small set of sensible defaults so the UI still works.
-      try {
-        require_once __DIR__ . '/../include/config.php';
-        $roles = [];
-        $stmt = $pdo->query('SELECT id, name FROM role_table ORDER BY name');
-        $f = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        if ($f) $roles = $f;
-      } catch (Throwable $e) {
-        // Fallback roles when DB/table is not available
-        $roles = [
-          ['id' => 'admin', 'name' => 'Admin'],
-          ['id' => 'manager', 'name' => 'Manager'],
-          ['id' => 'staff', 'name' => 'Staff']
-        ];
-      }
-
-      // Generate a CSRF token for the add-staff form. Store it in session
-      // and also set a cookie with the same token (double-submit cookie
-      // pattern). The cookie is not httponly so client-side JS can read it
-      // if needed; this helps AJAX submissions when session cookie isn't
-      // preserved by the client's environment.
-      if (empty($_SESSION['csrf_add_staff'])) {
-        $_SESSION['csrf_add_staff'] = bin2hex(random_bytes(24));
-        // Set cookie for the token; expires at end of session, path=/.
-        // Note: in production consider setting 'Secure' => true and
-        // proper SameSite attributes via setcookie options when available.
-        @setcookie('csrf_add_staff', $_SESSION['csrf_add_staff'], 0, '/');
-      } else {
-        // Ensure cookie exists for existing session token as well.
-        if (empty($_COOKIE['csrf_add_staff'])) {
-          @setcookie('csrf_add_staff', $_SESSION['csrf_add_staff'], 0, '/');
-        }
-      }
-        // CSRF token is initialized at the top of the file. It is included
-        // below as a hidden input inside the add-staff modal form.
-
-      // Show flash message from add_staff redirect (non-AJAX fallback).
-      if (isset($_GET['msg'])) {
-        $ok = isset($_GET['ok']) && $_GET['ok'] === '1';
-        $msg = htmlspecialchars($_GET['msg']);
-        echo '<div class="alert ' . ($ok ? 'alert-success' : 'alert-danger') . ' text-center m-3">' . $msg . '</div>';
-      }
-      ?>
           <div class="content-wrapper">
+            
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+              <h1 class="welcome-title">Welcome to SalesPilot</h1>
+              <p class="welcome-subtitle">Your comprehensive inventory management solution</p>
+            </div>
+
+           
+            <!-- Dashboard Stats Row -->
+             <div class="d-flex align-items-center justify-content-end gap-3 flex-wrap mb-3">
+                <div class="btn-group btn-group-sm" role="group" aria-label="Quick time filters">
+                  <button type="button" class="btn btn-outline-primary timeframe-btn active" data-range="today">Today</button>
+                  <button type="button" class="btn btn-outline-primary timeframe-btn" data-range="week">This Week</button>
+                  <button type="button" class="btn btn-outline-primary timeframe-btn" data-range="month">This Month</button>
+                   <button type="button" class="btn btn-outline-primary timeframe-btn" data-range="year">This Year</button>
+                </div>
+                <div class="d-flex align-items-center gap-1" style="font-size: 0.875rem;">
+                  <span class="text-muted">From:</span>
+                  <input type="text" class="form-control form-control-sm date-picker" id="startDate" placeholder="DD/MM/YYYY" style="width: 110px;">
+                  <span class="text-muted">To:</span>
+                  <input type="text" class="form-control form-control-sm date-picker" id="endDate" placeholder="DD/MM/YYYY" style="width: 110px;">
+                  <button class="btn btn-sm btn-primary" type="button" id="applyCustomRange" title="Apply date range">
+                    <i class="bi bi-search"></i> Go
+                  </button>
+
+                </div>
+
+              </div>
             <div class="row">
-              <div class="col-sm-12">
-                <div class="home-tab">
-                  <div class="d-sm-flex align-items-center justify-content-between border-bottom">
-                    <ul class="nav nav-tabs" role="tablist">
-                      <li class="nav-item">
-                        <a class="nav-link active ps-0" id="home-tab" data-bs-toggle="tab" href="#overview" role="tab" aria-controls="overview" aria-selected="true">Overview</a>
-                      </li>
-                    </ul>
-                    <div>
-                      <div class="btn-wrapper">
-                        <a href="pages/sales_summary.html" class="btn btn-otline-dark align-items-center"><i class="bi bi-file-earmark-text"></i> View all reports</a>
-                        <button type="button" class="btn btn-primary text-white me-0 bi bi-person-fill-add" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo"> Add staff</button>
-                        <button type="button" class="btn btn-primary text-white me-0 bi bi-person-fill-add" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@fat"> Add item</button>
-                      </div>
+              <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="dashboard-card stat-card">
+                  <div class="stat-icon">
+                    <i class="bi bi-box-seam-fill"></i>
+                  </div>
+                  <div class="stat-number">2,567</div>
+                  <div class="stat-label">Items Sold</div>
+                </div>
+              </div>
+              
+              <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="dashboard-card stat-card">
+                  <div class="stat-icon">
+                    <i class="bi bi-receipt"></i>
+                  </div>
+                  <div class="stat-number">1,234</div>
+                  <div class="stat-label">Number of Sales</div>
+                </div>
+              </div>
+              
+              <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="dashboard-card stat-card">
+                  <div class="stat-icon">
+                    <i class="bi bi-cash-stack"></i>
+                  </div>
+                  <div class="stat-number">$85,420</div>
+                  <div class="stat-label">Gross Sales</div>
+                </div>
+              </div>
+              
+              <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="dashboard-card stat-card">
+                  <div class="stat-icon">
+                    <i class="bi bi-graph-up-arrow"></i>
+                  </div>
+                  <div class="stat-number">$34,168</div>
+                  <div class="stat-label">Gross Profit</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Quick Actions and Recent Activity Row -->
+            <div class="row">
+              <div class="col-lg-2">
+                <div class="dashboard-card">
+                  <h5 class="mb-3">Quick Actions</h5>
+                  <button type="button" class="quick-action-btn" id="addItemQuickAction" style="border: none; width: 100%; text-align: center;">
+                    <i class="bi bi-box me-2"></i>Add Item
+                  </button>
+                  <a href="#" class="quick-action-btn">
+                    <i class="bi bi-plus-circle me-2"></i>New Sale
+                  </a>
+                   <a href="views/staffs.php" class="quick-action-btn">
+                    <i class="bi bi-person-plus me-2"></i>Add New Staff
+                  </a>
+                  <a href="views/sales_summary.php" class="quick-action-btn">
+                    <i class="bi bi-graph-up me-2"></i>View Reports
+                  </a>
+                </div>
+              </div>
+              <div class="col-lg-10">
+                <div class="dashboard-card">
+                  <h5 class="mb-3">Recent Sales Activity</h5>
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>Sale ID</th>
+                          <th>Customer</th>
+                          <th>Amount</th>
+                          <th>Date</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>#001</td>
+                          <td>John Doe</td>
+                          <td>$125.50</td>
+                          <td>Today</td>
+                          <td><span class="badge bg-success">Completed</span></td>
+                        </tr>
+                        <tr>
+                          <td>#002</td>
+                          <td>Jane Smith</td>
+                          <td>$89.99</td>
+                          <td>Yesterday</td>
+                          <td><span class="badge bg-success">Completed</span></td>
+                        </tr>
+                        <tr>
+                          <td>#003</td>
+                          <td>Mike Johnson</td>
+                          <td>$234.75</td>
+                          <td>2 days ago</td>
+                          <td><span class="badge bg-warning">Pending</span></td>
+                        </tr>
+                        <tr>
+                          <td>#004</td>
+                          <td>Sarah Wilson</td>
+                          <td>$56.20</td>
+                          <td>3 days ago</td>
+                          <td><span class="badge bg-success">Completed</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Charts Row -->
+            <div class="row">
+              <div class="col-lg-6">
+                <div class="dashboard-card">
+                  <h5 class="mb-3">Sales Overview</h5>
+                  <div style="height: 300px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                    <div class="text-center">
+                      <i class="bi bi-bar-chart" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                      <p>Sales Chart Placeholder</p>
+                      <small>Integrate with Chart.js or similar</small>
                     </div>
                   </div>
-
-
-        <!--Modal for adding staff-->
-                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Add New Staff</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          
-                          <div class="modal-body">
-                            <form id="addStaffForm" action="components/add_staff.php" method="POST">
-                              <div class="row">
-                                <div class="col-md-6 mb-3">
-                                  <label for="fullname" class="col-form-label">Full Name:</label>
-                                  <input type="text" class="form-control" id="fullname" placeholder="Enter Fullname" name="fullname">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                  <label for="username" class="col-form-label">Username:</label>
-                                  <input type="text" class="form-control" id="username" placeholder="Enter Username" name="username">
-                                </div>
-                              </div>
-
-                              <div class="row">
-                                <div class="col-md-6 mb-3">
-                                  <label for="email" class="col-form-label">Email:</label>
-                                  <input type="email" class="form-control" id="email" placeholder="Enter Email" name="email">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                  <label for="phone" class="col-form-label">Phone:</label>
-                                  <input type="text" class="form-control" id="phone" placeholder="Enter Phone Number" name="phone">
-                                </div>
-                              </div>
-
-                              <div class="row">
-                                <div class="col-md-6 mb-3">
-                                  <label for="password" class="col-form-label">Password:</label>
-                                  <input type="password" class="form-control" id="password" placeholder="Enter Password" name="password">
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                  <label for="role" class="col-form-label">Role:</label>
-                                  <select class="form-control" id="role" name="role">
-                                    <?php foreach ($roles as $r): ?>
-                                      <option value="<?= htmlspecialchars($r['id']) ?>"><?= htmlspecialchars($r['name']) ?></option>
-                                    <?php endforeach; ?>
-                                  </select>
-                                </div>
-                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_add_staff']) ?>">
-                              </div>
-                 <button type="submit" id="addStaffBtn" class="btn btn-primary text-white">Add Staff</button>
-                            </form>
-                          </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary text-white" data-bs-dismiss="modal">Close</button>
-                           
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-        <!-- end of adding modal for staff-->
-
-                  <div class="tab-content tab-content-basic">
-                    <!-- overview tab -->
-                    <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview">
-                      <div class="row">
-                        <div class="col-sm-12">
-                          <div class="statistics-details d-flex align-items-center justify-content-between">
-                            <div>
-                              <p class="statistics-title">Bounce Rate</p>
-                              <h3 class="rate-percentage">32.53%</h3>
-                              <p class="text-danger d-flex"><i class="mdi mdi-menu-down"></i><span>-0.5%</span></p>
-                            </div>
-                            <div>
-                              <p class="statistics-title">Page Views</p>
-                              <h3 class="rate-percentage">7,682</h3>
-                              <p class="text-success d-flex"><i class="mdi mdi-menu-up"></i><span>+0.1%</span></p>
-                            </div>
-                            <div>
-                              <p class="statistics-title">New Sessions</p>
-                              <h3 class="rate-percentage">68.8</h3>
-                              <p class="text-danger d-flex"><i class="mdi mdi-menu-down"></i><span>68.8</span></p>
-                            </div>
-                            <div class="d-none d-md-block">
-                              <p class="statistics-title">Avg. Time on Site</p>
-                              <h3 class="rate-percentage">2m:35s</h3>
-                              <p class="text-success d-flex"><i class="mdi mdi-menu-down"></i><span>+0.8%</span></p>
-                            </div>
-                            <div class="d-none d-md-block">
-                              <p class="statistics-title">New Sessions</p>
-                              <h3 class="rate-percentage">68.8</h3>
-                              <p class="text-danger d-flex"><i class="mdi mdi-menu-down"></i><span>68.8</span></p>
-                            </div>
-                            <div class="d-none d-md-block">
-                              <p class="statistics-title">Avg. Time on Site</p>
-                              <h3 class="rate-percentage">2m:35s</h3>
-                              <p class="text-success d-flex"><i class="mdi mdi-menu-down"></i><span>+0.8%</span></p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                   
-                          <div class="row flex-grow"><!-- pending requests table -->
-                            <div class="col-12 grid-margin stretch-card">
-                              <div class="card card-rounded">
-                                <div class="card-body">
-                                  <div class="d-sm-flex justify-content-between align-items-start">
-                                    <div>
-                                      <h4 class="card-title card-title-dash">Pending Requests</h4>
-                                      <p class="card-subtitle card-subtitle-dash">You have 50+ new requests</p>
-                                    </div>
-                                    <div>
-                                      <button class="btn btn-primary btn-lg text-white mb-0 me-0" type="button"><i class="mdi mdi-account-plus"></i>Add new member</button>
-                                    </div>
-                                  </div>
-                                  <div class="table-responsive  mt-1">
-                                    <table class="table select-table">
-                                      <thead>
-                                        <tr>
-                                          <th>
-                                            <div class="form-check form-check-flat mt-0">
-                                              <label class="form-check-label">
-                                                <input type="checkbox" class="form-check-input" aria-checked="false" id="check-all"><i class="input-helper"></i></label>
-                                            </div>
-                                          </th>
-                                          <th>Customer</th>
-                                          <th>Company</th>
-                                          <th>Progress</th>
-                                          <th>Status</th>
-                                        </tr>
-                                      </thead>
-                                      <tbody>
-                                        <tr>
-                                          <td>
-                                            <div class="form-check form-check-flat mt-0">
-                                              <label class="form-check-label">
-                                                <input type="checkbox" class="form-check-input" aria-checked="false"><i class="input-helper"></i></label>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <div class="d-flex ">
-                                              <img src="assets/images/faces/face1.jpg" alt="">
-                                              <div>
-                                                <h6>Brandon Washington</h6>
-                                                <p>Head admin</p>
-                                              </div>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <h6>Company name 1</h6>
-                                            <p>company type</p>
-                                          </td>
-                                          <td>
-                                            <div>
-                                              <div class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap">
-                                                <p class="text-success">79%</p>
-                                                <p>85/162</p>
-                                              </div>
-                                              <div class="progress progress-md">
-                                                <div class="progress-bar bg-success" role="progressbar" style="width: 85%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                              </div>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <div class="badge badge-opacity-warning">In progress</div>
-                                          </td>
-                                        </tr>
-                                        <tr>
-                                          <td>
-                                            <div class="form-check form-check-flat mt-0">
-                                              <label class="form-check-label">
-                                                <input type="checkbox" class="form-check-input" aria-checked="false"><i class="input-helper"></i></label>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <div class="d-flex">
-                                              <img src="assets/images/faces/face2.jpg" alt="">
-                                              <div>
-                                                <h6>Laura Brooks</h6>
-                                                <p>Head admin</p>
-                                              </div>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <h6>Company name 1</h6>
-                                            <p>company type</p>
-                                          </td>
-                                          <td>
-                                            <div>
-                                              <div class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap">
-                                                <p class="text-success">65%</p>
-                                                <p>85/162</p>
-                                              </div>
-                                              <div class="progress progress-md">
-                                                <div class="progress-bar bg-success" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
-                                              </div>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <div class="badge badge-opacity-warning">In progress</div>
-                                          </td>
-                                        </tr>
-                                        <tr>
-                                          <td>
-                                            <div class="form-check form-check-flat mt-0">
-                                              <label class="form-check-label">
-                                                <input type="checkbox" class="form-check-input" aria-checked="false"><i class="input-helper"></i></label>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <div class="d-flex">
-                                              <img src="assets/images/faces/face3.jpg" alt="">
-                                              <div>
-                                                <h6>Wayne Murphy</h6>
-                                                <p>Head admin</p>
-                                              </div>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <h6>Company name 1</h6>
-                                            <p>company type</p>
-                                          </td>
-                                          <td>
-                                            <div>
-                                              <div class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap">
-                                                <p class="text-success">65%</p>
-                                                <p>85/162</p>
-                                              </div>
-                                              <div class="progress progress-md">
-                                                <div class="progress-bar bg-warning" role="progressbar" style="width: 38%" aria-valuenow="38" aria-valuemin="0" aria-valuemax="100"></div>
-                                              </div>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <div class="badge badge-opacity-warning">In progress</div>
-                                          </td>
-                                        </tr>
-                                        <tr>
-                                          <td>
-                                            <div class="form-check form-check-flat mt-0">
-                                              <label class="form-check-label">
-                                                <input type="checkbox" class="form-check-input" aria-checked="false"><i class="input-helper"></i></label>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <div class="d-flex">
-                                              <img src="assets/images/faces/face4.jpg" alt="">
-                                              <div>
-                                                <h6>Matthew Bailey</h6>
-                                                <p>Head admin</p>
-                                              </div>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <h6>Company name 1</h6>
-                                            <p>company type</p>
-                                          </td>
-                                          <td>
-                                            <div>
-                                              <div class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap">
-                                                <p class="text-success">65%</p>
-                                                <p>85/162</p>
-                                              </div>
-                                              <div class="progress progress-md">
-                                                <div class="progress-bar bg-danger" role="progressbar" style="width: 15%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
-                                              </div>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <div class="badge badge-opacity-danger">Pending</div>
-                                          </td>
-                                        </tr>
-                                        <tr>
-                                          <td>
-                                            <div class="form-check form-check-flat mt-0">
-                                              <label class="form-check-label">
-                                                <input type="checkbox" class="form-check-input" aria-checked="false"><i class="input-helper"></i></label>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <div class="d-flex">
-                                              <img src="assets/images/faces/face5.jpg" alt="">
-                                              <div>
-                                                <h6>Katherine Butler</h6>
-                                                <p>Head admin</p>
-                                              </div>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <h6>Company name 1</h6>
-                                            <p>company type</p>
-                                          </td>
-                                          <td>
-                                            <div>
-                                              <div class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap">
-                                                <p class="text-success">65%</p>
-                                                <p>85/162</p>
-                                              </div>
-                                              <div class="progress progress-md">
-                                                <div class="progress-bar bg-success" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
-                                              </div>
-                                            </div>
-                                          </td>
-                                          <td>
-                                            <div class="badge badge-opacity-success">Completed</div>
-                                          </td>
-                                        </tr>
-                                      </tbody>
-                                    </table>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div> <!-- end of pending requests table -->
-                        </div>
-                      
-                        <!-- end of overview tab -->
-                        <div class="col-lg-4 d-flex flex-column">
-                          <div class="row flex-grow">
-                            <div class="col-12 grid-margin stretch-card">
-                              <div class="card card-rounded">
-                                <div class="card-body">
-                                  <div class="row">
-                                    <div class="col-lg-12">
-                                      <div class="d-flex justify-content-between align-items-center">
-                                        <h4 class="card-title card-title-dash">Todo list</h4>
-                                        <div class="add-items d-flex mb-0">
-                                          <!-- <input type="text" class="form-control todo-list-input" placeholder="What do you need to do today?"> -->
-                                          <button class="add btn btn-icons btn-rounded btn-primary todo-list-add-btn text-white me-0 pl-12p"><i class="mdi mdi-plus"></i></button>
-                                        </div>
-                                      </div>
-                                      <div class="list-wrapper">
-                                        <ul class="todo-list todo-list-rounded">
-                                          <li class="d-block">
-                                            <div class="form-check w-100">
-                                              <label class="form-check-label">
-                                                <input class="checkbox" type="checkbox"> Lorem Ipsum is simply dummy text of the printing <i class="input-helper rounded"></i>
-                                              </label>
-                                              <div class="d-flex mt-2">
-                                                <div class="ps-4 text-small me-3">24 June 2020</div>
-                                                <div class="badge badge-opacity-warning me-3">Due tomorrow</div>
-                                                <i class="mdi mdi-flag ms-2 flag-color"></i>
-                                              </div>
-                                            </div>
-                                          </li>
-                                          <li class="d-block">
-                                            <div class="form-check w-100">
-                                              <label class="form-check-label">
-                                                <input class="checkbox" type="checkbox"> Lorem Ipsum is simply dummy text of the printing <i class="input-helper rounded"></i>
-                                              </label>
-                                              <div class="d-flex mt-2">
-                                                <div class="ps-4 text-small me-3">23 June 2020</div>
-                                                <div class="badge badge-opacity-success me-3">Done</div>
-                                              </div>
-                                            </div>
-                                          </li>
-                                          <li>
-                                            <div class="form-check w-100">
-                                              <label class="form-check-label">
-                                                <input class="checkbox" type="checkbox"> Lorem Ipsum is simply dummy text of the printing <i class="input-helper rounded"></i>
-                                              </label>
-                                              <div class="d-flex mt-2">
-                                                <div class="ps-4 text-small me-3">24 June 2020</div>
-                                                <div class="badge badge-opacity-success me-3">Done</div>
-                                              </div>
-                                            </div>
-                                          </li>
-                                          <li class="border-bottom-0">
-                                            <div class="form-check w-100">
-                                              <label class="form-check-label">
-                                                <input class="checkbox" type="checkbox"> Lorem Ipsum is simply dummy text of the printing <i class="input-helper rounded"></i>
-                                              </label>
-                                              <div class="d-flex mt-2">
-                                                <div class="ps-4 text-small me-3">24 June 2020</div>
-                                                <div class="badge badge-opacity-danger me-3">Expired</div>
-                                              </div>
-                                            </div>
-                                          </li>
-                                        </ul>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="row flex-grow">
-                            <div class="col-12 grid-margin stretch-card">
-                              <div class="card card-rounded">
-                                <div class="card-body">
-                                  <div class="row">
-                                    <div class="col-lg-12">
-                                      <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h4 class="card-title card-title-dash">Type By Amount</h4>
-                                      </div>
-                                      <div>
-                                        <canvas class="my-auto" id="doughnutChart"></canvas>
-                                      </div>
-                                      <div id="doughnutChart-legend" class="mt-5 text-center"></div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="row flex-grow">
-                            <div class="col-12 grid-margin stretch-card">
-                              <div class="card card-rounded">
-                                <div class="card-body">
-                                  <div class="row">
-                                    <div class="col-lg-12">
-                                      <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <div>
-                                          <h4 class="card-title card-title-dash">Leave Report</h4>
-                                        </div>
-                                        <div>
-                                          <div class="dropdown">
-                                            <button class="btn btn-light dropdown-toggle toggle-dark btn-lg mb-0 me-0" type="button" id="dropdownMenuButton3" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Month Wise </button>
-                                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
-                                              <h6 class="dropdown-header">week Wise</h6>
-                                              <a class="dropdown-item" href="#">Year Wise</a>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                      <div class="mt-3">
-                                        <canvas id="leaveReport"></canvas>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="row flex-grow">
-                          </div>
-                        </div>
-                      </div>
+                </div>
+              </div>
+              
+              <div class="col-lg-6">
+                <div class="dashboard-card">
+                  <h5 class="mb-3">Top Products</h5>
+                  <div style="height: 300px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                    <div class="text-center">
+                      <i class="bi bi-pie-chart" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                      <p>Product Chart Placeholder</p>
+                      <small>Integrate with Chart.js or similar</small>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+            
           </div>
-          <!-- content-wrapper ends -->
-          <!-- partial:partials/_footer.html -->
+          
+          <!-- Footer -->
           <footer class="footer">
             <div class="d-sm-flex justify-content-center justify-content-sm-between">
-              <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Premium <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap admin template</a> from BootstrapDash.</span>
-              <span class="float-none float-sm-end d-block mt-1 mt-sm-0 text-center">Copyright © 2023. All rights reserved.</span>
+             
+              <span class="float-none float-sm-end d-block mt-1 mt-sm-0 text-center">
+                Copyright © 2025. All rights reserved.
+              </span>
             </div>
           </footer>
-          <!-- partial -->
         </div>
-        <!-- main-panel ends -->
       </div>
-      <!-- page-body-wrapper ends -->
     </div>
-    <!-- container-scroller -->
+
     <!-- plugins:js -->
     <script src="assets/vendors/js/vendor.bundle.base.js"></script>
-    <script src="assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
     <!-- endinject -->
-    <!-- Plugin js for this page -->
-    <script src="assets/vendors/chart.js/chart.umd.js"></script>
-    <script src="assets/vendors/progressbar.js/progressbar.min.js"></script>
-    <!-- End plugin js for this page -->
     <!-- inject:js -->
-    <script src="assets/js/off-canvas.js"></script>
-    <script src="assets/js/template.js"></script>
-    <!-- Small script to keep sidebar static on large screens -->
-    <script>
-      (function () {
-        function applyFixedSidebar() {
-          var mq = window.matchMedia('(min-width: 992px)');
-          var sidebar = document.getElementById('sidebar');
-          var mainPanel = document.querySelector('.main-panel');
-          if (!sidebar || !mainPanel) return;
-
-          if (mq.matches) {
-            // compute top offset from navbar height
-            var navbar = document.querySelector('.navbar');
-            var topOffset = navbar ? navbar.getBoundingClientRect().height : 70;
-            // compute computed width of sidebar so we can shift main panel
-            var sidebarWidth = sidebar.getBoundingClientRect().width || 220;
-
-            sidebar.classList.add('fixed-static');
-            sidebar.style.top = topOffset + 'px';
-            sidebar.style.height = 'calc(100vh - ' + topOffset + 'px)';
-
-            mainPanel.classList.add('fixed-with-sidebar');
-            mainPanel.style.marginLeft = sidebarWidth + 'px';
-          } else {
-            sidebar.classList.remove('fixed-static');
-            sidebar.style.top = '';
-            sidebar.style.height = '';
-
-            mainPanel.classList.remove('fixed-with-sidebar');
-            mainPanel.style.marginLeft = '';
-          }
-        }
-
-        document.addEventListener('DOMContentLoaded', applyFixedSidebar);
-        window.addEventListener('resize', function () {
-          // debounce resize a little
-          clearTimeout(window._applyFixedSidebarTimer);
-          window._applyFixedSidebarTimer = setTimeout(applyFixedSidebar, 120);
-        });
-      })();
-    </script>
-    <script src="assets/js/settings.js"></script>
-    <script src="assets/js/hoverable-collapse.js"></script>
-    <script src="assets/js/todolist.js"></script>
+    <!-- <script src="assets/js/off-canvas.js"></script> Commented out to avoid conflicts -->
+  <script src="assets/js/template.js"></script>
+    <!-- <script src="assets/js/hoverable-collapse.js"></script> Commented out to avoid conflicts -->
     <!-- endinject -->
-    <!-- Custom js for this page-->
-    <script src="assets/js/jquery.cookie.js" type="text/javascript"></script>
-    <script src="assets/js/dashboard.js"></script>
-    <!-- <script src="assets/js/Chart.roundedBarCharts.js"></script> -->
-    <!-- End custom js for this page-->
-    <!-- Toast container for AJAX responses -->
-    <div aria-live="polite" aria-atomic="true" class="position-relative">
-      <div id="globalToast" class="toast-container position-fixed top-0 end-0 p-3" style="z-index:99999;"></div>
-    </div>
-    <script>
-      // AJAX submit for Add Staff modal
-      (function(){
-        var form = document.getElementById('addStaffForm');
-        if (!form) return;
-        var addBtn = document.getElementById('addStaffBtn');
-        form.addEventListener('submit', function(e){
-          e.preventDefault();
-          if (addBtn) { addBtn.disabled = true; addBtn.textContent = 'Saving...'; }
-          var data = new FormData(form);
-          // include credentials and CSRF header explicitly to ensure session cookie
-          var csrfVal = data.get('csrf_token');
-          fetch(form.action, {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: { 'Accept': 'application/json', 'X-CSRF-Token': csrfVal },
-            body: data
-          }).then(function(resp){ return resp.json(); }).then(function(json){
-            showToast(json.message || (json.success ? 'Saved' : 'Error'), json.success);
-            // If server provided email status, show it as an informational toast
-            if (json.email_message) {
-              setTimeout(function(){ showToast(json.email_message, !!json.email_sent); }, 250);
-            }
-            if (json.success) {
-              // close modal
-              var modalEl = document.getElementById('exampleModal');
-              if (modalEl) {
-                var bsModal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                bsModal.hide();
-              }
-              // reset form
-              form.reset();
-            }
-          }).catch(function(err){
-            showToast('Server error. See console.', false);
-            console.error(err);
-          }).finally(function(){ if (addBtn) { addBtn.disabled = false; addBtn.textContent = 'Add Staff'; } });
-        });
 
-        function showToast(message, success) {
-          var container = document.getElementById('globalToast');
-          if (!container) return;
-          var toast = document.createElement('div');
-          toast.className = 'toast';
-          toast.role = 'alert';
-          toast.ariaLive = 'assertive';
-          toast.ariaAtomic = 'true';
-          toast.innerHTML = '<div class="toast-header ' + (success ? 'text-success' : 'text-danger') + '"><strong class="me-auto">' + (success ? 'Success' : 'Error') + '</strong><button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button></div><div class="toast-body">' + message + '</div>';
-          container.appendChild(toast);
-          var bs = new bootstrap.Toast(toast, { delay: 5000 });
-          bs.show();
-          // remove after hidden
-          toast.addEventListener('hidden.bs.toast', function(){ toast.remove(); });
-        }
-      })();
+    <!-- Bootstrap JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Include Sidebar Scripts -->
+    <?php include 'layouts/sidebar_scripts.php'; ?>
+
+    <!-- Minimal Bootstrap Collapse Test Script and Add Item Modal Fallback -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Only one submenu open at a time, expand/collapse on one click
+      document.querySelectorAll('.sidebar .nav-link[data-bs-toggle="collapse"]').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          var targetSelector = this.getAttribute('href');
+          var target = document.querySelector(targetSelector);
+          if (!target) return;
+          // Collapse all other open submenus
+          document.querySelectorAll('.sidebar .collapse.show').forEach(function(openMenu) {
+            if (openMenu !== target) {
+              var openCollapse = bootstrap.Collapse.getOrCreateInstance(openMenu);
+              openCollapse.hide();
+            }
+          });
+          // Toggle the clicked submenu
+          var bsCollapse = bootstrap.Collapse.getOrCreateInstance(target);
+          bsCollapse.toggle();
+        });
+      });
+
+      // Add Item Quick Action fallback handler
+      var addItemBtn = document.getElementById('addItemQuickAction');
+      if (addItemBtn) {
+        console.log('Add Item button found, attaching event listener');
+        addItemBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          console.log('Add Item button clicked');
+          
+          var modal = document.getElementById('itemTypeModal');
+          if (modal) {
+            try {
+              // Check if Bootstrap is loaded
+              if (typeof bootstrap === 'undefined') {
+                console.error('Bootstrap JS is not loaded!');
+                alert('Bootstrap JavaScript is required for modals. Please refresh the page.');
+                return;
+              }
+              
+              var bsModal = bootstrap.Modal.getOrCreateInstance(modal);
+              bsModal.show();
+              console.log('Modal should be showing now');
+            } catch (error) {
+              console.error('Error showing modal:', error);
+              alert('Error opening modal: ' + error.message);
+            }
+          } else {
+            console.error('Modal element not found!');
+            alert('Modal not found on page!');
+          }
+        });
+      } else {
+        console.error('Add Item button not found!');
+      }
+    });
     </script>
+    
+    <!-- Dashboard Time Filter JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all timeframe buttons
+        const timeframeButtons = document.querySelectorAll('.timeframe-btn');
+        
+        // Add click event listener to each button
+        timeframeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                timeframeButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.classList.add('btn-outline-primary');
+                    btn.classList.remove('btn-primary');
+                });
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-primary');
+                
+                // Get the selected time range
+                const selectedRange = this.getAttribute('data-range');
+                console.log('Selected time range:', selectedRange);
+                
+                // Here you can add functionality to update the dashboard data
+                // based on the selected time range
+                updateDashboardData(selectedRange);
+            });
+        });
+        
+        // Function to update dashboard data (placeholder)
+        function updateDashboardData(range) {
+            // This is where you would typically make an AJAX call
+            // to fetch new data based on the selected time range
+            
+            // For now, just show a loading indicator or update UI
+            console.log('Updating dashboard for range:', range);
+            
+            // Example: You could update the stat numbers here
+            // updateStatCards(range);
+        }
+        
+        // Optional: Function to update stat cards with new data
+        function updateStatCards(range) {
+            // Example implementation - you would replace with actual data
+            const statNumbers = document.querySelectorAll('.stat-number');
+            
+            // Simulate loading state
+            statNumbers.forEach(stat => {
+                stat.style.opacity = '0.5';
+            });
+            
+            // Simulate data update after a short delay
+            setTimeout(() => {
+                statNumbers.forEach(stat => {
+                    stat.style.opacity = '1';
+                });
+            }, 300);
+        }
+    });
+    
+    // Function to show item details when clicking on options
+    function showItemDetails(type) {
+        console.log('Showing details for type:', type);
+        
+        // Remove active class from all options and reset their styles
+        document.querySelectorAll('.item-option').forEach(option => {
+            option.classList.remove('active');
+            option.style.border = '2px solid transparent';
+            option.style.backgroundColor = '';
+        });
+        
+        // Add active class to clicked option and apply active styling
+        const selectedOption = document.querySelector(`[data-type="${type}"]`);
+        if (selectedOption) {
+            selectedOption.classList.add('active');
+            
+            // Apply type-specific active styling
+            switch(type) {
+                case 'standard':
+                    selectedOption.style.border = '2px solid #007bff';
+                    selectedOption.style.backgroundColor = '#e3f2fd';
+                    break;
+                case 'variant':
+                    selectedOption.style.border = '2px solid #28a745';
+                    selectedOption.style.backgroundColor = '#d4edda';
+                    break;
+                case 'bundled':
+                    selectedOption.style.border = '2px solid #ffc107';
+                    selectedOption.style.backgroundColor = '#fff3cd';
+                    break;
+            }
+        }
+        
+        // Hide all detail sections
+        document.querySelectorAll('.item-details').forEach(detail => {
+            detail.style.display = 'none';
+            detail.style.opacity = '0';
+            detail.classList.remove('active');
+        });
+        
+        // Show selected detail section with animation
+        const selectedDetail = document.getElementById(`${type}-details`);
+        if (selectedDetail) {
+            selectedDetail.style.display = 'block';
+            selectedDetail.classList.add('active');
+            
+            // Use setTimeout to ensure display:block is applied before opacity change
+            setTimeout(() => {
+                selectedDetail.style.opacity = '1';
+            }, 10);
+        }
+    }
+
+    // Function to handle item type selection
+    function selectItemType(type) {
+        console.log('Selecting item type:', type);
+        
+        // Close the modal first
+        const modalElement = document.getElementById('itemTypeModal');
+        if (modalElement) {
+            try {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) {
+                    modal.hide();
+                } else {
+                    console.warn('Modal instance not found, creating new one to hide');
+                    const newModal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                    newModal.hide();
+                }
+            } catch (error) {
+                console.error('Error closing modal:', error);
+            }
+        }
+        
+        // Small delay to ensure modal closes before redirect
+        setTimeout(() => {
+            // Redirect based on the selected item type
+            switch(type) {
+                case 'standard':
+                    console.log('Redirecting to standard item page');
+                    window.location.href = 'views/add_item_standard.php';
+                    break;
+                case 'variant':
+                    console.log('Redirecting to variant item page');
+                    window.location.href = 'views/add_item_variant.php';
+                    break;
+                case 'bundled':
+                    console.log('Redirecting to bundled item page');
+                    window.location.href = 'views/add_item_bundled.php';
+                    break;
+                default:
+                    console.error('Unknown item type:', type);
+                    alert('Unknown item type: ' + type);
+            }
+        }, 200);
+    }
+    
+    // Function to handle Continue button click
+    function proceedWithItemType() {
+        // Get the currently selected item type
+        const activeOption = document.querySelector('.item-option.active');
+        if (activeOption) {
+            const selectedType = activeOption.getAttribute('data-type');
+            console.log('Proceeding with item type:', selectedType);
+            selectItemType(selectedType);
+        } else {
+            console.warn('No item type selected');
+            alert('Please select an item type first.');
+        }
+    }
+    </script>
+
+    <!-- Modal for selecting item type - Properly positioned at body level -->
+    <div class="modal fade" id="itemTypeModal" tabindex="-1" aria-labelledby="itemTypeModalLabel" aria-hidden="true" style="z-index: 1055;">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);">
+          <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-bottom: none;">
+            <h5 class="modal-title" id="itemTypeModalLabel" style="font-weight: 600;">
+              <i class="bi bi-box-seam me-2"></i>Select Item Type
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" style="min-height: 400px; padding: 2rem;">
+            <div class="row">
+              <!-- Left Column - Item Type Options -->
+              <div class="col-md-4">
+                <div class="list-group">
+                  <button type="button" class="list-group-item list-group-item-action d-flex align-items-center p-3 item-option active" 
+                          data-type="standard" onclick="showItemDetails('standard')" style="border: 2px solid #007bff; background-color: #e3f2fd;">
+                    <i class="bi bi-box-seam text-primary me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                      <h6 class="mb-0 text-primary">Standard Item</h6>
+                      <small class="text-muted">Simple single product</small>
+                    </div>
+                  </button>
+                  
+                  <button type="button" class="list-group-item list-group-item-action d-flex align-items-center p-3 item-option" 
+                          data-type="variant" onclick="showItemDetails('variant')" style="border: 2px solid transparent;">
+                    <i class="bi bi-grid-3x3 text-success me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                      <h6 class="mb-0 text-success">Variant Item</h6>
+                      <small class="text-muted">Multiple variations</small>
+                    </div>
+                  </button>
+                  
+                  <button type="button" class="list-group-item list-group-item-action d-flex align-items-center p-3 item-option" 
+                          data-type="bundled" onclick="showItemDetails('bundled')" style="border: 2px solid transparent;">
+                    <i class="bi bi-collection text-warning me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                      <h6 class="mb-0 text-warning">Bundled Item</h6>
+                      <small class="text-muted">Package of products</small>
+                    </div>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Right Column - Item Details -->
+              <div class="col-md-8">
+                <div class="item-details-container">
+                  <!-- Standard Item Details -->
+                  <div id="standard-details" class="item-details active" style="display: block; opacity: 1;">
+                    <div class="d-flex align-items-start mb-3">
+                      <i class="bi bi-box-seam text-primary me-3" style="font-size: 3rem;"></i>
+                      <div>
+                        <h4 class="text-primary mb-2">
+                          <i class="bi bi-check-circle-fill me-1"></i> Standard Item
+                        </h4>
+                        <p class="text-dark mb-3">
+                          A simple product with a single SKU, tracked individually with its own price and stock quantity.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <h6><strong>Best for:</strong></h6>
+                      <ul class="text-muted mb-3">
+                        <li>Products without variations (no size, color, or model options)</li>
+                        <li>Individual items with unique barcodes</li>
+                        <li>Simple inventory tracking</li>
+                      </ul>
+                    </div>
+                    
+                    <div class="mb-4">
+                      <h6><strong>Examples:</strong></h6>
+                      <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-primary-subtle text-primary border">Laptop Model XYZ</span>
+                        <span class="badge bg-primary-subtle text-primary border">Office Chair</span>
+                        <span class="badge bg-primary-subtle text-primary border">USB Cable 2m</span>
+                        <span class="badge bg-primary-subtle text-primary border">Water Bottle</span>
+                        <span class="badge bg-primary-subtle text-primary border">Notebook A4</span>
+                      </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="selectItemType('standard')" style="padding: 0.75rem 1.5rem;">
+                      <i class="bi bi-plus-circle me-1"></i> Create Standard Item
+                    </button>
+                  </div>
+                  
+                  <!-- Variant Item Details -->
+                  <div id="variant-details" class="item-details" style="display: none; opacity: 0;">
+                    <div class="d-flex align-items-start mb-3">
+                      <i class="bi bi-grid-3x3 text-success me-3" style="font-size: 3rem;"></i>
+                      <div>
+                        <h4 class="text-success mb-2">
+                          <i class="bi bi-grid-fill me-1"></i> Variant Item
+                        </h4>
+                        <p class="text-dark mb-3">
+                          A product available in multiple variations (e.g., different sizes, colors, or styles). Each variant has its own SKU, price, and stock level.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <h6><strong>Best for:</strong></h6>
+                      <ul class="text-muted mb-3">
+                        <li>Products with multiple size options (S, M, L, XL)</li>
+                        <li>Items available in different colors or patterns</li>
+                        <li>Products with different specifications or models</li>
+                        <li>Tracking inventory per variant combination</li>
+                      </ul>
+                    </div>
+                    
+                    <div class="mb-4">
+                      <h6><strong>Examples:</strong></h6>
+                      <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-success-subtle text-success border">T-Shirt (Red/Blue/Green, S/M/L/XL)</span>
+                        <span class="badge bg-success-subtle text-success border">Shoes (Size 6-12, Black/White)</span>
+                        <span class="badge bg-success-subtle text-success border">Phone Case (iPhone/Samsung, Colors)</span>
+                        <span class="badge bg-success-subtle text-success border">Jeans (Size 28-38, Regular/Slim)</span>
+                      </div>
+                    </div>
+                    
+                    <button class="btn btn-success" onclick="selectItemType('variant')" style="padding: 0.75rem 1.5rem;">
+                      <i class="bi bi-plus-circle me-1"></i> Create Variant Item
+                    </button>
+                  </div>
+                  
+                  <!-- Bundled Item Details -->
+                  <div id="bundled-details" class="item-details" style="display: none; opacity: 0;">
+                    <div class="d-flex align-items-start mb-3">
+                      <i class="bi bi-collection text-warning me-3" style="font-size: 3rem;"></i>
+                      <div>
+                        <h4 class="text-warning mb-2">
+                          <i class="bi bi-box2-fill me-1"></i> Bundled Item
+                        </h4>
+                        <p class="text-dark mb-3">
+                          A package or combo containing multiple existing products sold together as one unit. Selling a bundle automatically deducts stock from all included items.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                      <h6><strong>Best for:</strong></h6>
+                      <ul class="text-muted mb-3">
+                        <li>Product packages or gift sets</li>
+                        <li>Promotional combos and special offers</li>
+                        <li>Starter kits or complete sets</li>
+                        <li>Value packs with multiple related items</li>
+                      </ul>
+                    </div>
+                    
+                    <div class="mb-4">
+                      <h6><strong>Examples:</strong></h6>
+                      <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-warning-subtle text-warning border">Office Starter Kit (Pen + Notepad + Stapler)</span>
+                        <span class="badge bg-warning-subtle text-warning border">Gaming Bundle (Mouse + Keyboard + Headset)</span>
+                        <span class="badge bg-warning-subtle text-warning border">Skincare Set (Cleanser + Toner + Moisturizer)</span>
+                        <span class="badge bg-warning-subtle text-warning border">Back to School Pack</span>
+                      </div>
+                    </div>
+                    
+                    <button class="btn btn-warning text-dark" onclick="selectItemType('bundled')" style="padding: 0.75rem 1.5rem;">
+                      <i class="bi bi-plus-circle me-1"></i> Create Bundled Item
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer" style="border-top: 1px solid #dee2e6; background-color: #f8f9fa; padding: 1.5rem;">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="padding: 0.75rem 1.5rem;">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="proceedWithItemType()" style="padding: 0.75rem 1.5rem;">
+              <i class="bi bi-arrow-right me-1"></i>Continue
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- end of item type selection modal -->
+
   </body>
 </html>

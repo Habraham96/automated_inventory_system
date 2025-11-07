@@ -18,7 +18,10 @@
         if (href.indexOf("index.html") !== -1) {
           element.parents('.nav-item').last().addClass('active');
           if (element.parents('.sub-menu').length) {
-            element.closest('.collapse').addClass('show');
+            // Only add .show if not the Sales menu (ui-basic)
+            if (!element.closest('.collapse').attr('id') || element.closest('.collapse').attr('id') !== 'ui-basic') {
+              element.closest('.collapse').addClass('show');
+            }
             element.addClass('active');
           }
         }
@@ -27,7 +30,10 @@
         if (href.indexOf(current) !== -1) {
           element.parents('.nav-item').last().addClass('active');
           if (element.parents('.sub-menu').length) {
-            element.closest('.collapse').addClass('show');
+            // Only add .show if not the Sales menu (ui-basic)
+            if (!element.closest('.collapse').attr('id') || element.closest('.collapse').attr('id') !== 'ui-basic') {
+              element.closest('.collapse').addClass('show');
+            }
             element.addClass('active');
           }
           if (element.parents('.submenu-item').length) {
@@ -49,10 +55,14 @@
     })
 
     //Close other submenu in sidebar on opening any
+    // Note: This functionality is now handled by the initialization script in index.php
+    // to avoid conflicts with Bootstrap 5's native collapse component
+    
 
-    sidebar.on('show.bs.collapse', '.collapse', function () {
-      sidebar.find('.collapse.show').collapse('hide');
-    });
+      // Only one sidebar submenu open at a time
+      sidebar.on('show.bs.collapse', '.collapse', function () {
+        sidebar.find('.collapse.show').not(this).collapse('hide');
+      });
 
 
     //Change sidebar and content-wrapper height
