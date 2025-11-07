@@ -1,3 +1,29 @@
+/* --- Sidebar Overlap Fix for Categories Page and All Main Content --- */
+.sidebar {
+  z-index: 1040 !important;
+  background: #fff !important;
+  box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+}
+
+.main-panel {
+  margin-left: 280px !important;
+  transition: margin-left 0.2s ease !important;
+  min-height: calc(100vh - 70px);
+  background-color: #f5f7fa;
+}
+
+body.sidebar-collapsed .main-panel {
+  margin-left: 70px !important;
+}
+
+@media (max-width: 768px) {
+  .main-panel {
+    margin-left: 0 !important;
+  }
+  body.sidebar-collapsed .main-panel {
+    margin-left: 0 !important;
+  }
+}
 @charset "UTF-8";
 /*------------------------------------------------------------------
  [Master Stylesheet]
@@ -28831,14 +28857,14 @@ dl li {
   -moz-transition: background 0.25s ease;
   -ms-transition: background 0.25s ease;
   box-shadow: none;
-  background: #F4F5F7;
+  background: rgba(244, 245, 247, 0.7);
   /* Navbar color variations */
 }
 .sidebar-dark .navbar {
   box-shadow: none;
 }
 .navbar .navbar-brand-wrapper {
-  background: #F4F5F7;
+  background: rgba(244, 245, 247, 0.7);
   transition: width 0.25s ease, background 0.25s ease;
   -webkit-transition: width 0.25s ease, background 0.25s ease;
   -moz-transition: width 0.25s ease, background 0.25s ease;
@@ -28848,11 +28874,11 @@ dl li {
   padding: 20px 35px;
 }
 .sidebar-dark .navbar .navbar-brand-wrapper {
-  background: #232227;
+  background: rgba(35, 34, 39, 0.7);
 }
 @media (max-width: 991px) {
   .sidebar-dark .navbar .navbar-brand-wrapper {
-    background: #F4F5F7;
+    background: rgba(244, 245, 247, 0.7);
   }
 }
 @media (max-width: 991px) {
@@ -28907,8 +28933,11 @@ dl li {
   transition: transform 0.3s linear;
 }
 @media (max-width: 991px) {
+  /* OVERRIDE: Keep hamburger visible on mobile */
   .navbar .navbar-brand-wrapper .navbar-toggler:not(.navbar-toggler-right) {
-    display: none;
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 .sidebar-icon-only .navbar .navbar-brand-wrapper .navbar-toggler:not(.navbar-toggler-right) {
@@ -28929,7 +28958,7 @@ dl li {
   margin-left: 1rem !important;
 }
 .navbar .navbar-menu-wrapper {
-  background: #F4F5F7;
+  background: rgba(244, 245, 247, 0.7);
   transition: width 0.25s ease;
   -webkit-transition: width 0.25s ease;
   -moz-transition: width 0.25s ease;
@@ -28967,8 +28996,11 @@ dl li {
   transition: transform 0.3s linear;
 }
 @media (max-width: 991px) {
+  /* OVERRIDE: Keep secondary hamburger visible on mobile */
   .navbar .navbar-menu-wrapper .navbar-toggler:not(.navbar-toggler-right) {
-    display: none;
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 .sidebar-icon-only .navbar .navbar-menu-wrapper .navbar-toggler:not(.navbar-toggler-right) {
@@ -29987,7 +30019,7 @@ dl li {
 }
 .navbar.headerLight .navbar-menu-wrapper,
 .navbar.headerLight .navbar-brand-wrapper {
-  background: transparent;
+  background: rgba(244, 245, 247, 0.3);
   height: 70px;
 }
 
@@ -30026,7 +30058,7 @@ dl li {
 @media (min-width: 992px) {
   .sidebar-mini .navbar .navbar-brand-wrapper {
     width: 145px;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.7);
   }
   .sidebar-mini .navbar .navbar-brand-wrapper .navbar-brand {
     display: none;
@@ -30114,11 +30146,12 @@ dl li {
   .sidebar-dark.sidebar-icon-only .navbar .navbar-brand-wrapper .navbar-toggler {
     color: #484848;
   }
+  /* OVERRIDE: Keep full logo visible in collapsed (icon-only) mode */
   .sidebar-icon-only .navbar .navbar-brand-wrapper .brand-logo {
-    display: none;
+    display: inline-block !important;
   }
   .sidebar-icon-only .navbar .navbar-brand-wrapper .brand-logo-mini {
-    display: inline-block;
+    display: none !important;
   }
   .sidebar-icon-only .navbar .navbar-menu-wrapper {
     width: calc(100% - 70px);
@@ -30400,4 +30433,474 @@ dl li {
   background-color: darkgrey;
   outline: 1px solid slategrey;
 }
+
+/* ===== Custom Dashboard Styles ===== */
+
+/* Sidebar collapse/expand toggle styles (minimal, local overrides) */
+.sidebar {
+  transition: width .2s ease;
+}
+
+.main-panel, .page-body-wrapper {
+  transition: margin-left .2s ease;
+}
+
+body.sidebar-collapsed .sidebar {
+  width: 70px !important;
+  overflow: hidden;
+}
+
+body.sidebar-collapsed .sidebar .menu-title,
+body.sidebar-collapsed .sidebar .menu-arrow {
+  display: none !important;
+}
+
+body.sidebar-collapsed .sidebar .menu-icon {
+  margin-right: 0 !important;
+  text-align: center;
+  width: 100%;
+}
+
+body.sidebar-collapsed .main-panel {
+  margin-left: 70px !important;
+}
+
+/* Navbar container wrapper - fixed at top with fixed height */
+.navbar-container-wrapper {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  height: 70px !important;
+  min-height: 70px !important;
+  max-height: 70px !important;
+  z-index: 1030 !important;
+  background-color: #fff !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+  /* Allow children (icons, logos, dropdowns) to render fully */
+  overflow: visible !important;
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+  will-change: transform !important;
+}
+
+/* Keep navbar fixed at top while scrolling with fixed height */
+.navbar-container-wrapper nav.navbar.fixed-top {
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  height: 70px !important;
+  min-height: 70px !important;
+  max-height: 70px !important;
+  z-index: inherit !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+}
+
+/* Keep brand wrapper static and centered vertically */
+.navbar-brand-wrapper {
+  position: relative !important;
+  height: 70px !important;
+  min-height: 70px !important;
+  max-height: 70px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-shrink: 0 !important;
+  transform: translate3d(0, 0, 0) !important;
+  -webkit-transform: translate3d(0, 0, 0) !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+}
+
+/* Keep toggle button static */
+#sidebarToggle,
+.navbar-toggler {
+  position: relative !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transform: translate3d(0, 0, 0) !important;
+  -webkit-transform: translate3d(0, 0, 0) !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+}
+
+/* Keep logo static and centered vertically - anti-flicker */
+.nav_logo,
+.nav_logo img {
+  position: relative !important;
+  display: block !important;
+  flex-shrink: 0 !important;
+  transform: translate3d(0, 0, 0) !important;
+  -webkit-transform: translate3d(0, 0, 0) !important;
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  image-rendering: -webkit-optimize-contrast !important;
+  image-rendering: crisp-edges !important;
+  will-change: auto !important;
+  pointer-events: auto !important;
+}
+
+/* Additional logo image specific rules */
+.nav_logo img {
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  vertical-align: middle !important;
+  -webkit-user-drag: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  transform-style: preserve-3d !important;
+  -webkit-transform-style: preserve-3d !important;
+  perspective: 1000px !important;
+  -webkit-perspective: 1000px !important;
+}
+
+/* Ensure navbar menu wrapper doesn't cause shifts */
+.navbar-menu-wrapper {
+  height: 70px !important;
+  min-height: 70px !important;
+  max-height: 70px !important;
+  display: flex !important;
+  align-items: center !important;
+  position: relative !important;
+  transform: translate3d(0, 0, 0) !important;
+  -webkit-transform: translate3d(0, 0, 0) !important;
+}
+
+/* Add padding to body to account for fixed navbar */
+body.with-welcome-text {
+  padding-top: 70px !important;
+}
+
+/* Ensure page-body-wrapper starts correctly */
+.container-fluid.page-body-wrapper {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Remove any default spacing from sidebar area */
+nav.sidebar.sidebar-offcanvas {
+  position: fixed !important;
+  top: 70px !important;
+  left: 0 !important;
+  height: calc(100vh - 70px) !important;
+  overflow-y: auto !important;
+  z-index: 1000 !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Main panel positioning */
+.main-panel {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* ULTRA COMPACT - Close margin between header and overview - NO GAP */
+.content-wrapper {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  padding-left: 2.187rem !important;
+  padding-right: 2.187rem !important;
+  padding-bottom: 1.5rem !important;
+  display: block !important;
+  line-height: normal !important;
+}
+
+@media (max-width: 767px) {
+  .content-wrapper {
+    padding: 0 1.5rem 1.5rem 1.5rem !important;
+  }
+}
+
+/* Remove all spacing from all nested elements */
+.content-wrapper > .row,
+.content-wrapper .row,
+.content-wrapper > .row:first-child,
+.content-wrapper .row:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.content-wrapper .col-sm-12,
+.content-wrapper > .row > .col-sm-12 {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Home tab container - absolutely no spacing AND STICKY */
+.home-tab {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  display: block !important;
+}
+
+/* Make the nav tabs area ZERO spacing AND STICKY to header */
+.home-tab .d-sm-flex,
+.home-tab > .d-sm-flex {
+  position: sticky !important;
+  top: 70px !important;
+  z-index: 1020 !important;
+  background-color: #F4F5F7 !important;
+  margin-top: 0 !important;
+  padding-top: 0.25rem !important;
+  padding-bottom: 0.25rem !important;
+  margin-bottom: 0 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+}
+
+.home-tab .border-bottom {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0.25rem !important;
+  border-bottom: 1px solid #dee2e6 !important;
+}
+
+/* Nav tabs themselves - zero all spacing */
+.home-tab .nav-tabs,
+.home-tab .nav,
+.nav-tabs {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.home-tab .nav-item {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Tab content - absolutely flush */
+.tab-content-basic,
+.tab-content {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Overview tab - absolutely no gap */
+#overview,
+.tab-pane {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+#overview > .row,
+#overview .row:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+#overview > .row > .col-sm-12 {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* Sales Overview header - absolutely flush to tabs */
+#overview .d-flex.justify-content-between,
+#overview > .row > .col-sm-12 > .d-flex {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  margin-bottom: 0.75rem !important;
+}
+
+#overview h5,
+#overview .mb-0 {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Reduce spacing in cards and sections */
+.card {
+  margin-bottom: 1rem !important;
+}
+
+.card-body {
+  padding: 1rem !important;
+}
+
+/* Make rows more compact globally */
+.row {
+  margin-bottom: 0.5rem !important;
+}
+
+/* Item Type Modal Styles */
+.item-type-option {
+  transition: all 0.3s ease;
+  border: 2px solid #dee2e6 !important;
+}
+
+.item-type-option:hover {
+  background-color: #f8f9fa !important;
+  border-color: #0d6efd !important;
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+  transform: translateY(-3px);
+}
+
+.item-type-option:active {
+  transform: translateY(-1px);
+}
+
+#itemTypeModal .modal-dialog {
+  max-width: 800px;
+}
+
+#itemTypeModal .modal-body {
+  padding: 2rem;
+}
+
+#itemTypeModal .modal-header {
+  border-bottom: 2px solid #e9ecef;
+}
+
+#itemTypeModal .modal-footer {
+  border-top: 2px solid #e9ecef;
+}
+
+/* Badge styling for examples */
+.bg-primary-subtle {
+  background-color: rgba(13, 110, 253, 0.1) !important;
+}
+
+.bg-success-subtle {
+  background-color: rgba(25, 135, 84, 0.1) !important;
+}
+
+.bg-warning-subtle {
+  background-color: rgba(255, 193, 7, 0.15) !important;
+}
+
+.badge.border {
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+/* Scrollbar styling for modal body */
+#itemTypeModal .modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+#itemTypeModal .modal-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+#itemTypeModal .modal-body::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+#itemTypeModal .modal-body::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* =============================
+   GLOBAL OVERRIDES – NAV LOGO & HAMBURGER VISIBILITY
+   Ensure the brand logo and both hamburger buttons never disappear
+   across Manager views regardless of other CSS/JS.
+   ============================= */
+/* Keep full logo always visible */
+.navbar .navbar-brand-wrapper .navbar-brand.brand-logo {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+.navbar .navbar-brand-wrapper .navbar-brand.brand-logo img,
+.nav_logo img {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: 36px !important;
+  width: auto !important;
+  object-fit: contain !important;
+}
+
+/* Hide mini logo unless explicitly needed */
+.navbar .navbar-brand-wrapper .brand-logo-mini {
+  display: none !important;
+}
+
+/* Force both hamburger buttons to be visible */
+.navbar .navbar-brand-wrapper .navbar-toggler,
+.navbar .navbar-menu-wrapper .navbar-toggler,
+#sidebarToggle {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Ensure icon glyphs are visible */
+.icon-menu,
+.mdi-menu {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Prevent overlap issues for brand area */
+.navbar .navbar-brand-wrapper {
+  position: relative !important;
+  z-index: 1040 !important;
+}
+
+/* Custom: Reduced opacity for all header backgrounds */
+.navbar,
+.navbar .navbar-brand-wrapper,
+.navbar .navbar-menu-wrapper,
+.navbar.headerLight .navbar-menu-wrapper,
+.navbar.headerLight .navbar-brand-wrapper,
+header,
+.header,
+.page-header,
+.content-header,
+.section-header,
+.card-header,
+.modal-header,
+thead,
+th {
+  background-color: rgba(244, 245, 247, 0.7) !important;
+}
+
+/* Dark theme headers with reduced opacity */
+.sidebar-dark .navbar .navbar-brand-wrapper,
+.sidebar-dark .navbar .navbar-menu-wrapper,
+.dark-header,
+.header-dark {
+  background-color: rgba(35, 34, 39, 0.7) !important;
+}
+
+/* Light transparent headers with minimal opacity */
+.navbar.headerLight .navbar-menu-wrapper,
+.navbar.headerLight .navbar-brand-wrapper,
+.header-transparent,
+.transparent-header {
+  background-color: rgba(244, 245, 247, 0.3) !important;
+}
+
 /*# sourceMappingURL=maps/style.css.map */

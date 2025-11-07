@@ -8,7 +8,7 @@ var merge = require('merge-stream');
 
 /* inject partials like sidebar and navbar */
 gulp.task('injectPartial', function () {
-    return gulp.src(["./pages/**/*.html", "./index.html"], {
+    return gulp.src(["./views/**/*.html", "./index.html"], {
             base: "./"
         })
         .pipe(injectPartials())
@@ -53,18 +53,18 @@ gulp.task('injectAssets', function () {
 
 /*replace image path and linking after injection*/
 gulp.task('replacePath', function () {
-    var replacePath1 = gulp.src('./pages/**/*.html', {
+    var replacePath1 = gulp.src('./views/**/*.html', {
             base: "./"
         })
         .pipe(replace('="../assets/', '="../../assets/'))
-        .pipe(replace('href="../pages/', 'href="../../pages/'))
+        .pipe(replace('href="../views/', 'href="../../views/'))
         .pipe(replace('="../docs/', '="../../docs/'))
         .pipe(replace('href="../index.html"', 'href="../../index.html"'))
         .pipe(gulp.dest('.'));
     var replacePath2 = gulp.src('./index.html', {base: "./"})
         .pipe(replace('="../assets/', '="assets/'))
         .pipe(replace('="../docs/', '="docs/'))
-        .pipe(replace('="../pages/', '="pages/'))
+        .pipe(replace('="../views/', '="views/'))
         .pipe(replace('="../index.html"', '="index.html"'))
         .pipe(gulp.dest('.'));
     return merge(replacePath1, replacePath2);

@@ -157,15 +157,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <i class="uil uil-briefcase"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
+          <input type="text" name="branch_name" placeholder="Branch Name" required />
+          <i class="uil uil-sitemap"></i>
+        </div>
+        <div class="input_box" style="flex:1 1 45%; min-width:180px;">
           <label for="businessLogo" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:#fff;border:1.5px solid #ececf6;border-radius:10px;cursor:pointer;position:relative;">
-            <span id="logoPlaceholder" style="width:100%;text-align:center;color:#888;font-size:1.1rem;">Upload business logo</span>
+            <span id="logoPlaceholder" style="width:100%;text-align:center;color:#888;font-size:1.1rem;padding:0 50px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Upload business logo</span>
             <input id="businessLogo" name="business_logo" type="file" accept="image/*" style="opacity:0;position:absolute;left:0;top:0;width:100%;height:100%;cursor:pointer;" />
             <i class="uil uil-image" style="position:absolute;right:18px;top:50%;transform:translateY(-50%);"></i>
           </label>
-        </div>
-        <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <input type="text" name="address" placeholder="Address" required />
-          <i class="uil uil-location-point"></i>
         </div>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
           <select id="stateSelect" name="state" required style="height:100%;width:100%;border:none;outline:none;padding:0 30px;color:#222;font-size:1.25rem;font-weight:500;transition:all 0.2s ease;border-bottom:2.5px solid #7d2ae8;background:#f7f7fa;">
@@ -186,8 +186,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </select>
           <i class="uil uil-map-marker"></i>
         </div>
+        <div class="input_box" style="flex:1 1 100%; min-width:380px;">
+                          <input type="text" name="address" placeholder="Address (Number, Street, City)" required style="width:100%; font-size:1.25rem; padding:16px 18px;" />
+                          <i class="uil uil-location-point"></i>
+        </div><br>
         <div class="input_box" style="flex:1 1 45%; min-width:180px;">
-          <input type="tel" name="phone" placeholder="Phone number" required />
+          <input type="tel" name="phone" id="phoneInput" placeholder="Phone number" required pattern="[0-9]{11}" maxlength="11" title="Please enter exactly 11 digits" />
           <i class="uil uil-phone"></i>
         </div>
       </div>
@@ -284,6 +288,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   opt.textContent = lga;
                   lgaSelect.appendChild(opt);
                 });
+              }
+            });
+          }
+
+          // Handle business logo file upload
+          const businessLogoInput = document.getElementById('businessLogo');
+          const logoPlaceholder = document.getElementById('logoPlaceholder');
+          if(businessLogoInput && logoPlaceholder) {
+            businessLogoInput.addEventListener('change', function() {
+              if(this.files && this.files.length > 0) {
+                const fileName = this.files[0].name;
+                logoPlaceholder.textContent = fileName;
+                logoPlaceholder.style.color = '#222';
+              } else {
+                logoPlaceholder.textContent = 'Upload business logo';
+                logoPlaceholder.style.color = '#888';
+              }
+            });
+          }
+
+          // Handle phone number input - only allow numeric characters
+          const phoneInput = document.getElementById('phoneInput');
+          if(phoneInput) {
+            phoneInput.addEventListener('input', function(e) {
+              // Remove any non-numeric characters
+              this.value = this.value.replace(/[^0-9]/g, '');
+              // Limit to 11 characters
+              if(this.value.length > 11) {
+                this.value = this.value.slice(0, 11);
+              }
+            });
+            
+            // Prevent non-numeric key presses
+            phoneInput.addEventListener('keypress', function(e) {
+              if(e.key && !/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Tab') {
+                e.preventDefault();
               }
             });
           }

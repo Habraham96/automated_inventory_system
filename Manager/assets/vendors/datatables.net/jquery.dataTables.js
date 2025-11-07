@@ -661,7 +661,7 @@
 		/**
 		 * Change the pagination - provides the internal logic for pagination in a simple API
 		 * function. With this function you can have a DataTables table go to the next,
-		 * previous, first or last pages.
+		 * previous, first or last views.
 		 *  @param {string|int} mAction Paging action to take: "first", "previous", "next" or "last"
 		 *    or page number to jump to (integer), note that page 0 is the first page.
 		 *  @param {bool} [bRedraw=true] Redraw the table or not
@@ -1607,7 +1607,7 @@
 		return out;
 	}
 	
-	var _includes = function (search, start) {
+	var _layouts = function (search, start) {
 		if (start === undefined) {
 			start = 0;
 		}
@@ -1623,8 +1623,8 @@
 	    };
 	}
 	
-	if (! Array.prototype.includes) {
-		Array.prototype.includes = _includes;
+	if (! Array.prototype.layouts) {
+		Array.prototype.layouts = _layouts;
 	}
 	
 	// .trim() polyfill
@@ -1635,8 +1635,8 @@
 	  };
 	}
 	
-	if (! String.prototype.includes) {
-		String.prototype.includes = _includes;
+	if (! String.prototype.layouts) {
+		String.prototype.layouts = _layouts;
 	}
 	
 	/**
@@ -4806,7 +4806,7 @@
 			replace(/_MAX_/g,   formatter.call( settings, settings.fnRecordsTotal() ) ).
 			replace(/_TOTAL_/g, formatter.call( settings, vis ) ).
 			replace(/_PAGE_/g,  formatter.call( settings, all ? 1 : Math.ceil( start / len ) ) ).
-			replace(/_PAGES_/g, formatter.call( settings, all ? 1 : Math.ceil( vis / len ) ) );
+			replace(/_views_/g, formatter.call( settings, all ? 1 : Math.ceil( vis / len ) ) );
 	}
 	
 	
@@ -5029,13 +5029,13 @@
 							visRecords = settings.fnRecordsDisplay(),
 							all        = len === -1,
 							page = all ? 0 : Math.ceil( start / len ),
-							pages = all ? 1 : Math.ceil( visRecords / len ),
-							buttons = plugin(page, pages),
+							views = all ? 1 : Math.ceil( visRecords / len ),
+							buttons = plugin(page, views),
 							i, ien;
 	
 						for ( i=0, ien=features.p.length ; i<ien ; i++ ) {
 							_fnRenderer( settings, 'pageButton' )(
-								settings, features.p[i], i, buttons, page, pages
+								settings, features.p[i], i, buttons, page, views
 							);
 						}
 					}
@@ -7703,7 +7703,7 @@
 	 *
 	 * @return {object} Object with the following properties set:
 	 *  * `page` - Current page index (zero based - i.e. the first page is `0`)
-	 *  * `pages` - Total number of pages
+	 *  * `views` - Total number of views
 	 *  * `start` - Display index for the first record shown on the current page
 	 *  * `end` - Display index for the last record shown on the current page
 	 *  * `length` - Display length (number of records). Note that generally `start
@@ -7727,7 +7727,7 @@
 	
 		return {
 			"page":           all ? 0 : Math.floor( start / len ),
-			"pages":          all ? 1 : Math.ceil( visRecords / len ),
+			"views":          all ? 1 : Math.ceil( visRecords / len ),
 			"start":          start,
 			"end":            settings.fnDisplayEnd(),
 			"length":         len,
@@ -11797,7 +11797,7 @@
 			 * * `\_TOTAL\_` - Number of records in the table after filtering
 			 * * `\_MAX\_` - Number of records in the table without filtering
 			 * * `\_PAGE\_` - Current page number
-			 * * `\_PAGES\_` - Total number of pages of data in the table
+			 * * `\_views\_` - Total number of views of data in the table
 			 *
 			 *  @type string
 			 *  @default Showing _START_ to _END_ of _TOTAL_ entries
@@ -11809,7 +11809,7 @@
 			 *    $(document).ready( function() {
 			 *      $('#example').dataTable( {
 			 *        "language": {
-			 *          "info": "Showing page _PAGE_ of _PAGES_"
+			 *          "info": "Showing page _PAGE_ of _views_"
 			 *        }
 			 *      } );
 			 *    } );
@@ -14420,7 +14420,7 @@
 		 * The functions defined take two parameters:
 		 *
 		 * 1. `{int} page` The current page index
-		 * 2. `{int} pages` The number of pages in the table
+		 * 2. `{int} views` The number of views in the table
 		 *
 		 * Each function is expected to return an array where each element of the
 		 * array can be one of:
@@ -14444,7 +14444,7 @@
 		 *
 		 *  @example
 		 *    // Show previous, next and current page buttons only
-		 *    $.fn.dataTableExt.oPagination.current = function ( page, pages ) {
+		 *    $.fn.dataTableExt.oPagination.current = function ( page, views ) {
 		 *      return [ 'previous', page, 'next' ];
 		 *    };
 		 */
@@ -14791,30 +14791,30 @@
 	
 	var extPagination = DataTable.ext.pager;
 	
-	function _numbers ( page, pages ) {
+	function _numbers ( page, views ) {
 		var
 			numbers = [],
 			buttons = extPagination.numbers_length,
 			half = Math.floor( buttons / 2 ),
 			i = 1;
 	
-		if ( pages <= buttons ) {
-			numbers = _range( 0, pages );
+		if ( views <= buttons ) {
+			numbers = _range( 0, views );
 		}
 		else if ( page <= half ) {
 			numbers = _range( 0, buttons-2 );
 			numbers.push( 'ellipsis' );
-			numbers.push( pages-1 );
+			numbers.push( views-1 );
 		}
-		else if ( page >= pages - 1 - half ) {
-			numbers = _range( pages-(buttons-2), pages );
+		else if ( page >= views - 1 - half ) {
+			numbers = _range( views-(buttons-2), views );
 			numbers.splice( 0, 0, 'ellipsis' ); // no unshift in ie6
 			numbers.splice( 0, 0, 0 );
 		}
 		else {
 			numbers = _range( page-half+2, page+half-1 );
 			numbers.push( 'ellipsis' );
-			numbers.push( pages-1 );
+			numbers.push( views-1 );
 			numbers.splice( 0, 0, 'ellipsis' );
 			numbers.splice( 0, 0, 0 );
 		}
@@ -14825,28 +14825,28 @@
 	
 	
 	$.extend( extPagination, {
-		simple: function ( page, pages ) {
+		simple: function ( page, views ) {
 			return [ 'previous', 'next' ];
 		},
 	
-		full: function ( page, pages ) {
+		full: function ( page, views ) {
 			return [  'first', 'previous', 'next', 'last' ];
 		},
 	
-		numbers: function ( page, pages ) {
-			return [ _numbers(page, pages) ];
+		numbers: function ( page, views ) {
+			return [ _numbers(page, views) ];
 		},
 	
-		simple_numbers: function ( page, pages ) {
-			return [ 'previous', _numbers(page, pages), 'next' ];
+		simple_numbers: function ( page, views ) {
+			return [ 'previous', _numbers(page, views), 'next' ];
 		},
 	
-		full_numbers: function ( page, pages ) {
-			return [ 'first', 'previous', _numbers(page, pages), 'next', 'last' ];
+		full_numbers: function ( page, views ) {
+			return [ 'first', 'previous', _numbers(page, views), 'next', 'last' ];
 		},
 		
-		first_last_numbers: function (page, pages) {
-	 		return ['first', _numbers(page, pages), 'last'];
+		first_last_numbers: function (page, views) {
+	 		return ['first', _numbers(page, views), 'last'];
 	 	},
 	
 		// For testing and plug-ins to use
@@ -14859,7 +14859,7 @@
 	
 	$.extend( true, DataTable.ext.renderer, {
 		pageButton: {
-			_: function ( settings, host, idx, buttons, page, pages ) {
+			_: function ( settings, host, idx, buttons, page, views ) {
 				var classes = settings.oClasses;
 				var lang = settings.oLanguage.oPaginate;
 				var aria = settings.oLanguage.oAria.paginate || {};
@@ -14910,7 +14910,7 @@
 								case 'next':
 									btnDisplay = lang.sNext;
 	
-									if ( pages === 0 || page === pages-1 ) {
+									if ( views === 0 || page === views-1 ) {
 										disabled = true;
 									}
 									break;
@@ -14918,7 +14918,7 @@
 								case 'last':
 									btnDisplay = lang.sLast;
 	
-									if ( pages === 0 || page === pages-1 ) {
+									if ( views === 0 || page === views-1 ) {
 										disabled = true;
 									}
 									break;

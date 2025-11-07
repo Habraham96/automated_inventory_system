@@ -72,8 +72,8 @@ if (!isset($_SESSION['user_id'])) {
         <form style="display:flex;flex-direction:column;gap:16px;align-items:center;width:100%;max-width:320px;margin:0 auto;">
           <input type="text" maxlength="19" placeholder="Card Number" style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #ececf6;font-size:1rem;box-sizing:border-box;" required />
           <div style="display:flex;gap:12px;width:100%;">
-            <input type="text" maxlength="5" placeholder="MM/YY" style="flex:1 1 0;padding:10px 14px;border-radius:8px;border:1.5px solid #ececf6;font-size:1rem;box-sizing:border-box;" required />
-            <input type="text" maxlength="3" placeholder="CVV" style="flex:1 1 0;padding:10px 14px;border-radius:8px;border:1.5px solid #ececf6;font-size:1rem;box-sizing:border-box;" required />
+            <input type="text" maxlength="5" placeholder="MM/YY" style="width:100px;padding:10px 14px;border-radius:8px;border:1.5px solid #ececf6;font-size:1rem;box-sizing:border-box;" required />
+            <input type="text" maxlength="3" placeholder="CVV" style="width:80px;padding:10px 14px;border-radius:8px;border:1.5px solid #ececf6;font-size:1rem;box-sizing:border-box;" required />
           </div>
           <input type="text" maxlength="32" placeholder="Cardholder Name" style="width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid #ececf6;font-size:1rem;box-sizing:border-box;" required />
           <button type="submit" class="button" style="background:#7d2ae8;color:#fff;border:none;border-radius:8px;padding:10px 0;font-size:1rem;width:100%;font-weight:bold;">Pay Now</button>
@@ -94,11 +94,30 @@ if (!isset($_SESSION['user_id'])) {
         <div id="paymentNameMsg" style="display:none;margin-top:8px;font-size:1rem;"></div>
       </div>
     </div>
+    
+    <!-- Confirm Payment Button -->
+    <div style="text-align:center;margin-top:40px;margin-bottom:40px;">
+      <button id="confirmPaymentBtn" class="button" style="background:#28a745;color:#fff;border:none;border-radius:24px;padding:16px 48px;font-size:1.2rem;font-weight:bold;box-shadow:0 4px 24px 0 rgba(40,167,69,0.25);cursor:pointer;transition:all 0.3s ease;">
+        Confirm Payment
+      </button>
+    </div>
+    
       <!-- <div class="login_signup">Remembered your password? <a href="index.php">Login</a></div> -->
   <!-- Payment option actions can go here if needed -->
     </div>
   </section>
     <style>
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      
       .plan-card {
         flex: 1 1 200px;
         min-width: 200px;
@@ -314,6 +333,64 @@ if (!isset($_SESSION['user_id'])) {
             }
             // Call AJAX to verify and update
             verifyAndUpdatePayment(entered, amount);
+          });
+        }
+        
+        // Handle Confirm Payment button click
+        var confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+        if (confirmPaymentBtn) {
+          confirmPaymentBtn.addEventListener('click', function() {
+            // Create preloader/spinner overlay (same style as signup.php)
+            var preloader = document.createElement('div');
+            preloader.id = 'paymentPreloader';
+            preloader.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#fff;z-index:99999;transition:opacity 0.35s ease;';
+            
+            // Create spinner
+            var spinner = document.createElement('div');
+            spinner.className = 'spinner';
+            spinner.style.cssText = 'width:72px;height:72px;border-radius:50%;border:8px solid rgba(125,42,232,0.12);border-top-color:#7d2ae8;animation:spin 1s linear infinite;';
+            
+            // Create confirmation message below spinner
+            var message = document.createElement('div');
+            message.style.cssText = 'margin-top:24px;text-align:center;';
+            message.innerHTML = '<h2 style="color:#7d2ae8;margin-bottom:8px;font-size:1.5rem;">Processing Payment...</h2><p style="color:#555;font-size:1.1rem;">Please wait while we confirm your payment.</p>';
+            
+            // Append spinner and message to preloader
+            preloader.appendChild(spinner);
+            preloader.appendChild(message);
+            
+            // Append to body
+            document.body.appendChild(preloader);
+            
+            // After 1.5 seconds, show success message
+            setTimeout(function() {
+              // Update spinner to checkmark and message
+              spinner.style.cssText = 'width:72px;height:72px;border-radius:50%;background:#28a745;display:flex;align-items:center;justify-content:center;animation:none;';
+              spinner.innerHTML = '<div style="font-size:3rem;color:#fff;">✓</div>';
+              
+              message.innerHTML = '<h2 style="color:#28a745;margin-bottom:8px;font-size:1.5rem;">Payment Confirmed!</h2><p style="color:#555;font-size:1.1rem;">Redirecting to dashboard...</p>';
+              
+              // Redirect after another 1.5 seconds
+              setTimeout(function() {
+                preloader.style.opacity = '0';
+                setTimeout(function() {
+                  window.location.href = 'Manager/index.php';
+                }, 350);
+              }, 1500);
+            }, 1500);
+          });
+          
+          // Add hover effect
+          confirmPaymentBtn.addEventListener('mouseenter', function() {
+            this.style.background = '#218838';
+            this.style.transform = 'translateY(-2px)';
+            this.style.boxShadow = '0 6px 28px 0 rgba(40,167,69,0.35)';
+          });
+          
+          confirmPaymentBtn.addEventListener('mouseleave', function() {
+            this.style.background = '#28a745';
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '0 4px 24px 0 rgba(40,167,69,0.25)';
           });
         }
       });

@@ -1,140 +1,400 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inventory | Sales</title>
-    <link rel="stylesheet" href="style.css" />
-    <!-- Unicons -->
-    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
-    <link rel="stylesheet" href="asset/css/blank1.css" />
-  </head>
-  <body>
-    <!-- Preloader -->
-    <div id="preloader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;z-index:99999;transition:opacity 0.35s ease;">
-      <div class="spinner" style="width:72px;height:72px;border-radius:50%;border:8px solid rgba(125,42,232,0.12);border-top-color:#7d2ae8;animation:spin 1s linear infinite;"></div>
-    </div>
-
-    <!-- Header -->
-    <header class="header">
-      <nav class="nav">
-        <a href="#" class="nav_logo active"><img src="asset/images/salespilot%20logo2.png" alt="SalesPilot Logo" style="height:36px;display:block;object-fit:contain;"></a>
-        <ul class="nav_items" style="width:100%;display:flex;justify-content:center;align-items:center;">
-          <h2 style="margin:0 auto;text-align:center;font-size:1.7rem;font-weight:600;color:#7d2ae8;">Sales Pilot</h2>
-        </ul>
-        <!-- <button class="button" id="form-open">Login</button> -->
-      </nav>
-    </header>
-    
-
-    
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Taxes - SalesPilot</title>
+    <!-- plugins:css -->
+    <img src="../assets/icons/bootstrap.svg" alt="Bootstrap" width="32" height="32">
+    <link rel="stylesheet" href="../assets/vendors/feather/feather.css">
+    <link rel="stylesheet" href="../assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="../assets/vendors/ti-icons/css/themify-icons.css">
+    <link rel="stylesheet" href="../assets/vendors/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../assets/vendors/typicons/typicons.css">
+    <link rel="stylesheet" href="../assets/vendors/simple-line-icons/css/simple-line-icons.css">
+    <link rel="stylesheet" href="../assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="../assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.css">
+    <!-- endinject -->
+    <!-- Plugin css for this page -->
+    <link rel="stylesheet" href="../assets/vendors/datatables.net-bs4/dataTables.bootstrap4.css">
+    <link rel="stylesheet" type="text/css" href="../assets/js/select.dataTables.min.css">
+    <!-- End plugin css for this page -->
+    <!-- inject:css -->
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
-      .plan-card {
-        flex: 1 1 200px;
-        min-width: 200px;
-        max-width: 260px;
-        background: #fff;
-        border-radius: 16px;
-        box-shadow: 0 2px 12px 0 rgba(125,42,232,0.10);
-        padding: 32px 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        border: 2px solid #ececf6;
-        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-        cursor: pointer;
-        outline: none;
-      }
-      .plan-card h3 {
-        margin-bottom: 12px;
-        color: #7d2ae8;
-        font-size: 1.3rem;
-      }
-      .plan-price {
-        font-size: 1.1rem;
-        margin-bottom: 8px;
-        font-weight: bold;
-      }
-      .plan-desc {
-        font-size: 1rem;
-        color: #555;
-        text-align: center;
-        margin-bottom: 16px;
-      }
-      .plan-detail-btn {
-        background: #7d2ae8;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        padding: 8px 18px;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: background 0.2s;
-      }
-      .plan-card:hover {
-        border-color: #7d2ae8;
-        box-shadow: 0 4px 24px 0 rgba(125,42,232,0.18);
-        background: #f7f3ff;
-      }
-      .plan-card.selected, .plan-card:focus {
-        border-color: #007bff;
-        box-shadow: 0 6px 32px 0 rgba(0,123,255,0.18);
-        background: #eaf1ff;
-      } 
+    /* Sidebar collapse/expand toggle styles (minimal, local overrides) */
+    .sidebar{transition:width .2s ease;}
+    .main-panel, .page-body-wrapper{transition:margin-left .2s ease;}
+    body.sidebar-collapsed .sidebar{
+      width:70px !important;
+      overflow:hidden;
+    }
+    body.sidebar-collapsed .sidebar .menu-title,
+    body.sidebar-collapsed .sidebar .menu-arrow{
+      display:none !important;
+    }
+    body.sidebar-collapsed .sidebar .menu-icon{
+      margin-right:0 !important;
+      text-align:center;
+      width:100%;
+    }
+    body.sidebar-collapsed .main-panel{margin-left:70px !important}
     </style>
-    <script>
-      // Inject spinner keyframes for inline usage
-      (function(){
-        var css = '@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}';
-        var s = document.createElement('style'); s.appendChild(document.createTextNode(css)); document.head.appendChild(s);
-        function hidePreloader(){
-          var p = document.getElementById('preloader');
-          if(!p) return;
-          p.style.opacity = '0';
-          setTimeout(function(){ if(p && p.parentNode) p.parentNode.removeChild(p); }, 420);
-        }
-        if (document.readyState === 'complete') hidePreloader(); else { window.addEventListener('load', hidePreloader); setTimeout(hidePreloader, 5000); }
-      })();
+    <!-- endinject -->
+    <link rel="shortcut icon" href="../assets/images/favicon.png" />
+  </head>
+  <body class="with-welcome-text">
+    <div class="container-scroller">
+      <!-- partial:partials/_navbar.html -->
+      <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-top flex-row">
+        <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
+          <div class="me-3">
+            <!-- Hamburger: clicking this will toggle the sidebar collapsed state -->
+            <button id="sidebarToggle" class="navbar-toggler navbar-toggler align-self-center" type="button" aria-label="Toggle sidebar" title="Toggle sidebar">
+              <span class="icon-menu"></span>
+            </button>
+          </div>
+          <div>
+            <a class="navbar-brand brand-logo" href="../index.php">
+              <img src="../../asset/images/salespilot logo2.png" alt="logo" />
+            </a>
+          </div>
+        </div>
+        <div class="navbar-menu-wrapper d-flex align-items-top">
+          <ul class="navbar-nav">
+            <li class="nav-item fw-semibold d-none d-lg-block ms-0"></li>
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item d-none d-lg-block">
+              <div id="datepicker-popup" class="input-group date datepicker navbar-date-picker">
+                <span class="input-group-addon input-group-prepend border-right">
+                  <span class="icon-calendar input-group-text calendar-icon"></span>
+                </span>
+                <input type="text" class="form-control">
+              </div>
+            </li>
+            <li class="nav-item">
+              <form class="search-form" action="#">
+                <i class="icon-search"></i>
+                <input type="search" class="form-control" placeholder="Search Here" title="Search here">
+              </form>
+            </li>
+          </ul>
+          <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-bs-toggle="offcanvas">
+            <span class="mdi mdi-menu"></span>
+          </button>
+        </div>
+      </nav>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_sidebar.html -->
+        <nav class="sidebar sidebar-offcanvas" id="sidebar">
+          <ul class="nav">
+            <li class="nav-item">
+              <a class="nav-link" href="../index.php">
+                <i class="menu-icon bi bi-house-door-fill"></i>
+                <span class="menu-title">Home</span>
+              </a>
+            </li>
+            <li class="nav-item nav-category">Dropdown</li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+                <!-- <i class="menu-icon mdi mdi-floor-plan"></i> -->
+                <i class="menu-icon bi bi-wallet-fill"></i>
+                <span class="menu-title">Sales</span>
+                <i class="menu-arrow"></i>
+              </a>
+              <div class="collapse" id="ui-basic">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="completed_sales.php">Completed Sales</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="saved_carts.php">Saved Carts</a></li>
+                </ul>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="collapse" href="#form-elements" aria-expanded="false" aria-controls="form-elements">
+                <i class="menu-icon mdi mdi-card-text-outline"></i>
+                <span class="menu-title">Reports</span>
+                <i class="menu-arrow"></i>
+              </a>
+              <div class="collapse" id="form-elements">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"><a class="nav-link" href="sales_summary.php">Sales Summary</a></li>
+                  <li class="nav-item"><a class="nav-link" href="sales_by_staff.php">Sales by Staff</a></li>
+                  <li class="nav-item"><a class="nav-link" href="sales_by_item.php">Sales by Item</a></li>
+                  <li class="nav-item"><a class="nav-link" href="sales_by_category.php">Sales by Category</a></li>
+                  <li class="nav-item"><a class="nav-link" href="inventory_valuation.php">Inventory Valuation</a></li>
+                  <li class="nav-item"><a class="nav-link" href="taxes.php">Taxes</a></li>
+                  <li class="nav-item"><a class="nav-link" href="discount_report.php">Discount</a></li>
+                </ul>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="customers.php">
+                <i class="menu-icon bi bi-people-fill"></i>
+                <span class="menu-title">Customers</span>
+                <!-- <i class="menu-arrow"></i> -->
+              </a>
+             
+             <li class="nav-item">
+              <a class="nav-link" href="staffs.php">
+                <!-- <i class="menu-icon mdi mdi-chart-line"></i> -->
+                <i class="menu-icon bi bi-person-workspace"></i>
+                <span class="menu-title">Staffs</span>
+              </a>
 
-      // Payment option logic
-      document.addEventListener('DOMContentLoaded', function() {
-        var bankBtn = document.getElementById('bankTransferBtn');
-        var atmBtn = document.getElementById('atmBtn');
-        var paystackBox = document.getElementById('paystackAccountBox');
-        var copyBtn = document.getElementById('copyAccountBtn');
-        var copyMsg = document.getElementById('copyMsg');
-        var accountNumber = document.getElementById('accountNumber');
-          var atmCardBox = document.getElementById('atmCardBox');
-          // Show bank transfer info, hide ATM card by default
-          if (bankBtn && paystackBox && atmCardBox) {
-            bankBtn.addEventListener('click', function() {
-              paystackBox.style.display = 'block';
-              atmCardBox.style.display = 'none';
-              bankBtn.style.background = '#5a1bbf';
-              bankBtn.style.color = '#fff';
-              atmBtn.style.background = '#fff';
-              atmBtn.style.color = '#7d2ae8';
-            });
-          }
-          if (atmBtn && paystackBox && atmCardBox) {
-            atmBtn.addEventListener('click', function() {
-              paystackBox.style.display = 'none';
-              atmCardBox.style.display = 'block';
-              atmBtn.style.background = '#5a1bbf';
-              atmBtn.style.color = '#fff';
-              bankBtn.style.background = '#fff';
-              bankBtn.style.color = '#7d2ae8';
-            });
-          }
-        if (copyBtn && accountNumber) {
-          copyBtn.addEventListener('click', function() {
-            navigator.clipboard.writeText(accountNumber.textContent.trim());
-            copyMsg.style.display = 'block';
-            setTimeout(function(){ copyMsg.style.display = 'none'; }, 1200);
-          });
+              <li class="nav-item">
+              <a class="nav-link" href="activity_logs.php">
+                <i class="menu-icon bi bi-activity"></i>
+                <span class="menu-title">Activity Logs</span>
+              </a>
+
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="collapse" href="#icons" aria-expanded="false" aria-controls="icons">
+               <i class="menu-icon bi bi-shop-window"></i>
+                <span class="menu-title">Inventory</span>
+                <i class="menu-arrow"></i>
+              </a>
+              <div class="collapse" id="icons">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="all_items.php">All items</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="category.php">Categories</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="stock_history.php">Stock History</a></li>
+                </ul>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="suppliers.php">
+                <i class="menu-icon bi bi-truck"></i>
+                <span class="menu-title">Suppliers</span>
+              </a>
+              <li class="nav-item">
+              <a class="nav-link" href="settings.php">
+               <i class="menu-icon bi bi-gear-wide"></i>
+                <span class="menu-title">Settings</span>
+              </a>
+
+              <li class="nav-item dropdown d-none d-lg-block user-dropdown">
+              <a class="nav-link" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                <img class="img-xs rounded-circle" src="../assets/images/faces/face8.jpg" alt="Profile image"> </a>
+              <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
+                <div class="dropdown-header text-center">
+                  <img class="img-md rounded-circle" src="../assets/images/faces/face8.jpg" alt="Profile image">
+                  <p class="mb-1 mt-3 fw-semibold">Allen Moreno</p>
+                  <p class="fw-light text-muted mb-0">allenmoreno@gmail.com</p>
+                </div>
+                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> My Profile <span class="badge badge-pill badge-danger">1</span></a>
+                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-message-text-outline text-primary me-2"></i> Messages</a>
+                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-calendar-check-outline text-primary me-2"></i> Activity</a>
+                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-help-circle-outline text-primary me-2"></i> FAQ</a>
+                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-power text-primary me-2"></i>Sign Out</a>
+              </div>
+            </li>
+              
+
+            
+          </ul>
+        </nav>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <!-- Taxes content starts here -->
+            <div class="row">
+              <div class="col-12 grid-margin stretch-card">
+                <div class="card card-rounded">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h4 class="card-title mb-0">Tax Report</h4>
+                      <button type="button" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i>Add Tax Rate
+                      </button>
+                    </div>
+                    <p class="card-description">Summary of taxes collected and tax rates applied to transactions.</p>
+                    <div class="table-responsive">
+                      <table class="table table-striped" id="taxesTable">
+                        <thead>
+                          <tr>
+                            <th>Tax Name</th>
+                            <th>Tax Rate (%)</th>
+                            <th>Total Sales</th>
+                            <th>Tax Collected</th>
+                            <th>Transactions</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>Sales Tax (Standard)</td>
+                            <td>7.5%</td>
+                            <td>$25,420.00</td>
+                            <td>$1,906.50</td>
+                            <td>142</td>
+                            <td><span class="badge badge-opacity-success">Active</span></td>
+                            <td>
+                              <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-primary" title="Edit">
+                                  <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" title="View Details">
+                                  <i class="bi bi-eye"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>VAT (Value Added Tax)</td>
+                            <td>15.0%</td>
+                            <td>$18,750.00</td>
+                            <td>$2,812.50</td>
+                            <td>87</td>
+                            <td><span class="badge badge-opacity-success">Active</span></td>
+                            <td>
+                              <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-primary" title="Edit">
+                                  <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" title="View Details">
+                                  <i class="bi bi-eye"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Luxury Goods Tax</td>
+                            <td>20.0%</td>
+                            <td>$8,900.00</td>
+                            <td>$1,780.00</td>
+                            <td>23</td>
+                            <td><span class="badge badge-opacity-success">Active</span></td>
+                            <td>
+                              <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-primary" title="Edit">
+                                  <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" title="View Details">
+                                  <i class="bi bi-eye"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>Service Tax</td>
+                            <td>5.0%</td>
+                            <td>$12,300.00</td>
+                            <td>$615.00</td>
+                            <td>64</td>
+                            <td><span class="badge badge-opacity-warning">Pending Review</span></td>
+                            <td>
+                              <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-primary" title="Edit">
+                                  <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" title="View Details">
+                                  <i class="bi bi-eye"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td colspan="3" class="text-end fw-bold">Total Tax Collected:</td>
+                            <td class="fw-bold text-success">$7,114.00</td>
+                            <td class="fw-bold">316</td>
+                            <td colspan="2"></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Taxes content ends here -->
+          </div>
+          <!-- content-wrapper ends -->
+          <footer class="footer">
+            <div class="d-sm-flex justify-content-center justify-content-sm-between">
+              <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Premium <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap admin template</a> from BootstrapDash.</span>
+              <span class="float-none float-sm-end d-block mt-1 mt-sm-0 text-center">Copyright © 2025. All rights reserved.</span>
+            </div>
+          </footer>
+        </div>
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+    <!-- plugins:js -->
+    <script src="../assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="../assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+    <!-- endinject -->
+    <!-- Plugin js for this page -->
+    <script src="../assets/vendors/chart.js/chart.umd.js"></script>
+    <script src="../assets/vendors/progressbar.js/progressbar.min.js"></script>
+    <!-- End plugin js for this page -->
+    <!-- inject:js -->
+    <script src="../assets/js/off-canvas.js"></script>
+    <script src="../assets/js/template.js"></script>
+    <script>
+      (function(){
+        var toggle = document.getElementById('sidebarToggle');
+        var body = document.body;
+        var storageKey = 'sidebarCollapsed';
+        function setCollapsed(collapsed, save){
+          if(collapsed) body.classList.add('sidebar-collapsed');
+          else body.classList.remove('sidebar-collapsed');
+          if(save) try{localStorage.setItem(storageKey, collapsed ? '1' : '0')}catch(e){}
         }
-      });
+        try{var saved = localStorage.getItem(storageKey); if(saved === '1') setCollapsed(true, false)}catch(e){}
+        if(toggle){toggle.addEventListener('click', function(e){e.preventDefault(); setCollapsed(!body.classList.contains('sidebar-collapsed'), true)});toggle.addEventListener('keydown', function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault(); toggle.click()}})}
+      })();
     </script>
+    <!-- Small script to keep sidebar static on large screens -->
+    <script>
+      (function () {
+        function applyFixedSidebar() {
+          var mq = window.matchMedia('(min-width: 992px)');
+          var sidebar = document.getElementById('sidebar');
+          var mainPanel = document.querySelector('.main-panel');
+          if (!sidebar || !mainPanel) return;
+
+          if (mq.matches) {
+            var navbar = document.querySelector('.navbar');
+            var topOffset = navbar ? navbar.getBoundingClientRect().height : 70;
+            var sidebarWidth = sidebar.getBoundingClientRect().width || 220;
+
+            sidebar.classList.add('fixed-static');
+            sidebar.style.top = topOffset + 'px';
+            sidebar.style.height = 'calc(100vh - ' + topOffset + 'px)';
+
+            mainPanel.classList.add('fixed-with-sidebar');
+            mainPanel.style.marginLeft = sidebarWidth + 'px';
+          } else {
+            sidebar.classList.remove('fixed-static');
+            sidebar.style.top = '';
+            sidebar.style.height = '';
+
+            mainPanel.classList.remove('fixed-with-sidebar');
+            mainPanel.style.marginLeft = '';
+          }
+        }
+
+        document.addEventListener('DOMContentLoaded', applyFixedSidebar);
+        window.addEventListener('resize', function () {
+          clearTimeout(window._applyFixedSidebarTimer);
+          window._applyFixedSidebarTimer = setTimeout(applyFixedSidebar, 120);
+        });
+      })();
+    </script>
+    <script src="../assets/js/settings.js"></script>
+    <script src="../assets/js/hoverable-collapse.js"></script>
+    <script src="../assets/js/todolist.js"></script>
+    <!-- endinject -->
+    <!-- Custom js for this page-->
+    <script src="../assets/js/jquery.cookie.js" type="text/javascript"></script>
+    <script src="../assets/js/dashboard.js"></script>
+    <!-- End custom js for this page-->
   </body>
 </html>

@@ -79,7 +79,7 @@ $.extend( DataTable.ext.classes, {
 
 
 /* Bootstrap paging button renderer */
-DataTable.ext.renderer.pageButton.bootstrap = function ( settings, host, idx, buttons, page, pages ) {
+DataTable.ext.renderer.pageButton.bootstrap = function ( settings, host, idx, buttons, page, views ) {
 	var api     = new DataTable.Api( settings );
 	var classes = settings.oClasses;
 	var lang    = settings.oLanguage.oPaginate;
@@ -125,13 +125,13 @@ DataTable.ext.renderer.pageButton.bootstrap = function ( settings, host, idx, bu
 
 					case 'next':
 						btnDisplay = lang.sNext;
-						btnClass = button + (page < pages-1 ?
+						btnClass = button + (page < views-1 ?
 							'' : ' disabled');
 						break;
 
 					case 'last':
 						btnDisplay = lang.sLast;
-						btnClass = button + (page < pages-1 ?
+						btnClass = button + (page < views-1 ?
 							'' : ' disabled');
 						break;
 

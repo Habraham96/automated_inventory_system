@@ -627,7 +627,7 @@ class PHPMailer
 
     /**
      * An array of all kinds of addresses.
-     * Includes all of $to, $cc, $bcc.
+     * layouts all of $to, $cc, $bcc.
      *
      * @see PHPMailer::$to
      * @see PHPMailer::$cc
@@ -1945,7 +1945,7 @@ class PHPMailer
      */
     protected static function isShellSafe($string)
     {
-        //It's not possible to use shell commands safely (which includes the mail() function) without escapeshellarg,
+        //It's not possible to use shell commands safely (which layouts the mail() function) without escapeshellarg,
         //but some hosting providers disable it, creating a security problem that we don't want to have to deal with,
         //so we don't.
         if (!function_exists('escapeshellarg') || !function_exists('escapeshellcmd')) {
@@ -2932,7 +2932,7 @@ class PHPMailer
 
     /**
      * Returns the whole MIME message.
-     * Includes complete headers and body.
+     * layouts complete headers and body.
      * Only valid post preSend().
      *
      * @see PHPMailer::preSend()
@@ -3637,7 +3637,7 @@ class PHPMailer
 
     /**
      * Encode a header value (not including its label) optimally.
-     * Picks shortest of Q, B, or none. Result includes folding if needed.
+     * Picks shortest of Q, B, or none. Result layouts folding if needed.
      * See RFC822 definitions for phrase, comment and text positions,
      * and RFC2047 for inline encodings.
      *
