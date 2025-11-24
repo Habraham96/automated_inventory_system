@@ -40,6 +40,7 @@
     <link rel="shortcut icon" href="../assets/images/favicon.png" />
   </head>
   <body class="with-welcome-text">
+    <?php include '../layouts/preloader.php'; ?>
   
       <!-- partial -->
       <div class="container-fluid page-body-wrapper">
@@ -56,58 +57,225 @@
                     <h4 class="card-title">Sales Summary</h4>
                     <p class="card-description">Overview of total sales, number of transactions, and totals by customer or date. Use filters to refine the report.</p>
 
-                    <!-- Search and Filter Section -->
-                    <div class="row mb-3">
-                      <div class="col-sm-3 col-6">
-                        <div class="input-group input-group-sm">
-                          <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-                          <input type="text" class="form-control form-control-sm border-start-0" placeholder="Search by date, status, or customer..." id="searchInput">
+                    <!-- Modern Search and Filter Section -->
+                    <style>
+                      .filter-container .form-select,
+                      .filter-container .btn {
+                        min-height: 38px;
+                      }
+                      .date-filter-wrapper {
+                        position: relative;
+                        display: inline-block;
+                      }
+                      #customDateInputs {
+                        position: absolute;
+                        top: calc(100% + 8px);
+                        right: 0;
+                        z-index: 1000;
+                        background: #ffffff;
+                        border: 2px solid #007bff;
+                        border-radius: 12px;
+                        padding: 16px;
+                        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.2);
+                        min-width: 380px;
+                        opacity: 0;
+                        transform: translateY(-10px) scale(0.95);
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        pointer-events: none;
+                        display: none;
+                      }
+                      #customDateInputs.show {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                        pointer-events: all;
+                        display: block;
+                      }
+                      #customDateInputs::before {
+                        content: '';
+                        position: absolute;
+                        top: -8px;
+                        right: 20px;
+                        width: 0;
+                        height: 0;
+                        border-left: 8px solid transparent;
+                        border-right: 8px solid transparent;
+                        border-bottom: 8px solid #007bff;
+                      }
+                      #customDateInputs::after {
+                        content: '';
+                        position: absolute;
+                        top: -6px;
+                        right: 21px;
+                        width: 0;
+                        height: 0;
+                        border-left: 7px solid transparent;
+                        border-right: 7px solid transparent;
+                        border-bottom: 7px solid #ffffff;
+                      }
+                      @media (max-width: 768px) {
+                        #customDateInputs {
+                          padding: 16px 18px;
+                          border-radius: 12px;
+                          min-width: 340px;
+                          margin-top: 6px;
+                        }
+                        .filter-container .col-md-8 {
+                          flex-direction: column;
+                          gap: 10px !important;
+                          align-items: stretch !important;
+                        }
+                        .filter-container .d-flex {
+                          flex-wrap: wrap;
+                        }
+                      }
+                    </style>
+                    <div class="row mb-3 filter-container">
+                      <div class="col-md-4">
+                        <div class="input-group">
+                          <input type="text" class="form-control" placeholder="Search sales summary..." id="searchSummary">
+                          <button class="btn btn-outline-secondary" type="button">
+                            <i class="bi bi-search"></i>
+                          </button>
                         </div>
                       </div>
-                      <div class="col-sm-4 col-6">
-                        <select class="form-select form-select-sm mb-2" id="dateRangeFilter" onchange="toggleCustomRangeInputs()">
-                          <option value="today">Today</option>
-                          <option value="yesterday">Yesterday</option>
-                          <option value="last7">Last 7 Days</option>
-                          <option value="last30">Last 30 Days</option>
-                          <option value="thisMonth">This Month</option>
-                          <option value="lastMonth">Last Month</option>
-                          <option value="custom">Custom Range</option>
+                      <div class="col-md-8 d-flex justify-content-end align-items-center gap-2">
+                        <!-- Status Filter -->
+                        <select class="form-select" id="statusFilter" style="max-width: 140px;">
+                          <option value="">All Status</option>
+                          <option value="Completed">Completed</option>
+                          <option value="Pending">Pending</option>
+                          <option value="Cancelled">Cancelled</option>
                         </select>
-                        <div id="customRangeInputs" style="display:none;">
-                          <div class="input-group input-group-sm mb-1">
-                            <span class="input-group-text">From</span>
-                            <input type="date" class="form-control form-control-sm" id="customStartDate">
-                          </div>
-                          <div class="input-group input-group-sm">
-                            <span class="input-group-text">To</span>
-                            <input type="date" class="form-control form-control-sm" id="customEndDate">
-                          </div>
-                        </div>
-                        <small class="form-text text-muted">Choose a date range to filter sales summary.</small>
-                        <script>
-                          function toggleCustomRangeInputs() {
-                            var range = document.getElementById('dateRangeFilter');
-                            var customInputs = document.getElementById('customRangeInputs');
-                            if (range && customInputs) {
-                              customInputs.style.display = range.value === 'custom' ? 'block' : 'none';
-                            }
-                          }
-                          document.addEventListener('DOMContentLoaded', function() {
-                            toggleCustomRangeInputs();
-                          });
-                        </script>
-                      </div>
-                      <div class="col-sm-3 col-12 mt-2 mt-sm-0">
-                        <select class="form-select form-select-sm" id="staffFilter">
+                        <!-- Staff Filter -->
+                        <select class="form-select" id="staffFilter" style="max-width: 140px;">
                           <option value="">All Staff</option>
                           <option value="Alice Johnson">Alice Johnson</option>
                           <option value="Bob Smith">Bob Smith</option>
                           <option value="Carol Williams">Carol Williams</option>
                           <option value="David Brown">David Brown</option>
                         </select>
+                        <!-- Date Range Filter -->
+                        <div class="date-filter-wrapper">
+                          <select class="form-select" id="dateRangeFilter" style="max-width: 140px;">
+                            <option value="">All Dates</option>
+                            <option value="today">Today</option>
+                            <option value="yesterday">Yesterday</option>
+                            <option value="last7">Last 7 Days</option>
+                            <option value="last30">Last 30 Days</option>
+                            <option value="thisMonth">This Month</option>
+                            <option value="lastMonth">Last Month</option>
+                            <option value="custom">Custom Range</option>
+                          </select>
+                          <!-- Custom Date Inputs -->
+                          <div id="customDateInputs" class="custom-date-container">
+                            <div class="row g-3">
+                              <div class="col-md-6">
+                                <label for="customStartDate" class="form-label text-muted">From Date</label>
+                                <input type="date" class="form-control" id="customStartDate" onchange="performSearch()">
+                              </div>
+                              <div class="col-md-6">
+                                <label for="customEndDate" class="form-label text-muted">To Date</label>
+                                <input type="date" class="form-control" id="customEndDate" onchange="performSearch()">
+                              </div>
+                            </div>
+                            <div class="text-center mt-3">
+                              <button type="button" class="btn btn-outline-secondary btn-sm" onclick="hideCustomDateOverlay()">
+                                <i class="bi bi-x"></i> Close
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Action Buttons -->
+                        <button class="btn btn-outline-primary" id="applyFilters">
+                          <i class="bi bi-funnel"></i> Apply
+                        </button>
+                        <button class="btn btn-outline-secondary" id="clearFilters">
+                          <i class="bi bi-x-circle"></i> Clear
+                        </button>
+                        <button class="btn btn-outline-success" id="exportReport">
+                          <i class="bi bi-download"></i> Export
+                        </button>
                       </div>
                     </div>
+                    <script>
+                      // Overlay logic for custom date inputs
+                      function showCustomDateOverlay() {
+                        document.getElementById('customDateInputs').classList.add('show');
+                      }
+                      function hideCustomDateOverlay() {
+                        document.getElementById('customDateInputs').classList.remove('show');
+                      }
+                      document.addEventListener('DOMContentLoaded', function() {
+                        var dateRangeFilter = document.getElementById('dateRangeFilter');
+                        dateRangeFilter.addEventListener('change', function() {
+                          if (this.value === 'custom') {
+                            showCustomDateOverlay();
+                          } else {
+                            hideCustomDateOverlay();
+                          }
+                        });
+                        document.getElementById('applyFilters').addEventListener('click', function() {
+                          performSearch();
+                        });
+                        document.getElementById('clearFilters').addEventListener('click', function() {
+                          document.getElementById('searchSummary').value = '';
+                          document.getElementById('statusFilter').value = '';
+                          document.getElementById('staffFilter').value = '';
+                          document.getElementById('dateRangeFilter').value = '';
+                          document.getElementById('customStartDate').value = '';
+                          document.getElementById('customEndDate').value = '';
+                          hideCustomDateOverlay();
+                          performSearch();
+                        });
+                        // Export button
+                        document.getElementById('exportReport').addEventListener('click', function() {
+                          // Export table to CSV
+                          function tableToCSV(tableId) {
+                            var table = document.getElementById(tableId);
+                            var rows = table.querySelectorAll('tr');
+                            var csv = [];
+                            for (var i = 0; i < rows.length; i++) {
+                              var row = [], cols = rows[i].querySelectorAll('th, td');
+                              for (var j = 0; j < cols.length; j++) {
+                                var text = cols[j].innerText.replace(/"/g, '""');
+                                if (text.indexOf(',') !== -1 || text.indexOf('"') !== -1) {
+                                  text = '"' + text + '"';
+                                }
+                                row.push(text);
+                              }
+                              csv.push(row.join(','));
+                            }
+                            return csv.join('\n');
+                          }
+                          function downloadCSV(csv, filename) {
+                            var csvFile = new Blob([csv], { type: 'text/csv' });
+                            var downloadLink = document.createElement('a');
+                            downloadLink.download = filename;
+                            downloadLink.href = window.URL.createObjectURL(csvFile);
+                            downloadLink.style.display = 'none';
+                            document.body.appendChild(downloadLink);
+                            downloadLink.click();
+                            document.body.removeChild(downloadLink);
+                          }
+                          var csv = tableToCSV('salesSummaryTable');
+                          downloadCSV(csv, 'sales_summary_report.csv');
+                        });
+                        // Close overlay when clicking outside
+                        document.addEventListener('click', function(e) {
+                          const overlay = document.getElementById('customDateInputs');
+                          const dateFilter = document.getElementById('dateRangeFilter');
+                          if (!overlay.contains(e.target) && !dateFilter.contains(e.target)) {
+                            hideCustomDateOverlay();
+                          }
+                        });
+                        // Close overlay with Escape key
+                        document.addEventListener('keydown', function(e) {
+                          if (e.key === 'Escape') {
+                            hideCustomDateOverlay();
+                          }
+                        });
+                      });
+                    </script>
                     <br>
                     <div class="table-responsive">
                       <table class="table table-striped" id="salesSummaryTable">
@@ -129,41 +297,41 @@
                         <tbody>
                           <tr>
                             <td>1</td>
-                            <td>2025-10-20</td>
-                            <td>$2,450.00</td>
-                            <td>$120.00</td>
-                            <td>$1,200.00</td>
-                            <td>$1,130.00</td>
+                            <td>Oct 20, 2025</td>
+                            <td>₦22,450.00</td>
+                            <td>₦11,200.00</td>
+                            <td>₦11,200.00</td>
+                            <td>₦11,130.00</td>
                             <td>15</td>
-                            <td>$1,130.00</td>
+                            <td>₦11,130.00</td>
                             <td>46.1%</td>
-                            <td>$98.00</td>
+                            <td>₦98,000</td>
                             <td><span class="badge badge-opacity-success">Completed</span></td>
                           </tr>
                           <tr>
                             <td>2</td>
-                            <td>2025-10-19</td>
-                            <td>$1,890.50</td>
-                            <td>$80.00</td>
-                            <td>$1,050.00</td>
-                            <td>$1,010.50</td>
+                            <td>Oct 19, 2025</td>
+                            <td>₦13,890.50</td>
+                            <td>₦80.00</td>
+                            <td>₦1,050.00</td>
+                            <td>₦1,010.50</td>
                             <td>12</td>
-                            <td>$760.50</td>
+                            <td>₦760.50</td>
                             <td>40.2%</td>
-                            <td>$75.00</td>
+                            <td>₦75.00</td>
                             <td><span class="badge badge-opacity-success">Completed</span></td>
                           </tr>
                           <tr>
                             <td>3</td>
-                            <td>2025-10-18</td>
-                            <td>$3,120.75</td>
-                            <td>$100.00</td>
-                            <td>$1,800.00</td>
-                            <td>$1,220.75</td>
+                            <td>Oct 18, 2025</td>
+                            <td>₦3,120.75</td>
+                            <td>₦100.00</td>
+                            <td>₦1,800.00</td>
+                            <td>₦1,220.75</td>
                             <td>18</td>
-                            <td>$1,220.75</td>
+                            <td>₦1,220.75</td>
                             <td>39.1%</td>
-                            <td>$120.00</td>
+                            <td>₦120.00</td>
                             <td><span class="badge badge-opacity-success">Completed</span></td>
                           </tr>
                         </tbody>
@@ -230,7 +398,7 @@
           <footer class="footer">
             <div class="d-sm-flex justify-content-center justify-content-sm-between">
               <!-- <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Premium <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap admin template</a> from BootstrapDash.</span> -->
-              <span class="float-none float-sm-end d-block mt-1 mt-sm-0 text-center">Copyright © 2025. All rights reserved.</span>
+							<span class="text-muted text-center text-sm-left d-block d-sm-inline-block">© 2025 SalesPilot. All rights reserved.</span>
             </div>
     <style>
       .footer {
@@ -312,25 +480,7 @@
   <script src="../assets/js/hoverable-collapse.js"></script>
   <script src="../assets/js/todolist.js"></script>
   
-  <!-- Sidebar Menu Collapse Behavior - Ensures only one submenu open at a time -->
-  <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Only one submenu open at a time, expand/collapse on one click
-    document.querySelectorAll('.sidebar .nav-link[data-bs-toggle="collapse"]').forEach(function(link) {
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
-        var targetSelector = this.getAttribute('href');
-        var target = document.querySelector(targetSelector);
-        if (!target) return;
-        // Collapse all other open submenus
-        document.querySelectorAll('.sidebar .collapse.show').forEach(function(openMenu) {
-          if (openMenu !== target) {
-            var openCollapse = bootstrap.Collapse.getOrCreateInstance(openMenu);
-            openCollapse.hide();
-          }
-        });
-        // Toggle the clicked submenu
-        var bsCollapse = bootstrap.Collapse.getOrCreateInstance(target);
+  
         bsCollapse.toggle();
       });
     });
@@ -344,9 +494,9 @@
   <script>
     // Example data from the table
     const salesData = [
-      { date: '2025-10-20', gross: 2450, cost: 1200, profit: 1130, transactions: 15 },
-      { date: '2025-10-19', gross: 1890.5, cost: 1050, profit: 760.5, transactions: 12 },
-      { date: '2025-10-18', gross: 3120.75, cost: 1800, profit: 1220.75, transactions: 18 }
+      { date: 'Oct 20, 2025', gross: 2450, cost: 1200, profit: 1130, transactions: 15 },
+      { date: 'Oct 19, 2025', gross: 1890.5, cost: 1050, profit: 760.5, transactions: 12 },
+      { date: 'Oct 18, 2025', gross: 3120.75, cost: 1800, profit: 1220.75, transactions: 18 }
     ];
 
     // Gross Sales Line Chart

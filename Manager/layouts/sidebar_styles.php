@@ -1,6 +1,6 @@
-<!-- Sidebar Styles - Include this in your page head section -->
+
 <style>
-/* Sidebar collapse/expand toggle styles (minimal, local overrides) */
+  /* Sidebar collapse/expand toggle styles (minimal, local overrides) */
 .sidebar{
   transition: width 0.2s ease;
   width: 280px;
@@ -161,4 +161,117 @@ body.sidebar-collapsed .fixed-logo-container {
 .page-body-wrapper {
   margin-top: 70px !important;
 }
+
+/* User dropdown responsive styles */
+.user-dropdown {
+  margin-top: auto !important;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  padding-top: 10px !important;
+}
+
+.user-dropdown .nav-link {
+  padding: 15px 20px !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.user-dropdown .nav-link:hover {
+  background-color: rgba(0,0,0,0.05) !important;
+}
+
+.user-dropdown .nav-link:active {
+  background-color: rgba(0,0,0,0.1) !important;
+}
+
+.user-dropdown .img-xs {
+  width: 40px !important;
+  height: 40px !important;
+  object-fit: cover !important;
+  border: 2px solid #fff !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.user-dropdown .img-md {
+  width: 80px !important;
+  height: 80px !important;
+  object-fit: cover !important;
+  border: 3px solid #fff !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}
+
+.user-dropdown .dropdown-menu {
+  min-width: 250px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  border: 1px solid rgba(0,0,0,0.1) !important;
+  border-radius: 8px !important;
+  margin-top: 10px !important;
+}
+
+.user-dropdown .dropdown-item {
+  padding: 10px 20px !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.user-dropdown .dropdown-item:hover {
+  background-color: #f8f9fa !important;
+  padding-left: 25px !important;
+}
+
+/* Collapsed sidebar - hide user dropdown */
+body.sidebar-collapsed .user-dropdown .img-xs {
+  width: 35px !important;
+  height: 35px !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+body.sidebar-collapsed .user-dropdown .nav-link {
+  padding: 10px !important;
+  justify-content: center !important;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .user-dropdown {
+    display: block !important;
+  }
+  
+  .user-dropdown .nav-link {
+    padding: 12px 15px !important;
+  }
+  
+  .user-dropdown .img-xs {
+    width: 35px !important;
+    height: 35px !important;
+  }
+  
+  .user-dropdown .dropdown-menu {
+    position: fixed !important;
+    top: auto !important;
+    bottom: 60px !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: calc(100% - 20px) !important;
+    margin: 0 !important;
+  }
+}
+
+/* Ensure dropdown is clickable on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .user-dropdown .nav-link {
+    -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+    tap-highlight-color: rgba(0,0,0,0.1);
+  }
+}
+
+/* Arrow rotation helper for sidebar parent triggers */
+.sidebar .menu-arrow {
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-left: auto;
+  transition: transform .18s ease;
+}
+.sidebar .menu-arrow.rotated { transform: rotate(90deg); }
 </style>

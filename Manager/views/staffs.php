@@ -180,14 +180,108 @@ try {
     
     /* Photo preview styling */
     #photoPreview {
-      margin-top: 10px;
+      margin-top: 15px;
+      width: 100%;
+    }
+    
+    #photoPreview .card {
+      max-width: 200px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease;
+    }
+    
+    #photoPreview .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
     
     #previewImage {
-      max-width: 150px;
-      max-height: 150px;
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      display: block;
+    }
+    
+    #photoPreview .card-body {
+      padding: 10px;
+      background: #f8f9fa;
+    }
+    
+    /* Photo drop zone styling */
+    .photo-drop-zone {
+      border: 2px dashed #d1d3e0;
       border-radius: 8px;
-      border: 2px solid #ddd;
+      background: #f8f9fc;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .photo-drop-zone:hover {
+      border-color: #4e73df;
+      background: #eef2ff;
+    }
+    
+    .photo-drop-zone.drag-over {
+      border-color: #4e73df;
+      background: #e0e9ff;
+      transform: scale(1.02);
+    }
+    
+    .drop-zone-content i {
+      display: block;
+      font-size: 2.5rem;
+    }
+    
+    /* Mobile responsive adjustments */
+    @media (max-width: 576px) {
+      #photoPreview .card {
+        max-width: 100%;
+      }
+      
+      #previewImage {
+        height: 180px;
+      }
+      
+      /* Modal adjustments for mobile */
+      #addStaffModal .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem) !important;
+      }
+      
+      #addStaffModal .modal-body {
+        padding: 20px 15px !important;
+      }
+      
+      #addStaffModal .modal-header,
+      #addStaffModal .modal-footer {
+        padding: 15px;
+      }
+      
+      #addStaffModal .modal-title {
+        font-size: 1.1rem;
+      }
+      
+      /* Stack form fields on mobile */
+      #addStaffModal .row > div {
+        margin-bottom: 0.75rem;
+      }
+    }
+    
+    /* Tablet adjustments */
+    @media (min-width: 577px) and (max-width: 768px) {
+      #addStaffModal .modal-dialog {
+        max-width: 90% !important;
+        margin: 1rem auto;
+      }
+    }
+    
+    /* Ensure proper image rendering */
+    img[alt*="Profile"], img[alt*="profile"] {
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
     }
     </style>
     <!-- endinject -->
@@ -195,13 +289,14 @@ try {
     <link rel="shortcut icon" href="../assets/images/favicon.png" />
   </head>
   <body class="with-welcome-text">
+    <?php include '../layouts/preloader.php'; ?>
     <div class="container-scroller">
       <div class="container-fluid page-body-wrapper">
         
         <!-- Include Sidebar Content -->
         <?php include '../layouts/sidebar_content_pages.php'; ?>
         
-        <!-- Main Panel -->
+        <!-- partial -->
         <div class="main-panel">
           <div class="content-wrapper d-flex" id="staffContentWrapper">
             <!-- Staff Management Content -->
@@ -230,27 +325,38 @@ try {
                         </h4>
                         <p class="card-description mb-0">Manage your staff members and their roles</p>
                       </div>
-                      <button type="button" class="btn btn-primary" style="min-width: 150px;" data-bs-toggle="modal" data-bs-target="#addStaffModal"><strong>+ Add Staff</strong></button>
+                      <button type="button" class="btn btn-primary" style="min-width: 150px;" id="openAddStaffBtn"><strong>+ Add Staff</strong></button>
                     </div>
 
-                    <!-- Search and Filter Section -->
+                    <!-- Search and Filter Options -->
                     <div class="row mb-3">
-                      <div class="col-md-6">
+                      <div class="col-md-4">
                         <div class="input-group">
-                          <span class="input-group-text bg-white border-end-0">
+                          <input type="text" class="form-control" placeholder="Search staff..." id="searchInput">
+                          <button class="btn btn-outline-secondary" type="button">
                             <i class="bi bi-search"></i>
-                          </span>
-                          <input type="text" class="form-control border-start-0" placeholder="Search by name, email, or ID..." id="searchInput">
+                          </button>
                         </div>
                       </div>
-                      <div class="col-md-3">
-                        <select class="form-select" id="roleFilter">
+                      <div class="col-md-8 d-flex justify-content-end align-items-center gap-2">
+                        <!-- Role Filter -->
+                        <select class="form-select" id="roleFilter" style="max-width: 140px;">
                           <option value="">All Roles</option>
                           <option value="Manager">Manager</option>
                           <option value="Sales Staff">Sales Staff</option>
                         </select>
+                        
+                        <!-- Status Filter -->
+                        <select class="form-select" id="statusFilter" style="max-width: 140px;">
+                          <option value="">All Status</option>
+                          <option value="Active">Active</option>
+                          <option value="Inactive">Inactive</option>
+                          <option value="Suspended">Suspended</option>
+                        </select>
+                        
+                        
                       </div>
-                    </div>
+                    </div><br>
 
                     <div class="table-responsive mt-1">
                       <table class="table select-table" id="staffsTable">
@@ -304,12 +410,7 @@ try {
                               <p class="mb-0">Oct 14, 2025</p>
                             </td>
                             <td>
-                            
-                                <a class="btn btn-sm btn-secondary text-white me-1 staff-settings-btn" title="Settings"
-                                  href="staff_settings.php?name=Alice%20Johnson&username=@ajohnson&role=Manager&email=alice.johnson@salespilot.com&phone=%2B234%20800%20123%204567">
-                                  <i class="mdi mdi-cog"></i>
-                                </a>
-                              <button class="btn btn-sm btn-info text-white me-1" title="View Details">
+                                <button class="btn btn-sm btn-info text-white me-1 view-staff-btn" title="View Details">
                                 <i class="bi bi-eye"></i>
                               </button>
                               
@@ -351,11 +452,8 @@ try {
                             </td>
                             <td>
                               
-                                <a class="btn btn-sm btn-secondary text-white me-1 staff-settings-btn" title="Settings"
-                                  href="staff_settings.php?name=Bob%20Smith&username=@bsmith&role=Sales%20Staff&email=bob.smith@salespilot.com&phone=%2B234%20800%20234%205678">
-                                  <i class="mdi mdi-cog"></i>
-                                </a>
-                              <button class="btn btn-sm btn-info text-white me-1" title="View Details">
+                                
+                              <button class="btn btn-sm btn-info text-white me-1 view-staff-btn" title="View Details">
                                 <i class="bi bi-eye"></i>
                               </button>
                               
@@ -396,11 +494,7 @@ try {
                               <p class="mb-0">Oct 19, 2025</p>
                             </td>
                             <td>
-                                <a class="btn btn-sm btn-secondary text-white me-1 staff-settings-btn" title="Settings"
-                                  href="staff_settings.php?name=Carol%20Williams&username=@cwilliams&role=Sales%20Staff&email=carol.williams@salespilot.com&phone=%2B234%20800%20345%206789">
-                                  <i class="mdi mdi-cog"></i>
-                                </a>
-                              <button class="btn btn-sm btn-info text-white me-1" title="View Details">
+                              <button class="btn btn-sm btn-info text-white me-1 view-staff-btn" title="View Details">
                                 <i class="bi bi-eye"></i>
                               </button>
                              
@@ -409,7 +503,7 @@ try {
                               </button>
                             </td>
                           </tr>
-                        </tbody>
+                                <i class="bi bi-eye"></i>
                       </table>
                     </div>
 
@@ -430,10 +524,14 @@ try {
                         </ul>
                       </nav>
                     </div>
+
+                    <!-- Enhanced Modal for Adding Staff (moved outside content wrapper below) -->
+                    <!-- End Enhanced Modal -->
                   </div>
                 </div>
               </div>
             </div>
+            <!-- End row -->
           </div>
           <!-- content-wrapper ends -->
           
@@ -441,7 +539,6 @@ try {
           <footer class="footer">
             <div class="d-sm-flex justify-content-center justify-content-sm-between">
               <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">© 2025 SalesPilot. All rights reserved.</span>
-              <span class="float-none float-sm-end d-block mt-1 mt-sm-0 text-center">Made with <i class="mdi mdi-heart text-danger"></i></span>
             </div>
           </footer>
           <!-- End Footer -->
@@ -451,77 +548,134 @@ try {
       <!-- page-body-wrapper ends -->
     </div>
     <!-- container-scroller -->
-
-    <!-- Modal for Adding Staff -->
-    <div class="modal fade" id="addStaffModal" tabindex="-1" aria-labelledby="addStaffModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
+    
+    <!-- Enhanced Modal for Adding Staff -->
+    <div class="modal fade" id="addStaffModal" tabindex="-1" aria-labelledby="addStaffModalLabel" aria-hidden="true" style="z-index: 1055;">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 650px;">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header bg-primary text-white">
             <h5 class="modal-title" id="addStaffModalLabel">
               <i class="bi bi-person-plus me-2"></i>Add New Staff Member
             </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           
-          <div class="modal-body">
+          <div class="modal-body p-4" style="background-color: #fff;">
             <form id="addStaffForm" action="../components/add_staff.php" method="POST" enctype="multipart/form-data">
-              <div class="row">
-                <div class="col-md-6 mb-3">
+              
+              <div class="row mb-3">
+                <div class="col-md-6 mb-2">
                   <label for="fullname" class="form-label">Full Name <span class="text-danger">*</span></label>
                   <input type="text" class="form-control" id="fullname" name="fullname" placeholder="Enter full name" required>
+                  <div class="invalid-feedback">Please provide a valid full name.</div>
                 </div>
-                <div class="col-md-6 mb-3">
+                <div class="col-md-6 mb-2">
                   <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
                   <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required>
+                  <div class="invalid-feedback">Username is required and must be unique.</div>
                 </div>
               </div>
 
-              <div class="row">
-                <div class="col-md-6 mb-3">
+              <div class="row mb-3">
+                <div class="col-md-6 mb-2">
                   <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
                   <input type="email" class="form-control" id="email" name="email" placeholder="Enter email address" required>
+                  <div class="invalid-feedback">Please provide a valid email address.</div>
                 </div>
-                <div class="col-md-6 mb-3">
-                  <label for="phone" class="form-label">Phone Number</label>
-                  <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter phone number">
+                <div class="col-md-6 mb-2">
+                  <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                  <input type="tel" class="form-control" id="phone" name="phone" placeholder="Enter phone number" required>
+                  <div class="invalid-feedback">Please provide a valid phone number.</div>
                 </div>
               </div>
 
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
-                  <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
-                </div>
-                <div class="col-md-6 mb-3">
+              <div class="row mb-3">
+                <div class="col-md-6 mb-2">
                   <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
                   <select class="form-select" id="role" name="role" required>
-                    <option value="">Select Role</option>
-                    <?php foreach ($roles as $r): ?>
-                      <option value="<?= htmlspecialchars($r['id']) ?>"><?= htmlspecialchars($r['name']) ?></option>
-                    <?php endforeach; ?>
+                    <option value="" selected disabled>Select a role</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Sales Staff">Sales Staff</option>
                   </select>
+                  <div class="invalid-feedback">Please select a role.</div>
                 </div>
+                <div class="col-md-6 mb-2">
+                  <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                  <select class="form-select" id="status" name="status" required>
+                    <option value="Active" selected>Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <option value="On Leave">On Leave</option>
+                  </select>
+                  <div class="invalid-feedback">Please select a status.</div>
               </div>
-              
-              <div class="row">
-                <div class="col-md-12 mb-3">
-                  <label for="passport_photo" class="form-label">Profile Photo <span class="text-muted">(Optional)</span></label>
-                  <input type="file" class="form-control" id="passport_photo" name="passport_photo" accept="image/*">
-                  <small class="form-text text-muted">Accepted formats: JPG, PNG, GIF. Max size: 2MB</small>
-                  <div id="photoPreview" class="mt-2" style="display: none;">
-                    <img id="previewImage" src="" alt="Preview">
-                    <button type="button" class="btn btn-sm btn-outline-danger ms-2" id="removePhoto">
-                      <i class="bi bi-x-circle"></i> Remove
+
+              <div class="row mb-3">
+                <div class="col-md-6 mb-2">
+                  <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                      <i class="bi bi-eye"></i>
                     </button>
                   </div>
+                  <small class="text-muted">Min 8 characters, mix of letters & numbers</small>
+                  <div class="invalid-feedback">Password must be at least 8 characters long.</div>
                 </div>
+                <div class="col-md-6 mb-2">
+                  <label for="confirmPassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Re-enter password" required>
+                    <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                  </div>
+                  <div class="invalid-feedback">Passwords do not match.</div>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-12 mb-2">
+                  <label for="address" class="form-label">Address</label>
+                  <textarea class="form-control" id="address" name="address" rows="2" placeholder="Enter address (optional)"></textarea>
+                </div>
+              </div>
+
+              
+              </div>
+
+              <div class="mb-3">
+                <label for="photo" class="form-label">Profile Photo</label>
+                <div class="d-flex align-items-center">
+                  <div class="flex-grow-1">
+                    <input type="file" class="form-control" id="photo" name="photo" accept="image/jpeg,image/png,image/gif,image/webp">
+                    <small class="text-muted">JPG, PNG, GIF, WebP (Max 2MB)</small>
+                  </div>
+                </div>
+                <small id="photoHelp" class="form-text text-muted d-block mt-1">
+                  <i class="bi bi-info-circle me-1"></i>Accepted: JPG, PNG, GIF, WebP. Max: 2MB
+                </small>
+                
+                <!-- Photo Preview -->
+                <div id="photoPreview" class="mt-3" style="display: none;">
+                  <div class="card border-0 shadow-sm">
+                    <img id="previewImage" src="" alt="Photo Preview" class="card-img-top">
+                    <div class="card-body text-center">
+                      <button type="button" class="btn btn-sm btn-outline-danger" id="removePhoto">
+                        <i class="bi bi-trash me-1"></i>Remove Photo
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_add_staff']) ?>">
               </div>
             </form>
           </div>
           
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="bi bi-x-circle me-1"></i>Cancel
+            </button>
             <button type="submit" form="addStaffForm" id="addStaffBtn" class="btn btn-primary">
               <i class="bi bi-person-plus me-1"></i>Add Staff Member
             </button>
@@ -529,12 +683,33 @@ try {
         </div>
       </div>
     </div>
-    <!-- End Modal -->
-
+    <!-- End Enhanced Modal -->
+    
     <!-- Staff Settings Modal -->
     <!-- Staff Settings Side Panel -->
     <!-- End Staff Settings Side Panel -->
     <style>
+      /* Modal Backdrop Fix */
+      .modal-backdrop {
+        z-index: 1050 !important;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+      
+      /* Ensure modal appears above backdrop */
+      #addStaffModal {
+        z-index: 1055 !important;
+      }
+      
+      #addStaffModal .modal-dialog {
+        z-index: 1055;
+      }
+      
+      #addStaffModal .modal-content {
+        background-color: #fff;
+        position: relative;
+        z-index: 1055;
+      }
+      
       .staff-settings-panel {
         position: fixed;
         top: 0;
@@ -582,12 +757,17 @@ try {
     <script src="../assets/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
     <!-- endinject -->
     
+    <!-- Bootstrap JS Bundle (required for modals) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
     <!-- Plugin js for this page -->
     <script src="../assets/vendors/chart.js/chart.umd.js"></script>
     <script src="../assets/vendors/progressbar.js/progressbar.min.js"></script>
     <!-- End plugin js for this page -->
     
     <!-- inject:js -->
+    <script src="../assets/js/off-canvas.js"></script>
+    <script src="../assets/js/template.js"></script>
     <script src="../assets/js/settings.js"></script>
     <script src="../assets/js/hoverable-collapse.js"></script>
     <script src="../assets/js/todolist.js"></script>
@@ -670,52 +850,323 @@ try {
     </script>
 
     <script>
+      // Simple and direct modal control
+      (function() {
+        'use strict';
+        
+        let modal = null;
+        let modalElement = null;
+        let backdrop = null;
+
+        function showModal() {
+          modalElement = document.getElementById('addStaffModal');
+          if (!modalElement) return;
+
+          console.log('Showing modal...');
+
+          // Set initial position above viewport
+          modalElement.style.display = 'block';
+          modalElement.style.opacity = '0';
+          modalElement.style.transform = 'translateY(-100px)';
+          modalElement.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+          // Trigger reflow
+          modalElement.offsetHeight;
+
+          // Animate to final position
+          setTimeout(function() {
+            modalElement.classList.add('show');
+            modalElement.style.opacity = '1';
+            modalElement.style.transform = 'translateY(0)';
+            modalElement.setAttribute('aria-modal', 'true');
+            modalElement.setAttribute('aria-hidden', 'false');
+            modalElement.removeAttribute('aria-hidden');
+          }, 10);
+
+          // Create and show backdrop
+          backdrop = document.createElement('div');
+          backdrop.className = 'modal-backdrop fade show';
+          document.body.appendChild(backdrop);
+          document.body.classList.add('modal-open');
+          
+          // Set padding to prevent scroll jump
+          const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+          document.body.style.paddingRight = scrollbarWidth + 'px';
+        }
+
+        function hideModal() {
+          if (!modalElement) return;
+
+          console.log('Hiding modal...');
+
+          // Animate modal sliding up
+          modalElement.style.opacity = '0';
+          modalElement.style.transform = 'translateY(-100px)';
+
+          // Wait for animation to complete before hiding
+          setTimeout(function() {
+            modalElement.style.display = 'none';
+            modalElement.classList.remove('show');
+            modalElement.setAttribute('aria-hidden', 'true');
+            modalElement.removeAttribute('aria-modal');
+            modalElement.style.transform = '';
+            modalElement.style.opacity = '';
+            modalElement.style.transition = '';
+
+            // Remove backdrop
+            if (backdrop && backdrop.parentNode) {
+              backdrop.parentNode.removeChild(backdrop);
+              backdrop = null;
+            }
+
+            // Clean up body
+            document.body.classList.remove('modal-open');
+            document.body.style.paddingRight = '';
+            document.body.style.overflow = '';
+          }, 300);
+        }
+
+        function init() {
+          // Open button
+          const openBtn = document.getElementById('openAddStaffBtn');
+          if (openBtn) {
+            openBtn.addEventListener('click', function(e) {
+              e.preventDefault();
+              showModal();
+            });
+          }
+
+          // Close buttons
+          const closeButtons = document.querySelectorAll('#addStaffModal [data-bs-dismiss="modal"], #addStaffModal .btn-close');
+          closeButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              hideModal();
+            });
+          });
+
+          // ESC key
+          document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' || e.keyCode === 27) {
+              const modalEl = document.getElementById('addStaffModal');
+              if (modalEl && modalEl.classList.contains('show')) {
+                hideModal();
+              }
+            }
+          });
+
+          // Backdrop click
+          document.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('modal-backdrop')) {
+              hideModal();
+            }
+          });
+
+          // Click outside modal content
+          const modalEl = document.getElementById('addStaffModal');
+          if (modalEl) {
+            modalEl.addEventListener('click', function(e) {
+              if (e.target === modalEl) {
+                hideModal();
+              }
+            });
+          }
+
+          // Password toggle (password + confirm password)
+          const togglePasswordBtn = document.getElementById('togglePassword');
+          const passwordInput = document.getElementById('password');
+          const toggleConfirmPasswordBtn = document.getElementById('toggleConfirmPassword');
+          const confirmPasswordInput = document.getElementById('confirmPassword');
+
+          if (togglePasswordBtn && passwordInput) {
+            togglePasswordBtn.addEventListener('click', function(e) {
+              e.preventDefault();
+              const type = passwordInput.type === 'password' ? 'text' : 'password';
+              passwordInput.type = type;
+              const icon = this.querySelector('i');
+              icon.className = type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+            });
+          }
+
+          if (toggleConfirmPasswordBtn && confirmPasswordInput) {
+            toggleConfirmPasswordBtn.addEventListener('click', function(e) {
+              e.preventDefault();
+              const type = confirmPasswordInput.type === 'password' ? 'text' : 'password';
+              confirmPasswordInput.type = type;
+              const icon = this.querySelector('i');
+              icon.className = type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+            });
+          }
+
+          console.log('Modal initialized');
+        }
+
+        // Initialize when ready
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', init);
+        } else {
+          init();
+        }
+      })();
+    </script>
+
+    <script>
       // AJAX submit for Add Staff modal
       (function(){
         var form = document.getElementById('addStaffForm');
         if (!form) return;
         var addBtn = document.getElementById('addStaffBtn');
         
-        // Photo preview functionality
+        // Photo preview functionality with enhanced error handling
         var photoInput = document.getElementById('passport_photo');
         var photoPreview = document.getElementById('photoPreview');
         var previewImage = document.getElementById('previewImage');
         var removePhotoBtn = document.getElementById('removePhoto');
+        var photoDropZone = document.getElementById('photoDropZone');
+        
+        // Helper function to reset photo preview
+        function resetPhotoPreview() {
+          if (photoInput) photoInput.value = '';
+          if (photoPreview) {
+            photoPreview.style.display = 'none';
+            photoPreview.style.opacity = '1';
+            photoPreview.style.transition = '';
+          }
+          if (previewImage) previewImage.src = '';
+        }
+        
+        // Helper function to process file
+        function processFile(file) {
+          if (!file) return;
+          
+          // Validate file size (2MB max)
+          var maxSize = 2 * 1024 * 1024; // 2MB in bytes
+          if (file.size > maxSize) {
+            showToast('File size must be less than 2MB. Current size: ' + (file.size / (1024 * 1024)).toFixed(2) + 'MB', false);
+            resetPhotoPreview();
+            return;
+          }
+          
+          // Validate file type
+          var validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+          if (!validTypes.includes(file.type.toLowerCase())) {
+            showToast('Please select a valid image file (JPG, PNG, GIF, or WebP)', false);
+            resetPhotoPreview();
+            return;
+          }
+
+          // Show preview with smooth animation
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            previewImage.src = e.target.result;
+            photoPreview.style.display = 'block';
+            
+            // Smooth fade-in animation
+            photoPreview.style.opacity = '0';
+            setTimeout(function() {
+              photoPreview.style.transition = 'opacity 0.3s ease';
+              photoPreview.style.opacity = '1';
+            }, 10);
+            
+            // Hide drop zone when preview is shown
+            if (photoDropZone) {
+              photoDropZone.style.display = 'none';
+            }
+          };
+          
+          reader.onerror = function() {
+            showToast('Error reading file. Please try again.', false);
+            resetPhotoPreview();
+          };
+          
+          reader.readAsDataURL(file);
+        }
+        
+        // Click to upload functionality
+        if (photoDropZone && photoInput) {
+          photoDropZone.addEventListener('click', function() {
+            photoInput.click();
+          });
+        }
 
         if (photoInput) {
           photoInput.addEventListener('change', function(e) {
             var file = e.target.files[0];
-            if (file) {
-              // Validate file size (2MB max)
-              if (file.size > 2 * 1024 * 1024) {
-                showToast('File size must be less than 2MB', false);
-                photoInput.value = '';
-                return;
-              }
-              
-              // Validate file type
-              if (!file.type.match('image.*')) {
-                showToast('Please select a valid image file', false);
-                photoInput.value = '';
-                return;
-              }
-
-              // Show preview
-              var reader = new FileReader();
-              reader.onload = function(e) {
-                previewImage.src = e.target.result;
-                photoPreview.style.display = 'block';
-              };
-              reader.readAsDataURL(file);
-            }
+            processFile(file);
           });
+        }
+        
+        // Drag and drop functionality
+        if (photoDropZone) {
+          ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            photoDropZone.addEventListener(eventName, preventDefaults, false);
+          });
+          
+          function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          
+          ['dragenter', 'dragover'].forEach(eventName => {
+            photoDropZone.addEventListener(eventName, function() {
+              photoDropZone.classList.add('drag-over');
+            }, false);
+          });
+          
+          ['dragleave', 'drop'].forEach(eventName => {
+            photoDropZone.addEventListener(eventName, function() {
+              photoDropZone.classList.remove('drag-over');
+            }, false);
+          });
+          
+          photoDropZone.addEventListener('drop', function(e) {
+            var dt = e.dataTransfer;
+            var files = dt.files;
+            
+            if (files.length > 0) {
+              var file = files[0];
+              // Update the file input
+              var dataTransfer = new DataTransfer();
+              dataTransfer.items.add(file);
+              photoInput.files = dataTransfer.files;
+              
+              processFile(file);
+            }
+          }, false);
         }
 
         if (removePhotoBtn) {
-          removePhotoBtn.addEventListener('click', function() {
-            photoInput.value = '';
-            photoPreview.style.display = 'none';
-            previewImage.src = '';
+          removePhotoBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Smooth fade-out animation
+            photoPreview.style.transition = 'opacity 0.2s ease';
+            photoPreview.style.opacity = '0';
+            
+            setTimeout(function() {
+              photoInput.value = '';
+              photoPreview.style.display = 'none';
+              previewImage.src = '';
+              photoPreview.style.opacity = '1';
+              photoPreview.style.transition = '';
+              
+              // Show drop zone again
+              if (photoDropZone) {
+                photoDropZone.style.display = 'block';
+              }
+            }, 200);
+          });
+        }
+        
+        // Also reset preview when modal is closed
+        var modalEl = document.getElementById('addStaffModal');
+        if (modalEl) {
+          modalEl.addEventListener('hidden.bs.modal', function() {
+            resetPhotoPreview();
+            if (photoDropZone) {
+              photoDropZone.style.display = 'block';
+            }
           });
         }
 
@@ -761,8 +1212,12 @@ try {
               
               // Reset form and preview
               form.reset();
-              photoPreview.style.display = 'none';
-              previewImage.src = '';
+              resetPhotoPreview();
+              
+              // Show drop zone again
+              if (photoDropZone) {
+                photoDropZone.style.display = 'block';
+              }
               
               // Optionally reload page to show new staff
               setTimeout(function(){ 
@@ -817,6 +1272,8 @@ try {
       document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
         const roleFilter = document.getElementById('roleFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const exportStaff = document.getElementById('exportStaff');
         const table = document.getElementById('staffsTable');
         const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
         const checkAll = document.getElementById('check-all');
@@ -833,8 +1290,7 @@ try {
 
         // Search functionality
         if (searchInput) {
-          searchInput.addEventListener('keyup', function() {
-            const filter = this.value.toLowerCase();
+          searchInput.addEventListener('input', function() {
             filterTable();
           });
         }
@@ -846,15 +1302,56 @@ try {
           });
         }
 
+        // Status filter functionality
+        if (statusFilter) {
+          statusFilter.addEventListener('change', function() {
+            filterTable();
+          });
+        }
+
+        // Export functionality
+        if (exportStaff) {
+          exportStaff.addEventListener('click', function() {
+            const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+            let csvContent = 'Staff Member,Role,Contact,Date Added\n';
+            
+            visibleRows.forEach(row => {
+              const cells = row.querySelectorAll('td');
+              if (cells.length > 1) {
+                // Extract text content, excluding checkboxes and action buttons
+                const name = cells[1].querySelector('h6')?.textContent || '';
+                const role = cells[2].textContent.trim();
+                const email = cells[3].querySelector('p')?.textContent || '';
+                const date = cells[4].textContent.trim();
+                
+                csvContent += `"${name}","${role}","${email}","${date}"\n`;
+              }
+            });
+
+            // Download CSV
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `staff_export_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          });
+        }
+
         function filterTable() {
           const searchFilter = searchInput.value.toLowerCase();
           const roleFilterValue = roleFilter.value.toLowerCase();
+          const statusFilterValue = statusFilter.value.toLowerCase();
 
           for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
             const cells = row.getElementsByTagName('td');
             let searchFound = true;
             let roleFound = true;
+            let statusFound = true;
 
             // Search through Staff Member name, Role, and Contact columns
             if (searchFilter) {
@@ -875,7 +1372,24 @@ try {
               roleFound = roleText.toLowerCase().indexOf(roleFilterValue) > -1;
             }
 
-            row.style.display = (searchFound && roleFound) ? '' : 'none';
+            // Status filter - check for badges or status indicators
+            if (statusFilterValue) {
+              // Look for status badges in the row
+              const badges = row.querySelectorAll('.badge');
+              statusFound = false;
+              badges.forEach(badge => {
+                if (badge.textContent.toLowerCase().includes(statusFilterValue)) {
+                  statusFound = true;
+                }
+              });
+              
+              // If no status badges found, assume Active for display purposes
+              if (badges.length === 0 && statusFilterValue === 'active') {
+                statusFound = true;
+              }
+            }
+
+            row.style.display = (searchFound && roleFound && statusFound) ? '' : 'none';
           }
 
           // Update showing entries count
@@ -891,6 +1405,82 @@ try {
             showingText.innerHTML = `Showing <strong>1-${visibleRows.length}</strong> of <strong>${totalRows}</strong> entries`;
           }
         }
+
+        
+      });
+    </script>
+
+    <!-- View Staff Modal -->
+    <div class="modal fade" id="viewStaffModal" tabindex="-1" aria-labelledby="viewStaffModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="viewStaffModalLabel">Staff Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="d-flex align-items-center mb-3">
+              <img id="viewStaffProfile" src="" alt="Profile" style="width:64px;height:64px;border-radius:8px;object-fit:cover;margin-right:12px;">
+              <div>
+                <h5 id="viewStaffName" class="mb-0"></h5>
+                <p id="viewStaffUsername" class="text-muted mb-0"></p>
+              </div>
+            </div>
+            <div class="mb-2"><strong>Role:</strong> <span id="viewStaffRole"></span></div>
+            <div class="mb-2"><strong>Email:</strong> <div id="viewStaffEmail"></div></div>
+            <div class="mb-2"><strong>Phone:</strong> <div id="viewStaffPhone"></div></div>
+            <div class="mb-2"><strong>Date Added:</strong> <div id="viewStaffDate"></div></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Wire table 'View' buttons to the View Staff modal
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.view-staff-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            var row = btn.closest('tr');
+            if (!row) return;
+
+            var imgEl = row.querySelector('td:nth-child(2) img');
+            var name = row.querySelector('td:nth-child(2) h6')?.textContent.trim() || '';
+            var username = row.querySelector('td:nth-child(2) p')?.textContent.trim() || '';
+            var roleEl = row.querySelector('td:nth-child(3) .badge');
+            var role = roleEl ? roleEl.textContent.trim() : (row.querySelector('td:nth-child(3)')?.textContent.trim() || '');
+            var email = row.querySelector('td:nth-child(4) p')?.textContent.trim() || '';
+            var phoneNodes = row.querySelectorAll('td:nth-child(4) p');
+            var phone = '';
+            if (phoneNodes.length > 1) phone = phoneNodes[1].textContent.trim();
+            else if (phoneNodes.length === 1) phone = phoneNodes[0].textContent.trim();
+            var date = row.querySelector('td:nth-child(5) p')?.textContent.trim() || '';
+
+            var profile = document.getElementById('viewStaffProfile');
+            var nameEl = document.getElementById('viewStaffName');
+            var usernameEl = document.getElementById('viewStaffUsername');
+            var roleElOut = document.getElementById('viewStaffRole');
+            var emailEl = document.getElementById('viewStaffEmail');
+            var phoneEl = document.getElementById('viewStaffPhone');
+            var dateEl = document.getElementById('viewStaffDate');
+
+            if (profile) profile.src = imgEl ? imgEl.src : '';
+            if (nameEl) nameEl.textContent = name;
+            if (usernameEl) usernameEl.textContent = username;
+            if (roleElOut) roleElOut.textContent = role;
+            if (emailEl) emailEl.textContent = email;
+            if (phoneEl) phoneEl.textContent = phone;
+            if (dateEl) dateEl.textContent = date;
+
+            var modalEl = document.getElementById('viewStaffModal');
+            if (modalEl) {
+              var bsModal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+              bsModal.show();
+            }
+          });
+        });
       });
     </script>
   </body>

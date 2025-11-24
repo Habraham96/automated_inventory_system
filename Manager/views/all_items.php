@@ -108,11 +108,410 @@
 		  transform: translateY(-1px) !important;
 		  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
 		}
+		
+		/* Import/Export button styles */
+		#importItems {
+		  transition: all 0.3s ease !important;
+		}
+		#importItems:hover {
+		  background-color: #17a2b8 !important;
+		  color: white !important;
+		  transform: translateY(-1px) !important;
+		}
+		#importItems:disabled {
+		  opacity: 0.6 !important;
+		  cursor: not-allowed !important;
+		}
+		
+		#exportItems {
+		  transition: all 0.3s ease !important;
+		}
+		#exportItems:hover {
+		  background-color: #28a745 !important;
+		  color: white !important;
+		  transform: translateY(-1px) !important;
+		}
+		#exportItems:disabled {
+		  opacity: 0.6 !important;
+		  cursor: not-allowed !important;
+		}
+		
+		/* Table row hover and click effects */
+		#itemsTable tbody tr[data-clickable] {
+		  transition: all 0.3s ease !important;
+		  cursor: pointer !important;
+		}
+		#itemsTable tbody tr[data-clickable]:hover {
+		  background-color: #f8f9fa !important;
+		  transform: translateY(-2px) !important;
+		  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+		}
+		#itemsTable tbody tr[data-clickable]:active {
+		  transform: translateY(0) !important;
+		  background-color: #e9ecef !important;
+		}
+		
+		/* Prevent pointer events on interactive elements within rows */
+		#itemsTable tbody tr td .form-check,
+		#itemsTable tbody tr td .btn {
+		  pointer-events: auto !important;
+		  position: relative !important;
+		  z-index: 10 !important;
+		}
+		
+		/* Hover tooltip effect */
+		#itemsTable tbody tr[data-clickable]:hover::after {
+		  content: "Click to view details";
+		  position: absolute;
+		  background: rgba(0,0,0,0.8);
+		  color: white;
+		  padding: 5px 10px;
+		  border-radius: 4px;
+		  font-size: 12px;
+		  white-space: nowrap;
+		  z-index: 1000;
+		  right: 10px;
+		  top: 50%;
+		  transform: translateY(-50%);
+		  opacity: 0;
+		  animation: fadeInTooltip 0.3s ease forwards;
+		}
+		
+		@keyframes fadeInTooltip {
+		  to {
+		    opacity: 1;
+		  }
+		}
+		
+		/* Item details side panel styling */
+		.item-details-panel {
+		  position: fixed;
+		  top: 0;
+		  right: -500px;
+		  width: 500px;
+		  height: 100vh;
+		  z-index: 1050;
+		  transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+		}
+		
+		.item-details-panel.active {
+		  right: 0;
+		}
+		
+		.panel-overlay {
+		  position: fixed;
+		  top: 0;
+		  left: 0;
+		  width: 100vw;
+		  height: 100vh;
+		  background: rgba(0, 0, 0, 0.5);
+		  opacity: 0;
+		  visibility: hidden;
+		  transition: all 0.3s ease;
+		  z-index: -1;
+		}
+		
+		.item-details-panel.active .panel-overlay {
+		  opacity: 1;
+		  visibility: visible;
+		}
+		
+		.panel-content {
+		  background: #ffffff;
+		  height: 100%;
+		  display: flex;
+		  flex-direction: column;
+		  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
+		  position: relative;
+		  z-index: 1;
+		}
+		
+		.panel-header {
+		  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		  color: white;
+		  padding: 1.5rem 2rem;
+		  display: flex;
+		  justify-content: between;
+		  align-items: center;
+		  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		}
+		
+		.panel-title {
+		  margin: 0;
+		  font-size: 1.25rem;
+		  font-weight: 600;
+		  flex: 1;
+		}
+		
+		.btn-close-panel {
+		  background: none;
+		  border: none;
+		  color: white;
+		  font-size: 1.2rem;
+		  cursor: pointer;
+		  padding: 0.5rem;
+		  border-radius: 50%;
+		  transition: all 0.3s ease;
+		}
+		
+		.btn-close-panel:hover {
+		  background: rgba(255, 255, 255, 0.2);
+		  transform: scale(1.1);
+		}
+		
+		.panel-body {
+		  flex: 1;
+		  padding: 2rem;
+		  overflow-y: auto;
+		}
+		
+		.item-image-section {
+		  text-align: center;
+		  margin-bottom: 2rem;
+		  position: relative;
+		}
+		
+		.item-image {
+		  width: 150px;
+		  height: 150px;
+		  object-fit: cover;
+		  border-radius: 15px;
+		  border: 3px solid #e9ecef;
+		  transition: all 0.3s ease;
+		}
+		
+		.image-overlay {
+		  position: absolute;
+		  bottom: 10px;
+		  left: 50%;
+		  transform: translateX(-50%);
+		  opacity: 0;
+		  transition: all 0.3s ease;
+		}
+		
+		.item-image-section:hover .image-overlay {
+		  opacity: 1;
+		}
+		
+		.item-form-section {
+		  animation: slideInUp 0.6s ease;
+		}
+		
+		.form-group {
+		  margin-bottom: 1.5rem;
+		}
+		
+		.form-label {
+		  font-weight: 600;
+		  color: #495057;
+		  margin-bottom: 0.5rem;
+		  font-size: 0.9rem;
+		}
+		
+		.form-control {
+		  border: 2px solid #e9ecef;
+		  border-radius: 10px;
+		  padding: 0.75rem 1rem;
+		  transition: all 0.3s ease;
+		  background: #f8f9fa;
+		}
+		
+		.form-control:focus {
+		  border-color: #667eea;
+		  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+		  background: white;
+		}
+		
+		.stock-status {
+		  font-weight: 600;
+		  border: none;
+		  border-radius: 0 10px 10px 0;
+		}
+		
+		.stock-status.in-stock {
+		  background-color: #d4edda;
+		  color: #155724;
+		}
+		
+		.stock-status.low-stock {
+		  background-color: #fff3cd;
+		  color: #856404;
+		}
+		
+		.stock-status.out-of-stock {
+		  background-color: #f8d7da;
+		  color: #721c24;
+		}
+		
+		.calculated-section {
+		  margin: 2rem 0;
+		  padding: 1.5rem;
+		  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+		  border-radius: 15px;
+		  border: 1px solid #dee2e6;
+		}
+		
+		.info-card {
+		  text-align: center;
+		  padding: 1rem;
+		}
+		
+		.info-label {
+		  font-size: 0.85rem;
+		  color: #6c757d;
+		  margin-bottom: 0.5rem;
+		  font-weight: 500;
+		}
+		
+		.info-value {
+		  font-size: 1.4rem;
+		  font-weight: 700;
+		  color: #495057;
+		}
+		
+		.panel-footer {
+		  padding: 1.5rem 2rem;
+		  background: #f8f9fa;
+		  border-top: 1px solid #dee2e6;
+		  display: flex;
+		  justify-content: flex-end;
+		  gap: 1rem;
+		}
+		
+		.panel-footer .btn {
+		  border-radius: 10px;
+		  padding: 0.75rem 1.5rem;
+		  font-weight: 600;
+		  transition: all 0.3s ease;
+		}
+		
+		.panel-footer .btn:hover {
+		  transform: translateY(-2px);
+		  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		}
+		
+		@keyframes slideInUp {
+		  from {
+		    opacity: 0;
+		    transform: translateY(30px);
+		  }
+		  to {
+		    opacity: 1;
+		    transform: translateY(0);
+		  }
+		}
+		
+		/* Responsive adjustments */
+		@media (max-width: 768px) {
+		  .item-details-panel {
+		    width: 100vw;
+		    right: -100vw;
+		  }
+		  
+		  .panel-body {
+		    padding: 1.5rem;
+		  }
+		  
+		  .panel-header {
+		    padding: 1rem 1.5rem;
+		  }
+		}
+		
+		/* Larger and centered checkboxes in table */
+		#itemsTable th:nth-child(2),
+		#itemsTable td:nth-child(2) {
+		  text-align: center !important;
+		  vertical-align: middle !important;
+		  width: 80px !important;
+		}
+		
+		/* Header checkbox styling */
+		#itemsTable th:nth-child(2) .form-check {
+		  justify-content: center !important;
+		  margin: 0 !important;
+		}
+		
+		#itemsTable th:nth-child(2) .form-check-input {
+		  width: 1.2em !important;
+		  height: 1.2em !important;
+		  margin: 0 !important;
+		  box-shadow: 0 2px 8px rgba(102,126,234,0.08);
+		  border: 2px solid #667eea !important;
+		}
+		
+		/* Row checkbox styling */
+		.form-check-input.item-checkbox {
+		  width: 1.5em !important;
+		  height: 1.5em !important;
+		  margin: 0 auto !important;
+		  display: block !important;
+		  box-shadow: 0 2px 8px rgba(102,126,234,0.08);
+		  border: 2px solid #667eea !important;
+		}
+		
+		.form-check {
+		  display: flex !important;
+		  justify-content: center !important;
+		  align-items: center !important;
+		  height: 100%;
+		  margin: 0 !important;
+		}
+
+		/* Bulk action buttons styling */
+		.bulk-actions {
+		  display: inline-flex !important;
+		  align-items: center;
+		  animation: slideInRight 0.3s ease;
+		}
+
+		.bulk-actions .btn {
+		  border-radius: 8px !important;
+		  font-weight: 500 !important;
+		  transition: all 0.3s ease !important;
+		  padding: 0.5rem 1rem !important;
+		}
+
+		.bulk-actions .btn:hover {
+		  transform: translateY(-1px) !important;
+		  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+		}
+
+		#deselectAllBtn:hover {
+		  background-color: #6c757d !important;
+		  color: white !important;
+		}
+
+		#deleteSelectedBtn:hover {
+		  background-color: #dc3545 !important;
+		  color: white !important;
+		}
+
+		@keyframes slideInRight {
+		  from {
+		    opacity: 0;
+		    transform: translateX(20px);
+		  }
+		  to {
+		    opacity: 1;
+		    transform: translateX(0);
+		  }
+		}
+
+		/* Selected row highlighting */
+		#itemsTable tbody tr.selected {
+		  background-color: #e3f2fd !important;
+		  border-left: 4px solid #2196f3 !important;
+		}
+
+		#itemsTable tbody tr.selected:hover {
+		  background-color: #bbdefb !important;
+		}
 		</style>
 		<!-- endinject -->
 		<link rel="shortcut icon" href="../assets/images/favicon.png" />
 	</head>
 	<body class="with-welcome-text">
+		<?php include '../layouts/preloader.php'; ?>
 		<div class="container-scroller">
 			<!-- partial -->
 			<div class="container-fluid page-body-wrapper">
@@ -131,11 +530,22 @@
 											<div>
 												<h4 class="card-title mb-0">All Items</h4>
 												<p class="card-description">Manage your inventory items</p>
+												<p style="color: red;">NOTE; Items tracked here are items with with TURNED ON stock tracking details.</p>
 											</div>
 											<div class="btn-wrapper">
 												<button type="button" class="btn btn-primary text-white me-0" id="addItemQuickAction">
 													<i class="bi bi-plus"></i> Add Item
 												</button>
+												
+												<!-- Bulk Action Buttons (Hidden by default) -->
+												<div class="bulk-actions ms-2" id="bulkActions" style="display: none;">
+													<button type="button" class="btn btn-outline-secondary me-2" id="deselectAllBtn">
+														<i class="bi bi-x-circle"></i> Deselect All
+													</button>
+													<button type="button" class="btn btn-outline-danger" id="deleteSelectedBtn">
+														<i class="bi bi-trash"></i> Delete Selected
+													</button>
+												</div>
 											</div>
 										</div>
 															
@@ -184,9 +594,15 @@
 																	<button class="btn btn-outline-secondary" id="clearFilters">
 																		<i class="bi bi-x-circle"></i> Clear
 																	</button>
-																	<button class="btn btn-outline-success">
+																	<button class="btn btn-outline-info" id="importItems">
+																		<i class="bi bi-upload"></i> Import
+																	</button>
+																	<button class="btn btn-outline-success" id="exportItems">
 																		<i class="bi bi-download"></i> Export
 																	</button>
+																	
+																	<!-- Hidden file input for import -->
+																	<input type="file" id="importFile" accept=".csv,.xlsx,.xls" style="display: none;">
 																</div>
 															</div>
 															<br>
@@ -196,15 +612,20 @@
 																<table class="table table-striped" id="itemsTable">
 																	<thead>
 																		<tr>
-																			<th>S/N</th>
-																			<th>Select</th>
-																			<th>Item</th>
-																			<th>Category</th>
-																			<th>Unit</th>
-																			<th>Stock</th>
-																			<th>Selling Price</th>
-																			<th>Cost Price</th>
-																			<th>Action</th>
+ 																	<th>S/N</th>
+ 																	<th>
+ 																		<div class="form-check">
+ 																			<input class="form-check-input" type="checkbox" id="selectAllItems" title="Select All Items">
+ 																		</div>
+ 																	</th>
+ 																	<th>Item</th>
+ 																	<th>Category</th>
+ 																	<th>Unit</th>
+ 																	<th>Stock</th>
+ 																	<th>Selling Price</th>
+ 																	<th>Cost Price</th>
+ 																	<th>Supplier</th>
+ 																	<th>Action</th>
 																		</tr>
 																	</thead>
 																	<tbody>
@@ -230,9 +651,9 @@
 																			<td>45</td>
 																			<td>₦850,000</td>
 																			<td>₦780,000</td>
+																			<td>Tech Solutions Ltd</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -258,9 +679,9 @@
 																			<td>8</td>
 																			<td>₦1,450,000</td>
 																			<td>₦1,300,000</td>
+																			<td>Global Electronics</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -286,9 +707,9 @@
 																			<td>0</td>
 																			<td>₦180,000</td>
 																			<td>₦150,000</td>
+																			<td>Global Electronics</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -314,9 +735,9 @@
 																			<td>12</td>
 																			<td>₦450,000</td>
 																			<td>₦380,000</td>
+																			<td>Office Furniture Co</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 
@@ -342,9 +763,9 @@
 																			<td>25</td>
 																			<td>₦280,000</td>
 																			<td>₦220,000</td>
+																			<td>Kitchen Essentials</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -370,9 +791,9 @@
 																			<td>65</td>
 																			<td>₦85,000</td>
 																			<td>₦65,000</td>
+																			<td>Global Electronics</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -398,9 +819,9 @@
 																			<td>18</td>
 																			<td>₦920,000</td>
 																			<td>₦820,000</td>
+																			<td>Global Electronics</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -426,9 +847,9 @@
 																			<td>42</td>
 																			<td>₦35,000</td>
 																			<td>₦28,000</td>
+																			<td>Tech Solutions Ltd</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -454,9 +875,9 @@
 																			<td>30</td>
 																			<td>₦75,000</td>
 																			<td>₦55,000</td>
+																			<td>Office Furniture Co</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -482,9 +903,9 @@
 																			<td>5</td>
 																			<td>₦95,000</td>
 																			<td>₦75,000</td>
+																			<td>Kitchen Essentials</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -510,9 +931,9 @@
 																			<td>85</td>
 																			<td>₦120,000</td>
 																			<td>₦95,000</td>
+																			<td>Global Electronics</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -538,9 +959,9 @@
 																			<td>22</td>
 																			<td>₦650,000</td>
 																			<td>₦580,000</td>
+																			<td>Tech Solutions Ltd</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -566,9 +987,9 @@
 																			<td>38</td>
 																			<td>₦145,000</td>
 																			<td>₦120,000</td>
+																			<td>Tech Solutions Ltd</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -594,9 +1015,9 @@
 																			<td>7</td>
 																			<td>₦380,000</td>
 																			<td>₦320,000</td>
+																			<td>Office Furniture Co</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -622,9 +1043,9 @@
 																			<td>55</td>
 																			<td>₦65,000</td>
 																			<td>₦50,000</td>
+																			<td>Kitchen Essentials</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -650,9 +1071,9 @@
 																			<td>120</td>
 																			<td>₦25,000</td>
 																			<td>₦18,000</td>
+																			<td>Global Electronics</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -678,9 +1099,9 @@
 																			<td>15</td>
 																			<td>₦750,000</td>
 																			<td>₦680,000</td>
+																			<td>Tech Solutions Ltd</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -706,9 +1127,9 @@
 																			<td>68</td>
 																			<td>₦28,000</td>
 																			<td>₦22,000</td>
+																			<td>Example Supplier</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -734,9 +1155,9 @@
 																			<td>3</td>
 																			<td>₦195,000</td>
 																			<td>₦155,000</td>
+																			<td>Example Supplier</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																		
@@ -762,9 +1183,9 @@
 																			<td>12</td>
 																			<td>₦380,000</td>
 																			<td>₦320,000</td>
+																			<td>Example Supplier</td>
 																			<td>
-																				<button class="btn btn-sm btn-primary me-1">Edit</button>
-																				<button class="btn btn-sm btn-danger">Delete</button>
+																				<button class="btn btn-sm btn-outline-primary edit-btn" title="Edit Item"><i class="bi bi-pencil"></i></button>
 																			</td>
 																		</tr>
 																	</tbody>
@@ -801,10 +1222,128 @@
 					</div>
 					
 					<!-- partial:partials/_footer.html -->
+					
+					<!-- Item Details Side Panel -->
+					<div class="item-details-panel" id="itemDetailsPanel">
+						<div class="panel-overlay" id="panelOverlay"></div>
+						<div class="panel-content">
+							<div class="panel-header">
+								<h5 class="panel-title">
+									<i class="bi bi-box-seam me-2"></i>Item Details
+								</h5>
+								<button type="button" class="btn-close-panel" id="closePanelBtn">
+									<i class="bi bi-x-lg"></i>
+								</button>
+							</div>
+							
+							<div class="panel-body">
+								<!-- Item Image Section -->
+								<div class="item-image-section">
+									<img id="panelItemImage" src="../assets/images/faces/face1.jpg" alt="Item Image" class="item-image">
+									<div class="image-overlay">
+										<button class="btn btn-light btn-sm">
+											<i class="bi bi-camera"></i> Change Image
+										</button>
+									</div>
+								</div>
+								
+								<!-- Item Information Form -->
+								<div class="item-form-section">
+									<div class="form-group">
+										<label class="form-label">Item Name</label>
+										<input type="text" class="form-control" id="panelItemName" readonly>
+									</div>
+									
+									<div class="row">
+										<div class="col-md-6">
+											<div class="form-group">
+												<label class="form-label">SKU</label>
+												<input type="text" class="form-control" id="panelItemSku" readonly>
+											</div>
+										</div>
+										<div class="col-md-6">
+											<div class="form-group">
+												<label class="form-label">Category</label>
+												<input type="text" class="form-control" id="panelItemCategory" readonly>
+											</div>
+										</div>
+									</div>
+									
+									<div class="row">
+										<div class="col-md-6">
+											<div class="form-group">
+												<label class="form-label">Unit</label>
+												<input type="text" class="form-control" id="panelItemUnit" readonly>
+											</div>
+										</div>
+										<div class="col-md-6">
+											<div class="form-group">
+												<label class="form-label">Stock Quantity</label>
+												<div class="input-group">
+													<input type="number" class="form-control" id="panelItemStock" readonly>
+													<span class="input-group-text stock-status" id="panelStockStatus">In Stock</span>
+												</div>
+											</div>
+										</div>
+									</div>
+									
+									<div class="row">
+										<div class="col-md-6">
+											<div class="form-group">
+												<label class="form-label">Selling Price</label>
+												<input type="text" class="form-control" id="panelItemSellingPrice" readonly>
+											</div>
+										</div>
+										<div class="col-md-6">
+											<div class="form-group">
+												<label class="form-label">Cost Price</label>
+												<input type="text" class="form-control" id="panelItemCostPrice" readonly>
+											</div>
+										</div>
+									</div>
+									
+									<div class="form-group">
+										<label class="form-label">Supplier</label>
+										<input type="text" class="form-control" id="panelItemSupplier" readonly>
+									</div>
+									
+									<!-- Calculated Fields -->
+									<div class="calculated-section">
+										<div class="row">
+											<div class="col-md-6">
+												<div class="info-card">
+													<div class="info-label">Profit Margin</div>
+													<div class="info-value" id="panelItemProfit">0%</div>
+												</div>
+											</div>
+											<div class="col-md-6">
+												<div class="info-card">
+													<div class="info-label">Total Value</div>
+													<div class="info-value" id="panelItemTotalValue">₦0</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									
+									<div class="form-group">
+										<label class="form-label">Last Updated</label>
+										<input type="text" class="form-control" id="panelItemLastUpdated" readonly>
+									</div>
+								</div>
+							</div>
+							
+							<div class="panel-footer">
+								<button type="button" class="btn btn-secondary me-2" id="closePanelFooterBtn">Close</button>
+								<button type="button" class="btn btn-primary" id="editItemPanelBtn">
+									<i class="bi bi-pencil me-1"></i>Edit Item
+								</button>
+							</div>
+						</div>
+					</div>
+					
 					<footer class="footer">
 						<div class="d-sm-flex justify-content-center justify-content-sm-between">
 							<span class="text-muted text-center text-sm-left d-block d-sm-inline-block">© 2025 SalesPilot. All rights reserved.</span>
-							<span class="float-none float-sm-end d-block mt-1 mt-sm-0 text-center">Made with <i class="mdi mdi-heart text-danger"></i></span>
 						</div>
 					</footer>
 					<!-- partial -->
@@ -844,46 +1383,52 @@
 		<!-- Sidebar Menu Behavior - Keep Inventory menu expanded on page load -->
 		<script>
 		document.addEventListener('DOMContentLoaded', function() {
-		  // Auto-expand the Inventory menu when page loads
-		  const inventoryMenu = document.getElementById('icons');
-		  if (inventoryMenu) {
-		    const bsCollapse = bootstrap.Collapse.getOrCreateInstance(inventoryMenu);
-		    bsCollapse.show();
-		  }
-		  
-		  // Only one submenu open at a time, but allow other parent menus to close this one
-		  document.querySelectorAll('.sidebar .nav-link[data-bs-toggle="collapse"]').forEach(function(link) {
-		    link.addEventListener('click', function(e) {
-		      e.preventDefault();
-		      var targetSelector = this.getAttribute('href');
-		      var target = document.querySelector(targetSelector);
-		      if (!target) return;
-		      
-		      // Collapse all other open submenus (including Inventory menu when other parent clicked)
-		      document.querySelectorAll('.sidebar .collapse.show').forEach(function(openMenu) {
-		        if (openMenu !== target) {
-		          var openCollapse = bootstrap.Collapse.getOrCreateInstance(openMenu);
-		          openCollapse.hide();
-		        }
-		      });
-		      
-		      // Toggle the clicked submenu
-		      var bsCollapse = bootstrap.Collapse.getOrCreateInstance(target);
-		      bsCollapse.toggle();
-		    });
-		  });
+          
+          
 
 		  // Items Table Functionality
 		  
 		  // Select All functionality
 		  const selectAllCheckbox = document.getElementById('selectAllItems');
 		  const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+		  const bulkActions = document.getElementById('bulkActions');
+		  const deselectAllBtn = document.getElementById('deselectAllBtn');
+		  const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+		  
+		  // Function to toggle bulk actions visibility
+		  function toggleBulkActions() {
+		    const selectedCheckboxes = Array.from(itemCheckboxes).filter(cb => cb.checked);
+		    
+		    if (selectedCheckboxes.length > 0) {
+		      bulkActions.style.display = 'inline-flex';
+		      deleteSelectedBtn.textContent = `Delete ${selectedCheckboxes.length} Selected`;
+		      
+		      // Highlight selected rows
+		      itemCheckboxes.forEach(checkbox => {
+		        const row = checkbox.closest('tr');
+		        if (checkbox.checked) {
+		          row.classList.add('selected');
+		        } else {
+		          row.classList.remove('selected');
+		        }
+		      });
+		    } else {
+		      bulkActions.style.display = 'none';
+		      
+		      // Remove highlighting from all rows
+		      itemCheckboxes.forEach(checkbox => {
+		        const row = checkbox.closest('tr');
+		        row.classList.remove('selected');
+		      });
+		    }
+		  }
 		  
 		  if (selectAllCheckbox) {
 		    selectAllCheckbox.addEventListener('change', function() {
 		      itemCheckboxes.forEach(checkbox => {
 		        checkbox.checked = this.checked;
 		      });
+		      toggleBulkActions();
 		    });
 		  }
 		  
@@ -897,7 +1442,213 @@
 		        selectAllCheckbox.checked = allChecked;
 		        selectAllCheckbox.indeterminate = someChecked && !allChecked;
 		      }
+		      
+		      toggleBulkActions();
 		    });
+		  });
+		  
+		  // Deselect All button functionality
+		  if (deselectAllBtn) {
+		    deselectAllBtn.addEventListener('click', function() {
+		      itemCheckboxes.forEach(checkbox => {
+		        checkbox.checked = false;
+		      });
+		      
+		      if (selectAllCheckbox) {
+		        selectAllCheckbox.checked = false;
+		        selectAllCheckbox.indeterminate = false;
+		      }
+		      
+		      toggleBulkActions();
+		    });
+		  }
+		  
+		  // Delete Selected button functionality
+		  if (deleteSelectedBtn) {
+		    deleteSelectedBtn.addEventListener('click', function() {
+		      const selectedCheckboxes = Array.from(itemCheckboxes).filter(cb => cb.checked);
+		      const selectedCount = selectedCheckboxes.length;
+		      
+		      if (selectedCount === 0) return;
+		      
+		      // Show confirmation dialog
+		      const confirmMessage = `Are you sure you want to delete ${selectedCount} selected item${selectedCount > 1 ? 's' : ''}? This action cannot be undone.`;
+		      
+		      if (confirm(confirmMessage)) {
+		        // Get selected item IDs
+		        const selectedIds = selectedCheckboxes.map(cb => cb.value);
+		        
+		        // Show loading state
+		        deleteSelectedBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Deleting...';
+		        deleteSelectedBtn.disabled = true;
+		        
+		        // Simulate deletion process (replace with actual server call)
+		        setTimeout(() => {
+		          // Remove selected rows from table
+		          selectedCheckboxes.forEach(checkbox => {
+		            const row = checkbox.closest('tr');
+		            row.remove();
+		          });
+		          
+		          // Reset button state
+		          deleteSelectedBtn.innerHTML = '<i class="bi bi-trash"></i> Delete Selected';
+		          deleteSelectedBtn.disabled = false;
+		          
+		          // Hide bulk actions
+		          bulkActions.style.display = 'none';
+		          
+		          // Reset select all checkbox
+		          if (selectAllCheckbox) {
+		            selectAllCheckbox.checked = false;
+		            selectAllCheckbox.indeterminate = false;
+		          }
+		          
+		          // Show success message
+		          alert(`Successfully deleted ${selectedCount} item${selectedCount > 1 ? 's' : ''}.`);
+		          
+		        }, 1500);
+		      }
+		    });
+		  }
+		  
+		  // Table row click functionality for item details
+		  const itemsTable = document.getElementById('itemsTable');
+		  const itemDetailsPanel = document.getElementById('itemDetailsPanel');
+		  const panelOverlay = document.getElementById('panelOverlay');
+		  const closePanelBtn = document.getElementById('closePanelBtn');
+		  const closePanelFooterBtn = document.getElementById('closePanelFooterBtn');
+		  
+		  // Add click event to table rows
+		  if (itemsTable) {
+		    const tableRows = itemsTable.querySelectorAll('tbody tr');
+		    
+		    tableRows.forEach((row, index) => {
+		      row.addEventListener('click', function(e) {
+		        // Prevent panel opening when clicking on checkbox or action buttons
+		        if (e.target.closest('.form-check') || e.target.closest('.btn') || e.target.closest('td:last-child')) {
+		          return;
+		        }
+		        
+		        // Extract item data from row
+		        const cells = row.querySelectorAll('td');
+		        const itemData = {
+		          id: cells[0].textContent.trim(),
+		          name: cells[2].querySelector('h6').textContent.trim(),
+		          sku: cells[2].querySelector('small').textContent.replace('SKU: ', '').trim(),
+		          category: cells[3].textContent.trim(),
+		          unit: cells[4].textContent.trim(),
+		          stock: parseInt(cells[5].textContent.trim()),
+		          sellingPrice: cells[6].textContent.trim(),
+		          costPrice: cells[7].textContent.trim(),
+		          supplier: cells[8].textContent.trim(),
+		          image: cells[2].querySelector('img').src
+		        };
+		        
+		        // Populate panel with item data
+		        populateItemPanel(itemData);
+		        
+		        // Show panel
+		        showItemPanel();
+		      });
+		      
+		      // Add hover effect data attribute
+		      row.setAttribute('data-clickable', 'true');
+		    });
+		  }
+		  
+		  // Function to show item panel
+		  function showItemPanel() {
+		    itemDetailsPanel.classList.add('active');
+		    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+		  }
+		  
+		  // Function to hide item panel
+		  function hideItemPanel() {
+		    itemDetailsPanel.classList.remove('active');
+		    document.body.style.overflow = ''; // Restore scrolling
+		  }
+		  
+		  // Panel close event listeners
+		  if (closePanelBtn) {
+		    closePanelBtn.addEventListener('click', hideItemPanel);
+		  }
+		  
+		  if (closePanelFooterBtn) {
+		    closePanelFooterBtn.addEventListener('click', hideItemPanel);
+		  }
+		  
+		  if (panelOverlay) {
+		    panelOverlay.addEventListener('click', hideItemPanel);
+		  }
+		  
+		  // ESC key to close panel
+		  document.addEventListener('keydown', function(e) {
+		    if (e.key === 'Escape' && itemDetailsPanel.classList.contains('active')) {
+		      hideItemPanel();
+		    }
+		  });
+		  
+		  // Function to populate item panel
+		  function populateItemPanel(itemData) {
+		    document.getElementById('panelItemImage').src = itemData.image;
+		    document.getElementById('panelItemName').value = itemData.name;
+		    document.getElementById('panelItemSku').value = itemData.sku;
+		    document.getElementById('panelItemCategory').value = itemData.category;
+		    document.getElementById('panelItemUnit').value = itemData.unit;
+		    document.getElementById('panelItemStock').value = itemData.stock;
+		    document.getElementById('panelItemSellingPrice').value = itemData.sellingPrice;
+		    document.getElementById('panelItemCostPrice').value = itemData.costPrice;
+		    document.getElementById('panelItemSupplier').value = itemData.supplier;
+		    
+		    // Calculate and display profit margin
+		    const sellingPrice = parseFloat(itemData.sellingPrice.replace(/[₦,]/g, ''));
+		    const costPrice = parseFloat(itemData.costPrice.replace(/[₦,]/g, ''));
+		    const profitMargin = ((sellingPrice - costPrice) / costPrice * 100).toFixed(2);
+		    document.getElementById('panelItemProfit').textContent = `${profitMargin}%`;
+		    
+		    // Calculate total value
+		    const totalValue = (sellingPrice * itemData.stock).toLocaleString('en-NG', {
+		      style: 'currency',
+		      currency: 'NGN',
+		      minimumFractionDigits: 0
+		    });
+		    document.getElementById('panelItemTotalValue').textContent = totalValue;
+		    
+		    // Set stock status
+		    const statusElement = document.getElementById('panelStockStatus');
+		    if (itemData.stock === 0) {
+		      statusElement.textContent = 'Out of Stock';
+		      statusElement.className = 'input-group-text stock-status out-of-stock';
+		    } else if (itemData.stock <= 10) {
+		      statusElement.textContent = 'Low Stock';
+		      statusElement.className = 'input-group-text stock-status low-stock';
+		    } else {
+		      statusElement.textContent = 'In Stock';
+		      statusElement.className = 'input-group-text stock-status in-stock';
+		    }
+		    
+		    // Set last updated date (current date for demo)
+		    const now = new Date();
+		    document.getElementById('panelItemLastUpdated').value = now.toLocaleDateString('en-US', {
+		      year: 'numeric',
+		      month: 'long',
+		      day: 'numeric',
+		      hour: '2-digit',
+		      minute: '2-digit'
+		    });
+		    
+		    // Store item ID for edit functionality
+		    document.getElementById('editItemPanelBtn').setAttribute('data-item-id', itemData.id);
+		  }
+		  
+		  // Edit item button functionality
+		  document.getElementById('editItemPanelBtn').addEventListener('click', function() {
+		    const itemId = this.getAttribute('data-item-id');
+		    // Close panel
+		    hideItemPanel();
+		    // Here you can redirect to edit page or enable editing mode
+		    console.log('Edit item with ID:', itemId);
+		    // Example: window.location.href = `edit_item.php?id=${itemId}`;
 		  });
 		  
 		  // Search and Filter functionality
@@ -971,6 +1722,118 @@
 		      supplierFilter.value = '';
 		      applyAllFilters();
 		    });
+		  }
+		  
+		  // Import functionality
+		  const importBtn = document.getElementById('importItems');
+		  const importFile = document.getElementById('importFile');
+		  
+		  if (importBtn) {
+		    importBtn.addEventListener('click', function() {
+		      importFile.click();
+		    });
+		  }
+		  
+		  if (importFile) {
+		    importFile.addEventListener('change', function(e) {
+		      const file = e.target.files[0];
+		      if (file) {
+		        // Check file type
+		        const fileType = file.name.split('.').pop().toLowerCase();
+		        if (['csv', 'xlsx', 'xls'].includes(fileType)) {
+		          handleFileImport(file);
+		        } else {
+		          alert('Please select a valid file format (CSV, XLSX, or XLS)');
+		        }
+		      }
+		    });
+		  }
+		  
+		  // Export functionality
+		  const exportBtn = document.getElementById('exportItems');
+		  
+		  if (exportBtn) {
+		    exportBtn.addEventListener('click', function() {
+		      exportItemsToCSV();
+		    });
+		  }
+		  
+		  // Function to handle file import
+		  function handleFileImport(file) {
+		    const formData = new FormData();
+		    formData.append('importFile', file);
+		    
+		    // Show loading state
+		    importBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Importing...';
+		    importBtn.disabled = true;
+		    
+		    // Simulate import process (replace with actual server call)
+		    setTimeout(() => {
+		      // Reset button state
+		      importBtn.innerHTML = '<i class="bi bi-upload"></i> Import';
+		      importBtn.disabled = false;
+		      
+		      // Show success message
+		      alert(`Successfully imported items from ${file.name}`);
+		      
+		      // Refresh the page or update the table
+		      location.reload();
+		    }, 2000);
+		    
+		    // Reset file input
+		    importFile.value = '';
+		  }
+		  
+		  // Function to export items to CSV
+		  function exportItemsToCSV() {
+		    // Show loading state
+		    exportBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Exporting...';
+		    exportBtn.disabled = true;
+		    
+		    // Get table data
+		    const table = document.getElementById('itemsTable');
+		    const rows = table.querySelectorAll('tbody tr');
+		    
+		    // CSV headers
+		    let csvContent = 'S/N,Item Name,Category,SKU,Quantity,Unit Price,Status,Action Date,Supplier\n';
+		    
+		    // Add visible rows to CSV
+		    rows.forEach((row, index) => {
+		      if (row.style.display !== 'none') {
+		        const cells = row.querySelectorAll('td');
+		        if (cells.length > 2) { // Skip empty rows
+		          const rowData = [
+		            cells[0].textContent.trim(), // S/N
+		            cells[2].textContent.trim(), // Item Name
+		            cells[3].textContent.trim(), // Category
+		            cells[4].textContent.trim(), // SKU
+		            cells[5].textContent.trim(), // Quantity
+		            cells[6].textContent.trim(), // Unit Price
+		            cells[7].textContent.trim(), // Status
+		            new Date().toLocaleDateString(), // Action Date
+		            'N/A' // Supplier (placeholder)
+		          ];
+		          csvContent += rowData.map(field => `"${field.replace(/"/g, '""')}"`).join(',') + '\n';
+		        }
+		      }
+		    });
+		    
+		    // Create and download CSV file
+		    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+		    const link = document.createElement('a');
+		    const url = URL.createObjectURL(blob);
+		    link.setAttribute('href', url);
+		    link.setAttribute('download', `inventory_items_${new Date().toISOString().split('T')[0]}.csv`);
+		    link.style.visibility = 'hidden';
+		    document.body.appendChild(link);
+		    link.click();
+		    document.body.removeChild(link);
+		    
+		    // Reset button state
+		    setTimeout(() => {
+		      exportBtn.innerHTML = '<i class="bi bi-download"></i> Export';
+		      exportBtn.disabled = false;
+		    }, 1000);
 		  }
 		  
 		  // Filter change events
@@ -1165,7 +2028,7 @@
 		<!-- Modal for selecting item type -->
 		<div class="modal fade" id="itemTypeModal" tabindex="-1" aria-labelledby="itemTypeModalLabel" aria-hidden="true" style="z-index: 1055;">
 			<div class="modal-dialog modal-lg modal-dialog-centered">
-				<div class="modal-content" style="border: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);">
+				<div class="modal-content" style="border: none; box-shadow: 0 10px  30px rgba(0, 0, 0, 0.3);">
 					<div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-bottom: none;">
 						<h5 class="modal-title" id="itemTypeModalLabel" style="font-weight: 600;">
 							<i class="bi bi-box-seam me-2"></i>Select Item Type

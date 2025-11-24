@@ -43,28 +43,51 @@
         min-height: 100vh;
       }
       .content-wrapper {
-        min-height: calc(100vh - 56px); /* adjust 56px if your footer is taller */
+        min-height: calc(100vh - 120px); /* adjust for footer height */
         display: flex;
         flex-direction: column;
       }
-      .fixed-bottom-footer {
-        background: transparent;
-        box-shadow: none;
-        border: none;
-        padding: 16px 0 8px 0;
-        color: #222;
-        font-size: 1rem;
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100vw;
-        z-index: 1050;
-        text-align: left;
+      
+      /* Footer positioning */
+      .footer {
+        margin-top: auto;
+        padding: 1rem 0;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
       }
-      @media (min-width: 992px) {
-        .fixed-bottom-footer {
-          left: 280px;
-          width:
+      
+      /* Date Filter Styles */
+      .date-filter-wrapper {
+        position: relative;
+      }
+      
+      .custom-date-container {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        z-index: 1000;
+        min-width: 300px;
+        display: none;
+      }
+      
+      .custom-date-container.show {
+        display: block;
+        animation: slideInDown 0.3s ease;
+      }
+      
+      @keyframes slideInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
       }
     </style>
@@ -72,6 +95,7 @@
     <link rel="shortcut icon" href="../assets/images/favicon.png" />
   </head>
   <body class="with-welcome-text">
+    <?php include '../layouts/preloader.php'; ?>
     <div class="container-scroller">
       <div class="container-fluid page-body-wrapper">
         <!-- partial: Include Sidebar Content -->
@@ -86,84 +110,191 @@
                   <div class="card-body">
                       <h4 class="card-title">Inventory Valuation Report</h4>
                       <p class="card-description">Current inventory value and stock levels.</p>
-                      <form class="row g-2 align-items-center mb-4" id="inventoryFilterForm" style="margin-bottom: 1.5rem !important;">
-                        <div class="col-md-4 col-12">
-                          <input type="text" class="form-control form-control-sm" id="searchInput" placeholder="Search Item Name or Category">
-                        </div>
-                        <div class="col-md-3 col-8">
-                          <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle w-100 text-start" type="button" id="categoryDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                              <span id="selectedCategoryLabel">All Categories</span>
+                      <p style="color: #dc3545; font-weight: 500;"><strong>NOTE:</strong> Only tracked items will be logged on this Inventory Valuation page. Items with TURNED OFF stock tracking details are NOT being tracked and will not appear in this list. Make sure to enable inventory tracking for each item you wish to include in the valuation Report.</p>
+                      
+                      <!-- Search and Filter Options -->
+                      <div class="row mb-3">
+                        <div class="col-md-4">
+                          <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search items..." id="searchInput">
+                            <button class="btn btn-outline-secondary" type="button">
+                              <i class="bi bi-search"></i>
                             </button>
-                            <ul class="dropdown-menu w-100 px-2" aria-labelledby="categoryDropdown" style="min-width: 100%;">
-                              <li>
-                                <label class="dropdown-item mb-1">
-                                  <input type="checkbox" class="categoryCheckbox" value="Electronics"> Electronics
-                                </label>
-                              </li>
-                              <li>
-                                <label class="dropdown-item mb-1">
-                                  <input type="checkbox" class="categoryCheckbox" value="Accessories"> Accessories
-                                </label>
-                              </li>
-                              <li>
-                                <label class="dropdown-item mb-1">
-                                  <input type="checkbox" class="categoryCheckbox" value="Furniture"> Furniture
-                                </label>
-                              </li>
-                              <li>
-                                <label class="dropdown-item mb-1">
-                                  <input type="checkbox" class="categoryCheckbox" value="Stationery"> Stationery
-                                </label>
-                              </li>
-                              <li class="text-center mt-2 mb-1">
-                                <button type="button" class="btn btn-sm btn-primary w-100" onclick="updateCategoryFilter()">Apply Filter</button>
-                              </li>
-                            </ul>
                           </div>
                         </div>
-                      </form>
+                        <div class="col-md-8 d-flex justify-content-end align-items-center gap-2">
+                          <!-- Category Filter -->
+                          <select class="form-select" id="categoryFilter" style="max-width: 160px;">
+                            <option value="">All Categories</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Stationery">Stationery</option>
+                          </select>
+                          
+                          <!-- Date Filter -->
+                          <div class="date-filter-wrapper position-relative">
+                            <select class="form-select" id="dateFilter" style="max-width: 140px;">
+                              <option value="">Date</option>
+                              <option value="today">Today</option>
+                              <option value="yesterday">Yesterday</option>
+                              <option value="specific"> Choose</option>
+                            </select>
+                            
+                            <!-- Custom Date Input -->
+                            <div id="customDateInputs" class="custom-date-container">
+                              <div class="row g-3">
+                                <div class="col-12">
+                                  <label for="specificDate" class="form-label text-muted">Select Date</label>
+                                  <input type="date" class="form-control" id="specificDate">
+                                </div>
+                              </div>
+                              <div class="text-center mt-3">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="hideCustomDateOverlay()">
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Apply and Clear Buttons -->
+                          <button class="btn btn-outline-primary" id="applyFilters">
+                            <i class="bi bi-funnel"></i> Apply
+                          </button>
+                          <button class="btn btn-outline-secondary" id="clearFilters">
+                            <i class="bi bi-x-circle"></i> Clear
+                          </button>
+                          
+                          <button class="btn btn-outline-success" id="exportInventoryBtn">
+                            <i class="bi bi-download"></i> Export
+                          </button>
+                        </div>
+                      </div><br>
                       <div class="row mb-4">
 <script>
-function updateCategoryFilter() {
-  var checkboxes = document.getElementsByClassName('categoryCheckbox');
-  var selected = [];
-  for (var i = 0; i < checkboxes.length; i++) {
-    if (checkboxes[i].checked) {
-      selected.push(checkboxes[i].value);
+// Filter functionality matching customers.php format with date filter
+function applyAllFilters() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const selectedCategory = document.getElementById('categoryFilter').value;
+  const dateRange = document.getElementById('dateFilter').value;
+  const table = document.getElementById('inventoryValuationTable');
+  const rows = Array.from(table.querySelector('tbody').querySelectorAll('tr'));
+
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    const itemName = cells[1].textContent.toLowerCase();
+    const category = cells[2].textContent;
+    
+    // For demonstration, we'll use a mock date (in real app, this would come from data)
+    const itemDate = new Date(); // Mock date - replace with actual item date
+    
+    // Search filter
+    const matchesSearch = itemName.includes(searchTerm) || 
+                         category.toLowerCase().includes(searchTerm);
+    
+    // Category filter
+    const matchesCategory = !selectedCategory || category === selectedCategory;
+    
+    // Date filter
+    const matchesDate = checkDateFilter(itemDate, dateRange);
+    
+    if (matchesSearch && matchesCategory && matchesDate) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
     }
-  }
-  var label = 'All Categories';
-  if (selected.length === 1) label = selected[0];
-  else if (selected.length > 1) label = selected.join(', ');
-  document.getElementById('selectedCategoryLabel').textContent = label;
-  filterInventoryTable();
+  });
 }
 
-function filterInventoryTable() {
-  var input = document.getElementById('searchInput').value.toLowerCase();
-  var checkboxes = document.getElementsByClassName('categoryCheckbox');
-  var selectedCategories = [];
-  for (var i = 0; i < checkboxes.length; i++) {
-    if (checkboxes[i].checked) {
-      selectedCategories.push(checkboxes[i].value);
-    }
+// Date filter logic
+function checkDateFilter(itemDate, dateRange) {
+  if (!dateRange) return true;
+  
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  switch (dateRange) {
+    case 'today':
+      return itemDate.toDateString() === today.toDateString();
+    case 'yesterday':
+      return itemDate.toDateString() === yesterday.toDateString();
+    case 'last7days':
+      const last7Days = new Date(today);
+      last7Days.setDate(last7Days.getDate() - 7);
+      return itemDate >= last7Days && itemDate <= today;
+    case 'last30days':
+      const last30Days = new Date(today);
+      last30Days.setDate(last30Days.getDate() - 30);
+      return itemDate >= last30Days && itemDate <= today;
+    case 'specific':
+      const specificDate = document.getElementById('specificDate').value;
+      if (specificDate) {
+        const selectedDate = new Date(specificDate);
+        return itemDate.toDateString() === selectedDate.toDateString();
+      }
+      return true;
+    default:
+      return true;
   }
-  var table = document.getElementById('inventoryValuationTable');
-  var trs = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-  for (var i = 0; i < trs.length; i++) {
-    var tds = trs[i].getElementsByTagName('td');
-    var itemName = tds[0].textContent.toLowerCase();
-    var itemCategory = tds[1].textContent;
-    var show = true;
-    if (input && !(itemName.includes(input) || itemCategory.toLowerCase().includes(input))) {
-      show = false;
+}
+
+// Show/hide custom date overlay
+function showCustomDateOverlay() {
+  document.getElementById('customDateInputs').classList.add('show');
+}
+
+function hideCustomDateOverlay() {
+  document.getElementById('customDateInputs').classList.remove('show');
+  document.getElementById('dateFilter').value = '';
+  applyAllFilters();
+}
+
+// Export to CSV functionality
+function exportInventoryToCSV() {
+  const table = document.getElementById('inventoryValuationTable');
+  const rows = [];
+  
+  // Get table headers
+  const headers = [];
+  const headerCells = table.querySelectorAll('thead th');
+  headerCells.forEach(cell => {
+    headers.push(cell.textContent.trim());
+  });
+  rows.push(headers);
+  
+  // Get visible table rows only
+  const visibleRows = table.querySelectorAll('tbody tr');
+  visibleRows.forEach(row => {
+    if (row.style.display !== 'none') {
+      const rowData = [];
+      const cells = row.querySelectorAll('td');
+      cells.forEach(cell => {
+        // Clean up the cell content and handle currency symbols
+        let cellText = cell.textContent.trim();
+        // Remove any HTML entities and normalize currency
+        cellText = cellText.replace(/&\w+;/g, '').replace(/\$/g, '$');
+        rowData.push(cellText);
+      });
+      rows.push(rowData);
     }
-    if (selectedCategories.length > 0 && !selectedCategories.includes(itemCategory)) {
-      show = false;
-    }
-    trs[i].style.display = show ? '' : 'none';
-  }
+  });
+  
+  // Convert to CSV
+  const csvContent = rows.map(row => 
+    row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')
+  ).join('\n');
+  
+  // Create and download file
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `inventory_valuation_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 </script>
@@ -173,7 +304,7 @@ function filterInventoryTable() {
                             <div class="card-body py-3 px-2">
                               <div class="d-flex flex-column align-items-start">
                                 <span class="fw-bold fs-6">Total Inventory Value</span>
-                                <span class="fs-5">$13,812.50</span>
+                                <span class="fs-5">₦13,812,000.50</span>
                               </div>
                             </div>
                           </div>
@@ -183,7 +314,7 @@ function filterInventoryTable() {
                             <div class="card-body py-3 px-2">
                               <div class="d-flex flex-column align-items-start">
                                 <span class="fw-bold fs-6">Total Selling Price Value</span>
-                                <span class="fs-5">$18,000.00</span>
+                                <span class="fs-5">₦18,000,000.00</span>
                               </div>
                             </div>
                           </div>
@@ -193,7 +324,7 @@ function filterInventoryTable() {
                             <div class="card-body py-3 px-2">
                               <div class="d-flex flex-column align-items-start">
                                 <span class="fw-bold fs-6">Potential Profit</span>
-                                <span class="fs-5">$4,187.50</span>
+                                <span class="fs-5">₦4,187,500.00</span>
                               </div>
                             </div>
                           </div>
@@ -231,10 +362,10 @@ function filterInventoryTable() {
                               <td>Product A</td>
                               <td>Electronics</td>
                               <td>150</td>
-                              <td>$25.00</td>
-                              <td>$3,750.00</td>
-                              <td>$4,950.00</td>
-                              <td>$1,200.00</td>
+                              <td>₦25000.00</td>
+                              <td>₦3,750.00</td>
+                              <td>₦4,950.00</td>
+                              <td>₦1,200.00</td>
                               <td>24.2%</td>
                             </tr>
                             <tr>
@@ -242,10 +373,10 @@ function filterInventoryTable() {
                               <td>Product B</td>
                               <td>Accessories</td>
                               <td>85</td>
-                              <td>$12.50</td>
-                              <td>$1,062.50</td>
-                              <td>$1,445.00</td>
-                              <td>$382.50</td>
+                              <td>₦12,000.50</td>
+                              <td>₦10,062.50</td>
+                              <td>₦10,445.00</td>
+                              <td>₦382,000.50</td>
                               <td>26.5%</td>
                             </tr>
                             <tr>
@@ -253,10 +384,10 @@ function filterInventoryTable() {
                               <td>Product C</td>
                               <td>Electronics</td>
                               <td>200</td>
-                              <td>$45.00</td>
-                              <td>$9,000.00</td>
-                              <td>$12,000.00</td>
-                              <td>$3,000.00</td>
+                              <td>₦4,500.00</td>
+                              <td>₦9,000.00</td>
+                              <td>₦12,000.00</td>
+                              <td>₦3,0000.00</td>
                               <td>25.0%</td>
                             </tr>
                             <tr>
@@ -264,10 +395,10 @@ function filterInventoryTable() {
                               <td>Product D</td>
                               <td>Furniture</td>
                               <td>60</td>
-                              <td>$80.00</td>
-                              <td>$4,800.00</td>
-                              <td>$6,600.00</td>
-                              <td>$1,800.00</td>
+                              <td>₦8,000.00</td>
+                              <td>₦40,800.00</td>
+                              <td>₦60,600.00</td>
+                              <td>₦10,800.00</td>
                               <td>27.3%</td>
                             </tr>
                             <tr>
@@ -275,10 +406,10 @@ function filterInventoryTable() {
                               <td>Product E</td>
                               <td>Stationery</td>
                               <td>500</td>
-                              <td>$2.00</td>
-                              <td>$1,000.00</td>
-                              <td>$1,500.00</td>
-                              <td>$500.00</td>
+                              <td>₦2,000.00</td>
+                              <td>₦10,000.00</td>
+                              <td>₦10,500.00</td>
+                              <td>₦5,000.00</td>
                               <td>33.3%</td>
                             </tr>
                             <tr>
@@ -286,10 +417,10 @@ function filterInventoryTable() {
                               <td>Product F</td>
                               <td>Accessories</td>
                               <td>120</td>
-                              <td>$15.00</td>
-                              <td>$1,800.00</td>
-                              <td>$2,400.00</td>
-                              <td>$600.00</td>
+                              <td>₦1,500.00</td>
+                              <td>₦1,800.00</td>
+                              <td>₦2,400.00</td>
+                              <td>₦600.00</td>
                               <td>25.0%</td>
                             </tr>
                             <tr>
@@ -297,10 +428,10 @@ function filterInventoryTable() {
                               <td>Product G</td>
                               <td>Electronics</td>
                               <td>75</td>
-                              <td>$60.00</td>
-                              <td>$4,500.00</td>
-                              <td>$6,000.00</td>
-                              <td>$1,500.00</td>
+                              <td>₦6,000.00</td>
+                              <td>₦4,500.00</td>
+                              <td>₦6,000.00</td>
+                              <td>₦1,500.00</td>
                               <td>25.0%</td>
                             </tr>
                             <tr>
@@ -308,10 +439,10 @@ function filterInventoryTable() {
                               <td>Product H</td>
                               <td>Furniture</td>
                               <td>40</td>
-                              <td>$120.00</td>
-                              <td>$4,800.00</td>
-                              <td>$6,000.00</td>
-                              <td>$1,200.00</td>
+                              <td>₦12,000.00</td>
+                              <td>₦48,000.00</td>
+                              <td>₦60,000.00</td>
+                              <td>₦12,000.00</td>
                               <td>20.0%</td>
                             </tr>
                             <tr>
@@ -319,10 +450,10 @@ function filterInventoryTable() {
                               <td>Product I</td>
                               <td>Stationery</td>
                               <td>300</td>
-                              <td>$3.00</td>
-                              <td>$900.00</td>
-                              <td>$1,200.00</td>
-                              <td>$300.00</td>
+                              <td>₦3,000.00</td>
+                              <td>₦9,000.00</td>
+                              <td>₦12,000.00</td>
+                              <td>₦3,000.00</td>
                               <td>25.0%</td>
                             </tr>
                             <tr>
@@ -330,10 +461,10 @@ function filterInventoryTable() {
                               <td>Product J</td>
                               <td>Accessories</td>
                               <td>200</td>
-                              <td>$8.00</td>
-                              <td>$1,600.00</td>
-                              <td>$2,200.00</td>
-                              <td>$600.00</td>
+                              <td>₦8,000.00</td>
+                              <td>₦10,600.00</td>
+                              <td>₦20,200.00</td>
+                              <td>₦60,000.00</td>
                               <td>27.3%</td>
                             </tr>
                           </tbody>
@@ -348,19 +479,19 @@ function filterInventoryTable() {
             </div>
           </div>
           <!-- content-wrapper ends -->
+</div>
+           <footer class="footer">
+            <div class="d-sm-flex justify-content-center justify-content-sm-between">
+							<span class="text-muted text-center text-sm-left d-block d-sm-inline-block">© 2025 SalesPilot. All rights reserved.</span>
+            </div>
+          </footer>
         </div>
         <!-- main-panel ends -->
-        <hr class="my-4" style="border-top: 2px solid #e0e0e0; margin-top: 2.5rem; margin-bottom: 1.5rem;">
-        <footer class="footer">
-          <div class="d-sm-flex justify-content-center justify-content-sm-between">
-            <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">© 2025 SalesPilot. All rights reserved.</span>
-            <span class="float-none float-sm-end d-block mt-1 mt-sm-0 text-center">Made with <i class="mdi mdi-heart text-danger"></i></span>
-          </div>
-        </footer>
-        </div>
-        <!-- main-panel ends -->
+         
       </div>
       <!-- page-body-wrapper ends -->
+      
+    
     </div>
     <!-- container-scroller -->
     <!-- plugins:js -->
@@ -384,34 +515,124 @@ function filterInventoryTable() {
     <!-- Sidebar Menu Collapse Behavior - Ensures only one submenu open at a time, auto-expand Reports menu -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Auto-expand the Reports menu when page loads (form-elements menu)
-      const reportsMenu = document.getElementById('form-elements');
-      if (reportsMenu) {
-        const bsCollapse = bootstrap.Collapse.getOrCreateInstance(reportsMenu);
-        bsCollapse.show();
+      // Search and Filter functionality
+      const searchInput = document.getElementById('searchInput');
+      const categoryFilter = document.getElementById('categoryFilter');
+      const dateFilter = document.getElementById('dateFilter');
+      const specificDate = document.getElementById('specificDate');
+      const exportBtn = document.getElementById('exportInventoryBtn');
+      const applyBtn = document.getElementById('applyFilters');
+      const clearBtn = document.getElementById('clearFilters');
+
+      // Apply filters function
+      function applyFilters() {
+        applyAllFilters();
+      }
+
+      // Apply button functionality
+      if (applyBtn) {
+        applyBtn.addEventListener('click', function() {
+          applyFilters();
+          // Show feedback
+          const originalText = this.innerHTML;
+          this.innerHTML = '<i class="bi bi-check2"></i> Applied';
+          this.classList.remove('btn-outline-primary');
+          this.classList.add('btn-success');
+          
+          setTimeout(() => {
+            this.innerHTML = originalText;
+            this.classList.remove('btn-success');
+            this.classList.add('btn-outline-primary');
+          }, 1500);
+        });
+      }
+
+      // Clear button functionality
+      if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+          // Clear all filters
+          if (searchInput) searchInput.value = '';
+          if (categoryFilter) categoryFilter.value = '';
+          if (dateFilter) dateFilter.value = '';
+          if (specificDate) specificDate.value = '';
+          
+          // Hide custom date overlay
+          hideCustomDateOverlay();
+          
+          // Apply filters to show all items
+          applyFilters();
+          
+          // Show feedback
+          const originalText = this.innerHTML;
+          this.innerHTML = '<i class="bi bi-check2"></i> Cleared';
+          this.classList.remove('btn-outline-secondary');
+          this.classList.add('btn-warning');
+          
+          setTimeout(() => {
+            this.innerHTML = originalText;
+            this.classList.remove('btn-warning');
+            this.classList.add('btn-outline-secondary');
+          }, 1500);
+        });
+      }
+
+      // Real-time search
+      if (searchInput) {
+        searchInput.addEventListener('input', applyFilters);
+      }
+
+      // Category filter
+      if (categoryFilter) {
+        categoryFilter.addEventListener('change', applyFilters);
+      }
+
+      // Date filter
+      if (dateFilter) {
+        dateFilter.addEventListener('change', function() {
+          if (this.value === 'specific') {
+            showCustomDateOverlay();
+          } else {
+            hideCustomDateOverlay();
+            applyFilters();
+          }
+        });
+      }
+
+      // Specific date input
+      if (specificDate) {
+        specificDate.addEventListener('change', applyFilters);
+      }
+
+      // Close custom date overlay when clicking outside
+      document.addEventListener('click', function(e) {
+        const dateWrapper = document.querySelector('.date-filter-wrapper');
+        const customInputs = document.getElementById('customDateInputs');
+        
+        if (dateWrapper && !dateWrapper.contains(e.target) && customInputs.classList.contains('show')) {
+          hideCustomDateOverlay();
+        }
+      });
+
+      // Export button functionality
+      if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+          // Add loading state
+          const originalText = this.innerHTML;
+          this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Exporting...';
+          this.disabled = true;
+          
+          // Export with a small delay to show loading state
+          setTimeout(() => {
+            exportInventoryToCSV();
+            
+            // Reset button state
+            this.innerHTML = originalText;
+            this.disabled = false;
+          }, 1000);
+        });
       }
       
-      // Only one submenu open at a time, expand/collapse on one click
-      document.querySelectorAll('.sidebar .nav-link[data-bs-toggle="collapse"]').forEach(function(link) {
-        link.addEventListener('click', function(e) {
-          e.preventDefault();
-          var targetSelector = this.getAttribute('href');
-          var target = document.querySelector(targetSelector);
-          if (!target) return;
-          
-          // Collapse all other open submenus (including Reports menu when other parent clicked)
-          document.querySelectorAll('.sidebar .collapse.show').forEach(function(openMenu) {
-            if (openMenu !== target) {
-              var openCollapse = bootstrap.Collapse.getOrCreateInstance(openMenu);
-              openCollapse.hide();
-            }
-          });
-          
-          // Toggle the clicked submenu
-          var bsCollapse = bootstrap.Collapse.getOrCreateInstance(target);
-          bsCollapse.toggle();
-        });
-      });
+      
     });
     </script>
     <!-- endinject -->

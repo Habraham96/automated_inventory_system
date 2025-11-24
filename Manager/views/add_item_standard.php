@@ -87,6 +87,23 @@ require_once '../../include/config.php';
         animation: smartZoomIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
       }
 
+      /* Ensure Select2 dropdowns appear above everything */
+      .select2-container {
+        z-index: 10050 !important;
+      }
+
+      .select2-dropdown {
+        z-index: 10051 !important;
+      }
+
+      /* Ensure modal body scrolls but doesn't clip dropdowns */
+      .modal-body-custom {
+        overflow-y: auto;
+        overflow-x: hidden;
+        flex: 1;
+        min-height: 0;
+      }
+
       @keyframes smartZoomIn {
         to {
           transform: translate(-50%, -50%) scale(1);
@@ -324,8 +341,6 @@ require_once '../../include/config.php';
 
       /* Action buttons - Enhanced */
       .action-buttons {
-        position: sticky;
-        bottom: 0;
         background: linear-gradient(to top, #ffffff, #f8f9fa);
         padding: 25px 40px;
         border-top: 2px solid rgba(102, 126, 234, 0.1);
@@ -334,6 +349,7 @@ require_once '../../include/config.php';
         gap: 15px;
         z-index: 10;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+        flex-shrink: 0;
       }
 
       .btn {
@@ -926,6 +942,7 @@ require_once '../../include/config.php';
     </style>
   </head>
   <body>
+    <?php include '../layouts/preloader.php'; ?>
     <!-- Modal Overlay -->
     <div class="modal-overlay"></div>
 
@@ -980,25 +997,26 @@ require_once '../../include/config.php';
                               <div class="form-group">
                                 <label for="category" class="form-label required-field">Category</label>
                                 <select class="form-select" id="category" name="category" required>
-                                  <option value="">Select Category</option>
+                                  <option value="">Select or type to create category</option>
                                   <option value="electronics">Electronics</option>
                                   <option value="clothing">Clothing</option>
                                   <option value="food">Food & Beverages</option>
                                   <option value="furniture">Furniture</option>
                                   <option value="stationery">Stationery</option>
-                                  <option value="other">Other</option>
                                 </select>
+                                <small class="form-text text-muted">Select existing or type new category name</small>
                               </div>
                             </div>
                             <div class="col-md-6">
                               <div class="form-group">
                                 <label for="supplier" class="form-label">Supplier</label>
                                 <select class="form-select" id="supplier" name="supplier">
-                                  <option value="">Select Supplier</option>
+                                  <option value="">Select or type to create supplier</option>
                                   <option value="supplier1">Supplier 1</option>
                                   <option value="supplier2">Supplier 2</option>
                                   <option value="supplier3">Supplier 3</option>
                                 </select>
+                                <small class="form-text text-muted">Select existing or type new supplier name</small>
                               </div>
                             </div>
                           </div>
@@ -1020,7 +1038,6 @@ require_once '../../include/config.php';
                                     <option value="yd">Yard (yd)</option>
                                     <option value="m">Metre (m)</option>
                                     <option value="mm">Millimetre (mm)</option>
-                                    <option value="custom">+ Add New Unit</option>
                                   </select>
                                   <div id="customUnitContainer" class="mt-2" style="display: none;">
                                     <div class="input-group">
@@ -1666,15 +1683,6 @@ require_once '../../include/config.php';
         document.getElementById('taxRate').addEventListener('change', calculateFinalPrice);
         document.getElementById('discount').addEventListener('input', calculateFinalPrice);
 
-        // Initialize Select2 for better dropdowns
-        if (typeof $ !== 'undefined' && $.fn.select2) {
-          $('#category, #supplier, #unit, #taxRate').select2({
-            theme: 'bootstrap',
-            width: '100%',
-            placeholder: 'Select an option'
-          });
-        }
-
         // Enhanced image upload with preview
         document.getElementById('itemImage').addEventListener('change', function(e) {
           const file = e.target.files[0];
@@ -1918,40 +1926,58 @@ require_once '../../include/config.php';
           finalPriceField.style.display = 'block';
         }
 
-        // Show relevant fields based on type
+        // Show relevant fields based on type (use defensive checks to avoid runtime errors)
         switch(type) {
-          case 'fixed':
-            document.getElementById('fixedFields').style.display = 'flex';
+          case 'fixed': {
+            const fixedEl = document.getElementById('fixedFields');
+            if (fixedEl) fixedEl.style.display = 'flex';
             const sellingPriceInput = document.getElementById('sellingPrice');
-            sellingPriceInput.required = true;
+            if (sellingPriceInput) sellingPriceInput.required = true;
             break;
-          case 'manual':
-            document.getElementById('manualFields').style.display = 'flex';
+          }
+          case 'manual': {
+            const manualEl = document.getElementById('manualFields');
+            if (manualEl) manualEl.style.display = 'flex';
             // For manual pricing, only cost price is required, no selling price field shown
             const sellingPriceInputManual = document.getElementById('sellingPrice');
             if (sellingPriceInputManual) {
               sellingPriceInputManual.required = false;
             }
-            // Reset tax, discount and final price for manual pricing
-            document.getElementById('taxRate').value = '0';
-            document.getElementById('discount').value = '0';
-            document.getElementById('finalPrice').textContent = '₦0.00';
+            // Reset tax, discount and final price for manual pricing (guarded)
+            const taxRateEl = document.getElementById('taxRate');
+            const discountEl = document.getElementById('discount');
+            const finalPriceEl = document.getElementById('finalPrice');
+            if (taxRateEl) taxRateEl.value = '0';
+            if (discountEl) discountEl.value = '0';
+            if (finalPriceEl) finalPriceEl.textContent = '₦0.00';
             break;
-          case 'margin':
-            document.getElementById('marginFields').style.display = 'flex';
-            document.getElementById('targetMargin').required = true;
+          }
+          case 'margin': {
+            const marginEl = document.getElementById('marginFields');
+            if (marginEl) marginEl.style.display = 'flex';
+            const targetMarginEl = document.getElementById('targetMargin');
+            if (targetMarginEl) targetMarginEl.required = true;
             // Reset discount and final price for margin pricing
-            document.getElementById('discount').value = '0';
-            document.getElementById('finalPrice').textContent = '₦0.00';
+            const discountEl2 = document.getElementById('discount');
+            const finalPriceEl2 = document.getElementById('finalPrice');
+            if (discountEl2) discountEl2.value = '0';
+            if (finalPriceEl2) finalPriceEl2.textContent = '₦0.00';
             break;
-          case 'range':
-            document.getElementById('rangeFields').style.display = 'flex';
-            document.getElementById('minPrice').required = true;
-            document.getElementById('maxPrice').required = true;
+          }
+          case 'range': {
+            const rangeEl = document.getElementById('rangeFields');
+            if (rangeEl) rangeEl.style.display = 'flex';
+            const minPriceEl = document.getElementById('minPrice');
+            const maxPriceEl = document.getElementById('maxPrice');
+            if (minPriceEl) minPriceEl.required = true;
+            if (maxPriceEl) maxPriceEl.required = true;
             // Reset discount and final price for range pricing
-            document.getElementById('discount').value = '0';
-            document.getElementById('finalPrice').textContent = '₦0.00';
+            const discountEl3 = document.getElementById('discount');
+            const finalPriceEl3 = document.getElementById('finalPrice');
+            if (discountEl3) discountEl3.value = '0';
+            if (finalPriceEl3) finalPriceEl3.textContent = '₦0.00';
             break;
+          }
         }
       }
 
@@ -2203,6 +2229,77 @@ require_once '../../include/config.php';
           toggleText.className = 'fw-bold text-danger';
           toggleText.style.color = '#dc3545';
         }
+      });
+
+      // Initialize Select2 after page and scripts load
+      $(document).ready(function() {
+        // Initialize unit with Select2 and tags support (allows creating new units)
+        $('#unit').select2({
+          theme: 'bootstrap',
+          width: '100%',
+          placeholder: 'Select or type to create unit',
+          tags: true,
+          dropdownParent: $('body'),
+          createTag: function (params) {
+            var term = $.trim(params.term);
+            if (term === '' || term.toLowerCase() === '+ add new unit') {
+              return null;
+            }
+            return {
+              id: term,
+              text: term,
+              newTag: true
+            }
+          }
+        });
+
+        // Initialize tax rate with Select2
+        $('#taxRate').select2({
+          theme: 'bootstrap',
+          width: '100%',
+          placeholder: 'Select an option',
+          dropdownParent: $('body')
+        });
+
+        // Initialize category with tags support (allows creating new options)
+        $('#category').select2({
+          theme: 'bootstrap',
+          width: '100%',
+          placeholder: 'Select or type to create category',
+          tags: true,
+          dropdownParent: $('body'),
+          createTag: function (params) {
+            var term = $.trim(params.term);
+            if (term === '') {
+              return null;
+            }
+            return {
+              id: term,
+              text: term,
+              newTag: true
+            }
+          }
+        });
+
+        // Initialize supplier with tags support
+        $('#supplier').select2({
+          theme: 'bootstrap',
+          width: '100%',
+          placeholder: 'Select or type to create',
+          tags: true,
+          dropdownParent: $('body'),
+          createTag: function (params) {
+            var term = $.trim(params.term);
+            if (term === '') {
+              return null;
+            }
+            return {
+              id: term,
+              text: term,
+              newTag: true
+            }
+          }
+        });
       });
     </script>
   </body>

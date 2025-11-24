@@ -93,6 +93,23 @@ require_once '../../include/config.php';
         }
       }
 
+      /* Ensure Select2 dropdowns appear above everything */
+      .select2-container {
+        z-index: 10050 !important;
+      }
+
+      .select2-dropdown {
+        z-index: 10051 !important;
+      }
+
+      /* Ensure modal body scrolls but doesn't clip dropdowns */
+      .modal-body-custom {
+        overflow-y: auto;
+        overflow-x: hidden;
+        flex: 1;
+        min-height: 0;
+      }
+
       /* Responsive design */
       @media (max-width: 768px) {
         .modal-container {
@@ -322,6 +339,54 @@ require_once '../../include/config.php';
         border-left: 2px solid #667eea;
       }
 
+      /* Custom Unit Container - Enhanced styling */
+      .unit-input-container {
+        position: relative;
+      }
+
+      #customUnitContainer {
+        animation: slideDown 0.3s ease-out;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        background: #f8f9fa;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          max-height: 0;
+          padding: 0 15px;
+        }
+        to {
+          opacity: 1;
+          max-height: 200px;
+          padding: 15px;
+        }
+      }
+
+      #customUnitContainer .input-group .form-control {
+        border-radius: 8px 0 0 8px;
+      }
+
+      #customUnitContainer .input-group .form-control:nth-child(2) {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+      }
+
+      #customUnitContainer .btn {
+        border-radius: 0 8px 8px 0;
+        white-space: nowrap;
+      }
+
+      /* Custom unit option styling */
+      .form-select option[value="custom"] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: 600;
+      }
+
       /* Action buttons - Enhanced */
       .action-buttons {
         position: sticky;
@@ -421,6 +486,16 @@ require_once '../../include/config.php';
         vertical-align: middle;
       }
 
+      .variant-display-text {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.95rem;
+        padding: 8px 12px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+      }
+
       .variant-table .form-control-sm {
         border-radius: 6px;
         border: 1px solid #e9ecef;
@@ -491,6 +566,37 @@ require_once '../../include/config.php';
       .variant-table .btn-group .btn {
         margin: 0;
         border-radius: 6px;
+      }
+
+      /* Pricing group button styling */
+      .pricing-group-btn {
+        padding: 8px 12px !important;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: block;
+      }
+
+      .pricing-group-btn:hover {
+        background-color: #17a2b8 !important;
+        border-color: #17a2b8 !important;
+        color: white !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+      }
+
+      .pricing-group-btn .cost-price-display,
+      .pricing-group-btn .sell-price-display {
+        font-weight: 600;
+        font-size: 0.85rem;
+      }
+
+      .pricing-group-btn:hover .cost-price-display,
+      .pricing-group-btn:hover .sell-price-display {
+        color: white !important;
+      }
+
+      .pricing-group-btn i {
+        margin-right: 4px;
       }
 
       /* Add Variant Card Styles */
@@ -1373,6 +1479,7 @@ require_once '../../include/config.php';
     </style>
   </head>
   <body>
+    <?php include '../layouts/preloader.php'; ?>
     <!-- Modal Overlay -->
     <div class="modal-overlay"></div>
     <!-- Modal Container -->
@@ -1425,25 +1532,26 @@ require_once '../../include/config.php';
                   <div class="form-group">
                     <label for="category" class="form-label required-field">Category</label>
                     <select class="form-select" id="category" name="category" required>
-                      <option value="">Select Category</option>
+                      <option value="">Select or type to create category</option>
                       <option value="electronics">Electronics</option>
                       <option value="clothing">Clothing</option>
                       <option value="food">Food & Beverages</option>
                       <option value="furniture">Furniture</option>
                       <option value="stationery">Stationery</option>
-                      <option value="other">Other</option>
                     </select>
+                    <small class="form-text text-muted">Select existing or type new category name</small>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="supplier" class="form-label">Supplier</label>
                     <select class="form-select" id="supplier" name="supplier">
-                      <option value="">Select Supplier</option>
+                      <option value="">Select or type to create supplier</option>
                       <option value="supplier1">Supplier 1</option>
                       <option value="supplier2">Supplier 2</option>
                       <option value="supplier3">Supplier 3</option>
                     </select>
+                    <small class="form-text text-muted">Select existing or type new supplier name</small>
                   </div>
                 </div>
               </div>
@@ -1452,25 +1560,38 @@ require_once '../../include/config.php';
                 <div class="col-md-6">
                   <div class="form-group">
                     <label for="unit" class="form-label required-field">Unit of Measurement</label>
-                    <select class="form-select" id="unit" name="unit" required>
-                      <option value="">Select Unit</option>
-                      <option value="pcs">Piece (pcs)</option>
-                      <option value="ct">Carton (ct)</option>
-                      <option value="cm">Centimeter (cm)</option>
-                      <option value="L">Litre (L)</option>
-                      <option value="g">Gram (g)</option>
-                      <option value="kg">Kilogram (kg)</option>
-                      <option value="pi">Per item (pi)</option>
-                      <option value="yd">Yard (yd)</option>
-                      <option value="m">Metre (m)</option>
-                      <option value="mm">Millimetre (mm)</option>
-                    </select>
+                    <div class="unit-input-container">
+                      <select class="form-select" id="unit" name="unit" required>
+                        <option value="">Select Unit</option>
+                        <option value="pcs">Piece (pcs)</option>
+                        <option value="ct">Carton (ct)</option>
+                        <option value="cm">Centimeter (cm)</option>
+                        <option value="L">Litre (L)</option>
+                        <option value="g">Gram (g)</option>
+                        <option value="kg">Kilogram (kg)</option>
+                        <option value="pi">Per item (pi)</option>
+                        <option value="yd">Yard (yd)</option>
+                        <option value="m">Metre (m)</option>
+                        <option value="mm">Millimetre (mm)</option>
+                        
+                      </select>
+                      <div id="customUnitContainer" class="mt-2" style="display: none;">
+                        <div class="input-group">
+                          <input type="text" class="form-control" id="customUnit" placeholder="Enter custom unit (e.g., tons, pieces)">
+                          <input type="text" class="form-control" id="customUnitAbbr" placeholder="Abbreviation (e.g., t, pcs)">
+                          <button type="button" class="btn btn-outline-primary" id="addUnitBtn">
+                            <i class="mdi mdi-plus"></i> Add
+                          </button>
+                        </div>
+                        <small class="form-text text-muted">Enter the unit name and its abbreviation</small>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-group">
-                    <label for="brand" class="form-label">Brand</label>
-                    <input type="text" class="form-control" id="brand" name="brand" placeholder="Enter brand name">
+                    <label for="barcode" class="form-label">Barcode</label>
+                    <input type="text" class="form-control" id="barcode" name="barcode" placeholder="Enter or scan barcode">
                   </div>
                 </div>
               </div>
@@ -1519,11 +1640,13 @@ require_once '../../include/config.php';
                 <table class="table table-bordered" id="variantTable">
                   <thead>
                     <tr>
-                      <th>Variant</th>
-                      <th class="text-center align-middle">Sell Item</th>
-                      <th>Cost Price</th>
-                      <th>Sell Price</th>
-                      <th>Action</th>
+                      <th style="width: 15%;">Variant</th>
+                      <th class="text-center align-middle" style="width: 10%;">Sell Item</th>
+                      <th style="width: 15%;">Cost Price</th>
+                      <th style="width: 15%;">Sell Price</th>
+                      <th style="width: 12%;">Stock</th>
+                      <th style="width: 13%;">Low Stock</th>
+                      <th style="width: 10%;">Action</th>
                     </tr>
                   </thead>
                   <tbody id="variantTableBody">
@@ -2005,7 +2128,7 @@ require_once '../../include/config.php';
               </div>
               <div class="pricing-help-text mt-2">
                 <strong><i class="mdi mdi-lock text-primary"></i> Fixed Pricing:</strong> Set a single, unchanging selling price for this variant.<br>
-                <strong><i class="mdi mdi-pencil text-warning"></i> Manual Pricing:</strong> Enter only the cost price. Selling prices set during sales.<br>
+                <strong><i class="mdi mdi-pencil text-warning"></i> Manual Pricing:</strong> Only cost price is required. Selling price, taxes, and discounts will be set during individual sales transactions.<br>
                 <strong><i class="mdi mdi-percent text-success"></i> Margin Pricing:</strong> Set a profit margin percentage, and selling price will be calculated automatically.<br>
                 <strong><i class="mdi mdi-chart-line text-info"></i> Range Pricing:</strong> Set minimum and maximum price boundaries for flexible pricing.
               </div>
@@ -2064,7 +2187,6 @@ require_once '../../include/config.php';
                   <div class="col-md-12">
                     <div class="alert alert-info">
                       <i class="mdi mdi-information"></i> 
-                      <strong>Manual Pricing:</strong> Only cost price is required. Selling price, taxes, and discounts will be set during individual sales transactions.
                     </div>
                   </div>
                 </div>
@@ -2600,7 +2722,12 @@ require_once '../../include/config.php';
               variantCounter++;
               totalCombinations++;
               
-              // Build variant name
+              // Build variant display (only variations, separated by /)
+              let variantDisplay = option1;
+              if (option2) variantDisplay += ` / ${option2}`;
+              if (option3) variantDisplay += ` / ${option3}`;
+              
+              // Build full variant name for backend (includes base name)
               let variantName = `${baseName} - ${option1}`;
               if (option2) variantName += ` ${option2}`;
               if (option3) variantName += ` ${option3}`;
@@ -2618,7 +2745,9 @@ require_once '../../include/config.php';
                          name="variants[${variantCounter}][name]" 
                          value="${variantName}" 
                          readonly
-                         required>
+                         required
+                         style="display: none;">
+                  <div class="variant-display-text">${variantDisplay}</div>
                   <input type="hidden" name="variants[${variantCounter}][sku]" value="${variantSku}">
                   <input type="hidden" name="variants[${variantCounter}][primary_value]" value="${option1}">
                   <input type="hidden" name="variants[${variantCounter}][secondary_value]" value="${option2}${option3 ? (option2 ? ' / ' + option3 : option3) : ''}">
@@ -2636,29 +2765,45 @@ require_once '../../include/config.php';
                     <small class="text-muted">${variantSku}</small>
                   </div>
                 </td>
-                <td>
-                  <button type="button" class="btn btn-outline-primary btn-sm w-100" 
-                          onclick="openPricingModal(${variantCounter}, '${variantName.replace(/'/g, "\\'")}')">
-                    <i class="mdi mdi-currency-usd"></i> 
-                    <span class="cost-price-display" id="costDisplay${variantCounter}">Set Cost</span>
+                <td colspan="2">
+                  <button type="button" onclick="openEditVariantModal(${variantCounter}, '${variantSku}')" class="btn btn-outline-info btn-sm w-100 pricing-group-btn" title="Click to edit pricing">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="text-start">
+                        <i class="mdi mdi-currency-usd"></i>
+                        <span class="cost-price-display" id="costDisplay${variantCounter}">₦0.00</span>
+                      </div>
+                      <div class="text-end">
+                        <i class="mdi mdi-tag"></i>
+                        <span class="sell-price-display" id="sellDisplay${variantCounter}">₦0.00</span>
+                      </div>
+                    </div>
                   </button>
-                  <input type="hidden" name="variants[${variantCounter}][cost_price]" id="costPrice${variantCounter}" value="" required>
+                  <input type="hidden" name="variants[${variantCounter}][cost_price]" id="costPrice${variantCounter}" value="0.00" required>
+                  <input type="hidden" name="variants[${variantCounter}][selling_price]" id="sellPrice${variantCounter}" value="0.00" required>
+                  <input type="hidden" name="variants[${variantCounter}][pricing_method]" id="pricingMethod${variantCounter}" value="fixed">
                 </td>
                 <td>
-                  <button type="button" class="btn btn-outline-success btn-sm w-100" 
-                          onclick="openPricingModal(${variantCounter}, '${variantName.replace(/'/g, "\\'")}')">
-                    <i class="mdi mdi-tag"></i> 
-                    <span class="sell-price-display" id="sellDisplay${variantCounter}">Set Price</span>
-                  </button>
-                  <input type="hidden" name="variants[${variantCounter}][selling_price]" id="sellPrice${variantCounter}" value="" required>
-                  <input type="hidden" name="variants[${variantCounter}][pricing_method]" id="pricingMethod${variantCounter}" value="fixed">
-                  <input type="hidden" name="variants[${variantCounter}][stock_quantity]" value="0">
+                  <input type="number" class="form-control form-control-sm" 
+                         name="variants[${variantCounter}][stock_quantity]" 
+                         id="stockQty${variantCounter}"
+                         value="0" 
+                         min="0" 
+                         step="1"
+                         placeholder="0"
+                         title="Stock quantity">
+                </td>
+                <td>
+                  <input type="number" class="form-control form-control-sm" 
+                         name="variants[${variantCounter}][low_stock_threshold]" 
+                         id="lowStock${variantCounter}"
+                         value="0" 
+                         min="0" 
+                         step="1"
+                         placeholder="0"
+                         title="Low stock alert threshold">
                 </td>
                 <td class="text-center">
                   <div class="btn-group" role="group">
-                    <a href="views/edit_variant.php?sku=${encodeURIComponent(variantSku)}" class="btn btn-sm btn-outline-secondary settings-variant-btn" title="Settings for this variant">
-                      <i class="mdi mdi-cog"></i>
-                    </a>
                     <button type="button" class="btn btn-sm remove-variant-btn" 
                             onclick="removeVariantRow(this)" title="Remove this variant">
                       <i class="mdi mdi-delete"></i>
@@ -2764,8 +2909,94 @@ require_once '../../include/config.php';
         }
       }
 
+      // Setup custom unit handlers
+      function setupCustomUnitHandlers() {
+        const unitSelect = document.getElementById('unit');
+        const customUnitContainer = document.getElementById('customUnitContainer');
+        const addUnitBtn = document.getElementById('addUnitBtn');
+        const customUnit = document.getElementById('customUnit');
+        const customUnitAbbr = document.getElementById('customUnitAbbr');
+
+        // Show/hide custom unit container
+        unitSelect.addEventListener('change', function() {
+          if (this.value === 'custom') {
+            customUnitContainer.style.display = 'block';
+            customUnit.focus();
+          } else {
+            customUnitContainer.style.display = 'none';
+            customUnit.value = '';
+            customUnitAbbr.value = '';
+          }
+        });
+
+        // Add new unit functionality
+        addUnitBtn.addEventListener('click', function() {
+          const unitName = customUnit.value.trim();
+          const unitAbbr = customUnitAbbr.value.trim();
+
+          if (!unitName || !unitAbbr) {
+            showNotification('Please enter both unit name and abbreviation', 'error');
+            return;
+          }
+
+          // Check if unit already exists
+          const existingOptions = Array.from(unitSelect.options);
+          const exists = existingOptions.some(option => 
+            option.value.toLowerCase() === unitAbbr.toLowerCase() ||
+            option.text.toLowerCase().includes(unitName.toLowerCase())
+          );
+
+          if (exists) {
+            showNotification('This unit already exists in the list', 'warning');
+            return;
+          }
+
+          // Create new option
+          const newOption = document.createElement('option');
+          newOption.value = unitAbbr;
+          newOption.text = `${unitName} (${unitAbbr})`;
+          
+          // Insert before the "Add New Unit" option
+          const customOption = unitSelect.querySelector('option[value="custom"]');
+          unitSelect.insertBefore(newOption, customOption);
+
+          // Select the new option
+          unitSelect.value = unitAbbr;
+          
+          // Hide the container and clear inputs
+          customUnitContainer.style.display = 'none';
+          customUnit.value = '';
+          customUnitAbbr.value = '';
+
+          // Update Select2 if initialized
+          if (typeof $ !== 'undefined' && $.fn.select2) {
+            $('#unit').trigger('change.select2');
+          }
+
+          showNotification(`Unit "${unitName} (${unitAbbr})" added successfully!`, 'success');
+        });
+
+        // Allow Enter key to add unit
+        customUnit.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            customUnitAbbr.focus();
+          }
+        });
+
+        customUnitAbbr.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            addUnitBtn.click();
+          }
+        });
+      }
+
       // Close variant modal on overlay click
       document.addEventListener('DOMContentLoaded', function() {
+        // Setup custom unit handlers
+        setupCustomUnitHandlers();
+
         const variantModalOverlay = document.getElementById('variantModalOverlay');
         if (variantModalOverlay) {
           variantModalOverlay.addEventListener('click', function(e) {
@@ -2829,14 +3060,14 @@ require_once '../../include/config.php';
         document.getElementById('addVariantForm').reset();
         
         // Reset variant table to initial state
-        const variantsTableBody = document.getElementById('variantsTableBody');
-        variantsTableBody.innerHTML = `
+        const variantTableBody = document.getElementById('variantTableBody');
+        variantTableBody.innerHTML = `
           <tr>
             <td><input type="text" class="form-control variant-name" name="variant_names[]" placeholder="Enter variant name" required></td>
             <td><input type="text" class="form-control variant-sku" name="variant_skus[]" placeholder="Auto-generated" readonly></td>
-            <td><input type="number" class="form-control variant-cost" name="variant_costs[]" placeholder="0.00" step="0.01" min="0"></td>
-            <td><input type="number" class="form-control variant-price" name="variant_prices[]" placeholder="0.00" step="0.01" min="0"></td>
-            <td><input type="number" class="form-control variant-stock" name="variant_stocks[]" placeholder="0" min="0"></td>
+            <td><input type="number" class="form-control variant-cost" name="variant_costs[]" value="0.00" step="0.01" min="0"></td>
+            <td><input type="number" class="form-control variant-price" name="variant_prices[]" value="0.00" step="0.01" min="0"></td>
+            <td><input type="number" class="form-control variant-stock" name="variant_stocks[]" value="0" min="0"></td>
             <td>
               <button type="button" class="btn btn-sm btn-danger" onclick="removeVariantRow(this)" title="Remove Variant">
                 <i class="mdi mdi-delete"></i>
@@ -2866,7 +3097,7 @@ require_once '../../include/config.php';
           }
           
           // Validate that at least one variant exists
-          const variantRows = document.querySelectorAll('#variantsTableBody tr');
+          const variantRows = document.querySelectorAll('#variantTableBody tr');
           if (variantRows.length === 0) {
             showNotification('At least one variant is required', 'error');
             removeLoading(submitBtn);
@@ -3088,11 +3319,16 @@ require_once '../../include/config.php';
         const sellInput = document.getElementById(`sellPrice${variantIndex}`);
         const methodInput = document.getElementById(`pricingMethod${variantIndex}`);
         
+        // Populate modal fields; default to 0.00 when values are empty
         if (costInput && costInput.value) {
           document.getElementById('modalCostPrice').value = costInput.value;
+        } else {
+          document.getElementById('modalCostPrice').value = '0.00';
         }
         if (sellInput && sellInput.value) {
           document.getElementById('modalSellingPrice').value = sellInput.value;
+        } else {
+          document.getElementById('modalSellingPrice').value = '0.00';
         }
         if (methodInput && methodInput.value) {
           document.querySelector(`input[name="pricing_method"][value="${methodInput.value}"]`).checked = true;
@@ -3312,6 +3548,941 @@ require_once '../../include/config.php';
               closePricingModal();
             }
           });
+        }
+
+        // Auto-generate item code if not provided
+        document.getElementById('itemName').addEventListener('input', function() {
+          const itemCode = document.getElementById('itemCode');
+          if (!itemCode.value) {
+            const name = this.value.replace(/\s+/g, '').toUpperCase();
+            const timestamp = Date.now().toString().slice(-4);
+            itemCode.value = name.slice(0, 4) + timestamp;
+          }
+        });
+      });
+
+      // Initialize Select2 after page and scripts load
+      $(document).ready(function() {
+        // Initialize unit with Select2 and tags support (allows creating new units)
+        $('#unit').select2({
+          theme: 'bootstrap',
+          width: '100%',
+          placeholder: 'Select or type to create unit',
+          tags: true,
+          dropdownParent: $('body'),
+          createTag: function (params) {
+            var term = $.trim(params.term);
+            if (term === '' || term.toLowerCase() === '+ add new unit') {
+              return null;
+            }
+            return {
+              id: term,
+              text: term,
+              newTag: true
+            }
+          }
+        });
+
+        // Initialize category with tags support (allows creating new options)
+        $('#category').select2({
+          theme: 'bootstrap',
+          width: '100%',
+          placeholder: 'Select or type to create category',
+          tags: true,
+          dropdownParent: $('body'),
+          createTag: function (params) {
+            var term = $.trim(params.term);
+            if (term === '') {
+              return null;
+            }
+            return {
+              id: term,
+              text: term,
+              newTag: true
+            }
+          }
+        });
+
+        // Initialize supplier with tags support
+        $('#supplier').select2({
+          theme: 'bootstrap',
+          width: '100%',
+          placeholder: 'Select or type to create supplier',
+          tags: true,
+          dropdownParent: $('body'),
+          createTag: function (params) {
+            var term = $.trim(params.term);
+            if (term === '') {
+              return null;
+            }
+            return {
+              id: term,
+              text: term,
+              newTag: true
+            }
+          }
+        });
+
+        // Initialize tax rate dropdowns in edit variant modal
+        $('#editTaxRate').select2({
+          theme: 'bootstrap',
+          width: '100%',
+          placeholder: 'Select tax rate',
+          minimumResultsForSearch: -1, // Hide search box
+          dropdownParent: $('#editVariantModalOverlay')
+        });
+
+        $('#editMarginTaxRate').select2({
+          theme: 'bootstrap',
+          width: '100%',
+          placeholder: 'Select tax rate',
+          minimumResultsForSearch: -1, // Hide search box
+          dropdownParent: $('#editVariantModalOverlay')
+        });
+
+        $('#editRangeTaxRate').select2({
+          theme: 'bootstrap',
+          width: '100%',
+          placeholder: 'Select tax rate',
+          minimumResultsForSearch: -1, // Hide search box
+          dropdownParent: $('#editVariantModalOverlay')
+        });
+      });
+    </script>
+
+    <!-- Edit Variant Modal (Embedded) -->
+    <div class="edit-variant-modal-overlay" id="editVariantModalOverlay" style="display: none;">
+      <div class="edit-variant-modal">
+        <!-- Modal Header -->
+        <div class="edit-variant-modal-header">
+          <h4><i class="mdi mdi-pencil"></i> Edit Variant</h4>
+          <button type="button" class="edit-variant-close-btn" onclick="closeEditVariantModal()">
+            <i class="mdi mdi-close"></i>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="edit-variant-modal-body">
+          <ul class="nav nav-tabs" id="editVariantTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="edit-item-details-tab" data-bs-toggle="tab" data-bs-target="#edit-item-details" type="button" role="tab">
+                <i class="mdi mdi-tag-outline"></i> Item Details
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="edit-pricing-tab" data-bs-toggle="tab" data-bs-target="#edit-pricing" type="button" role="tab">
+                <i class="mdi mdi-currency-usd"></i> Pricing Details
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="edit-stock-tab" data-bs-toggle="tab" data-bs-target="#edit-stock" type="button" role="tab">
+                <i class="mdi mdi-package-variant"></i> Stock Tracking
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="editVariantTabContent">
+            <!-- Item Details Tab -->
+            <div class="tab-pane fade show active" id="edit-item-details" role="tabpanel">
+              <form id="editItemDetailsForm">
+                <input type="hidden" id="editVariantIndex" value="">
+                <div class="form-group">
+                  <label for="editVariantDisplay" class="form-label">Variant</label>
+                  <input type="text" class="form-control" id="editVariantDisplay" name="variant_display" readonly>
+                  <small class="form-text text-muted">Variations separated by /</small>
+                </div>
+                <div class="form-group">
+                  <label for="editVariantSku" class="form-label">SKU</label>
+                  <input type="text" class="form-control" id="editVariantSku" name="sku" readonly>
+                </div>
+                <div class="form-group">
+                  <label for="editVariantBarcode" class="form-label">Barcode</label>
+                  <input type="text" class="form-control" id="editVariantBarcode" name="barcode" placeholder="Enter barcode">
+                  <small class="form-text text-muted">Optional: Product barcode for scanning</small>
+                </div>
+              </form>
+            </div>
+
+            <!-- Pricing Details Tab -->
+            <div class="tab-pane fade" id="edit-pricing" role="tabpanel">
+              <form id="editPricingForm">
+                <!-- Pricing Method Selection (Radio Buttons) -->
+                <div class="form-group mb-3">
+                  <label class="form-label required-field">Pricing Method</label>
+                  <div class="pricing-methods-row">
+                    <div class="pricing-method-option">
+                      <input type="radio" class="form-check-input" id="editFixedPricing" name="edit_pricing_type" value="fixed" required checked>
+                      <label for="editFixedPricing" class="pricing-method-label">
+                        <i class="mdi mdi-lock"></i>
+                        <span class="method-name">Fixed</span>
+                      </label>
+                    </div>
+                    <div class="pricing-method-option">
+                      <input type="radio" class="form-check-input" id="editManualPricing" name="edit_pricing_type" value="manual" required>
+                      <label for="editManualPricing" class="pricing-method-label">
+                        <i class="mdi mdi-pencil"></i>
+                        <span class="method-name">Manual</span>
+                      </label>
+                    </div>
+                    <div class="pricing-method-option">
+                      <input type="radio" class="form-check-input" id="editMarginPricing" name="edit_pricing_type" value="margin" required>
+                      <label for="editMarginPricing" class="pricing-method-label">
+                        <i class="mdi mdi-percent"></i>
+                        <span class="method-name">Margin</span>
+                      </label>
+                    </div>
+                    <div class="pricing-method-option">
+                      <input type="radio" class="form-check-input" id="editRangePricing" name="edit_pricing_type" value="range" required>
+                      <label for="editRangePricing" class="pricing-method-label">
+                        <i class="mdi mdi-chart-line"></i>
+                        <span class="method-name">Range</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Pricing Method Descriptions -->
+                <div id="editPricingDescription" class="alert alert-light mb-3" style="display: none;">
+                  <div id="editFixedDesc" class="pricing-desc" style="display: none;">
+                    <strong><i class="mdi mdi-lock text-primary"></i> Fixed Pricing:</strong> Set a single, unchanging selling price for this item.
+                  </div>
+                  <div id="editManualDesc" class="pricing-desc" style="display: none;">
+                    <strong><i class="mdi mdi-pencil text-warning"></i> Manual Pricing:</strong> Enter only the cost price. Selling prices will be set during sales.
+                  </div>
+                  <div id="editMarginDesc" class="pricing-desc" style="display: none;">
+                    <strong><i class="mdi mdi-percent text-success"></i> Margin Pricing:</strong> Set a profit margin percentage, and selling price will be auto-calculated.
+                  </div>
+                  <div id="editRangeDesc" class="pricing-desc" style="display: none;">
+                    <strong><i class="mdi mdi-chart-line text-info"></i> Range Pricing:</strong> Set minimum and maximum price boundaries for flexible pricing.
+                  </div>
+                </div>
+
+                <!-- Fixed Pricing Fields -->
+                <div id="editFixedFields" class="pricing-fields" style="display: block;">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="editFixedCostPrice" class="form-label required-field">Cost Price</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₦</span>
+                          <input type="number" class="form-control" id="editFixedCostPrice" name="fixed_cost_price" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                        <small class="form-text text-muted">Price you pay to supplier</small>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="editSellingPrice" class="form-label required-field">Selling Price</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₦</span>
+                          <input type="number" class="form-control" id="editSellingPrice" name="selling_price" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                        <small class="form-text text-muted">Price you sell to customers</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="editProfitMargin" class="form-label">Profit Margin</label>
+                        <div class="input-group">
+                          <input type="text" class="form-control" id="editProfitMargin" name="profit_margin" placeholder="0%" readonly>
+                          <span class="input-group-text">%</span>
+                        </div>
+                        <small class="form-text text-muted">Auto-calculated margin percentage</small>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="editPotentialProfit" class="form-label">Potential Profit</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₦</span>
+                          <input type="text" class="form-control" id="editPotentialProfit" name="potential_profit" placeholder="0.00" readonly>
+                        </div>
+                        <small class="form-text text-muted">Per unit profit</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="editTaxRate" class="form-label">Tax Rate</label>
+                        <select class="form-select" id="editTaxRate" name="tax_rate">
+                          <option value="0">No Tax (0%)</option>
+                          <option value="5">VAT 5%</option>
+                          <option value="7.5">VAT 7.5%</option>
+                          <option value="10">VAT 10%</option>
+                          <option value="15">VAT 15%</option>
+                        </select>
+                        <small class="form-text text-muted">Applicable tax percentage</small>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="editDiscount" class="form-label">Discount</label>
+                        <div class="input-group">
+                          <input type="number" class="form-control" id="editDiscount" name="discount" placeholder="0" step="0.01" min="0" max="100">
+                          <span class="input-group-text">%</span>
+                        </div>
+                        <small class="form-text text-muted">Discount percentage (if any)</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <label for="editFinalPrice" class="form-label">Final Price Review</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₦</span>
+                          <input type="text" class="form-control" id="editFinalPrice" name="final_price" placeholder="0.00" readonly>
+                        </div>
+                        <small class="form-text text-muted">After tax and discount</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Manual Pricing Fields -->
+                <div id="editManualFields" class="pricing-fields" style="display: none;">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <label for="editManualCostPrice" class="form-label required-field">Cost Price</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₦</span>
+                          <input type="number" class="form-control" id="editManualCostPrice" name="manual_cost_price" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                        <small class="form-text text-muted">Price you pay to supplier</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Margin Pricing Fields -->
+                <div id="editMarginFields" class="pricing-fields" style="display: none;">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="editMarginCostPrice" class="form-label required-field">Cost Price</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₦</span>
+                          <input type="number" class="form-control" id="editMarginCostPrice" name="margin_cost_price" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                        <small class="form-text text-muted">Price you pay to supplier</small>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="editTargetMargin" class="form-label required-field">Target Profit Margin</label>
+                        <div class="input-group">
+                          <input type="number" class="form-control" id="editTargetMargin" name="target_margin" placeholder="0" step="0.01" min="0" max="1000">
+                          <span class="input-group-text">%</span>
+                        </div>
+                        <small class="form-text text-muted">Desired profit margin percentage</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="editCalculatedPrice" class="form-label">Calculated Selling Price</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₦</span>
+                          <input type="number" class="form-control" id="editCalculatedPrice" name="calculated_price" placeholder="0.00" readonly>
+                        </div>
+                        <small class="form-text text-muted">Auto-calculated based on margin</small>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="editMarginProfit" class="form-label">Potential Profit</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₦</span>
+                          <input type="text" class="form-control" id="editMarginProfit" name="margin_profit" placeholder="0.00" readonly>
+                        </div>
+                        <small class="form-text text-muted">Per unit profit</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <label for="editMarginTaxRate" class="form-label">Tax Rate</label>
+                        <select class="form-select" id="editMarginTaxRate" name="margin_tax_rate">
+                          <option value="0">No Tax (0%)</option>
+                          <option value="5">VAT 5%</option>
+                          <option value="7.5">VAT 7.5%</option>
+                          <option value="10">VAT 10%</option>
+                          <option value="15">VAT 15%</option>
+                        </select>
+                        <small class="form-text text-muted">Applicable tax percentage</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Range Pricing Fields -->
+                <div id="editRangeFields" class="pricing-fields" style="display: none;">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <label for="editRangeCostPrice" class="form-label required-field">Cost Price</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₦</span>
+                          <input type="number" class="form-control" id="editRangeCostPrice" name="range_cost_price" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                        <small class="form-text text-muted">Price you pay to supplier</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="editMinPrice" class="form-label required-field">Minimum Price</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₦</span>
+                          <input type="number" class="form-control" id="editMinPrice" name="min_price" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                        <small class="form-text text-muted">Lowest selling price</small>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="editMaxPrice" class="form-label required-field">Maximum Price</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₦</span>
+                          <input type="number" class="form-control" id="editMaxPrice" name="max_price" placeholder="0.00" step="0.01" min="0">
+                        </div>
+                        <small class="form-text text-muted">Highest selling price</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="editRangeTaxRate" class="form-label">Tax Rate</label>
+                        <select class="form-select" id="editRangeTaxRate" name="range_tax_rate">
+                          <option value="0">No Tax (0%)</option>
+                          <option value="5">VAT 5%</option>
+                          <option value="7.5">VAT 7.5%</option>
+                          <option value="10">VAT 10%</option>
+                          <option value="15">VAT 15%</option>
+                        </select>
+                        <small class="form-text text-muted">Applicable tax percentage</small>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="editRangePotentialProfit" class="form-label">Potential Profit Range</label>
+                        <div class="input-group">
+                          <span class="input-group-text">₦</span>
+                          <input type="text" class="form-control" id="editRangePotentialProfit" name="range_potential_profit" placeholder="0.00 to 0.00" readonly>
+                        </div>
+                        <small class="form-text text-muted">Profit range per unit</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- Stock Tracking Tab -->
+            <div class="tab-pane fade" id="edit-stock" role="tabpanel">
+              <form id="editStockForm">
+                <div class="form-group">
+                  <label for="editStockQuantity" class="form-label">Stock Quantity</label>
+                  <input type="number" class="form-control" id="editStockQuantity" name="stock_quantity" min="0" required>
+                </div>
+                <div class="form-group">
+                  <label for="editLowStockThreshold" class="form-label">Low Stock Alert (Threshold)</label>
+                  <input type="number" class="form-control" id="editLowStockThreshold" name="low_stock_threshold" min="0">
+                </div>
+                <div class="form-group">
+                  <label for="editExpiryDate" class="form-label">Expiry Date</label>
+                  <input type="date" class="form-control" id="editExpiryDate" name="expiry_date">
+                </div>
+                <div class="form-group">
+                  <label for="editLocation" class="form-label">Storage Location</label>
+                  <input type="text" class="form-control" id="editLocation" name="location" placeholder="e.g., Warehouse A, Shelf 3">
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="edit-variant-modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeEditVariantModal()">
+            <i class="mdi mdi-close"></i> Cancel
+          </button>
+          <button type="button" class="btn btn-primary" onclick="saveVariantChanges()">
+            <i class="mdi mdi-content-save"></i> Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      /* Edit Variant Modal Styles */
+      .edit-variant-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      .edit-variant-modal {
+        background: #fff;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 700px;
+        max-height: 85vh;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease-out;
+        display: flex;
+        flex-direction: column;
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .edit-variant-modal-header {
+        padding: 20px 25px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 16px 16px 0 0;
+      }
+
+      .edit-variant-modal-header h4 {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .edit-variant-close-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: #fff;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .edit-variant-close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+      }
+
+      .edit-variant-modal-body {
+        padding: 25px;
+        overflow-y: auto;
+        flex: 1;
+      }
+
+      .edit-variant-modal-body::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .edit-variant-modal-body::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+
+      .edit-variant-modal-body::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 10px;
+      }
+
+      .edit-variant-modal-footer {
+        padding: 20px 25px;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .required-field::after {
+        content: " *";
+        color: #dc3545;
+      }
+
+      .pricing-desc {
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background: rgba(102, 126, 234, 0.1);
+      }
+    </style>
+
+    <script>
+      // Edit Variant Modal Functions
+      function openEditVariantModal(variantIndex, variantSku) {
+        const modal = document.getElementById('editVariantModalOverlay');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        // Store the variant index
+        document.getElementById('editVariantIndex').value = variantIndex;
+
+        // Find the variant row
+        const variantRow = document.querySelector(`#variantTableBody tr:nth-child(${variantIndex})`);
+        if (!variantRow) return;
+
+        // Get current values from the row
+        const variantDisplayDiv = variantRow.querySelector('.variant-display-text');
+        const skuInput = variantRow.querySelector('input[name*="[sku]"]');
+        const costPriceInput = variantRow.querySelector('input[name*="[cost_price]"]');
+        const sellingPriceInput = variantRow.querySelector('input[name*="[selling_price]"]');
+        const stockQtyInput = variantRow.querySelector('input[name*="[stock_quantity]"]');
+        const lowStockInput = variantRow.querySelector('input[name*="[low_stock_threshold]"]');
+
+        // Populate modal fields
+        document.getElementById('editVariantDisplay').value = variantDisplayDiv ? variantDisplayDiv.textContent.trim() : '';
+        document.getElementById('editVariantSku').value = skuInput ? skuInput.value : variantSku;
+        document.getElementById('editVariantBarcode').value = ''; // TODO: Get from database when available
+        
+        // Populate all method-specific cost price fields with the same initial value
+        const costPriceValue = costPriceInput ? costPriceInput.value : '0.00';
+        document.getElementById('editFixedCostPrice').value = costPriceValue;
+        document.getElementById('editManualCostPrice').value = costPriceValue;
+        document.getElementById('editMarginCostPrice').value = costPriceValue;
+        document.getElementById('editRangeCostPrice').value = costPriceValue;
+        
+        document.getElementById('editSellingPrice').value = sellingPriceInput ? sellingPriceInput.value : '0.00';
+        document.getElementById('editStockQuantity').value = stockQtyInput ? stockQtyInput.value : '0';
+        document.getElementById('editLowStockThreshold').value = lowStockInput ? lowStockInput.value : '0';
+        
+        // Reset tax rate dropdowns
+        $('#editTaxRate').val('0').trigger('change');
+        $('#editMarginTaxRate').val('0').trigger('change');
+        $('#editRangeTaxRate').val('0').trigger('change');
+        document.getElementById('editDiscount').value = '0'; // TODO: Get from database when available
+
+        // Calculate initial profit margin and final price
+        editCalculateProfitMargin();
+
+        // Setup pricing handlers
+        setupEditPricingHandlers();
+
+        // Reset to first tab and ensure tab functionality
+        const firstTabButton = document.querySelector('#edit-item-details-tab');
+        if (firstTabButton) {
+          // Remove active class from all tabs
+          document.querySelectorAll('#editVariantTab .nav-link').forEach(tab => {
+            tab.classList.remove('active');
+          });
+          document.querySelectorAll('#editVariantTabContent .tab-pane').forEach(pane => {
+            pane.classList.remove('show', 'active');
+          });
+          
+          // Activate first tab
+          firstTabButton.classList.add('active');
+          document.getElementById('edit-item-details').classList.add('show', 'active');
+          
+          // Initialize tab switching
+          initializeEditVariantTabs();
+        }
+      }
+
+      // Initialize tab switching for edit variant modal
+      function initializeEditVariantTabs() {
+        const tabButtons = document.querySelectorAll('#editVariantTab .nav-link');
+        
+        tabButtons.forEach(button => {
+          button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active from all tabs
+            document.querySelectorAll('#editVariantTab .nav-link').forEach(tab => {
+              tab.classList.remove('active');
+            });
+            document.querySelectorAll('#editVariantTabContent .tab-pane').forEach(pane => {
+              pane.classList.remove('show', 'active');
+            });
+            
+            // Activate clicked tab
+            this.classList.add('active');
+            const targetId = this.getAttribute('data-bs-target');
+            const targetPane = document.querySelector(targetId);
+            if (targetPane) {
+              targetPane.classList.add('show', 'active');
+            }
+          });
+        });
+      }
+
+      function closeEditVariantModal() {
+        const modal = document.getElementById('editVariantModalOverlay');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+
+      function saveVariantChanges() {
+        const variantIndex = document.getElementById('editVariantIndex').value;
+        if (!variantIndex) return;
+
+        const variantRow = document.querySelector(`#variantTableBody tr:nth-child(${variantIndex})`);
+        if (!variantRow) return;
+
+        // Get the active pricing method
+        const selectedPricingType = document.querySelector('input[name="edit_pricing_type"]:checked');
+        let costPrice = '0.00';
+        
+        // Get cost price from the appropriate method-specific field
+        if (selectedPricingType) {
+          switch(selectedPricingType.value) {
+            case 'fixed':
+              costPrice = document.getElementById('editFixedCostPrice').value;
+              break;
+            case 'manual':
+              costPrice = document.getElementById('editManualCostPrice').value;
+              break;
+            case 'margin':
+              costPrice = document.getElementById('editMarginCostPrice').value;
+              break;
+            case 'range':
+              costPrice = document.getElementById('editRangeCostPrice').value;
+              break;
+            default:
+              costPrice = document.getElementById('editFixedCostPrice').value;
+          }
+        }
+        
+        // Get values from modal
+        const sellingPrice = document.getElementById('editSellingPrice').value;
+        const stockQty = document.getElementById('editStockQuantity').value;
+        const lowStock = document.getElementById('editLowStockThreshold').value;
+
+        // Update hidden inputs in the table
+        const costPriceInput = variantRow.querySelector('input[name*="[cost_price]"]');
+        const sellingPriceInput = variantRow.querySelector('input[name*="[selling_price]"]');
+        const stockQtyInput = variantRow.querySelector('input[name*="[stock_quantity]"]');
+        const lowStockInput = variantRow.querySelector('input[name*="[low_stock_threshold]"]');
+
+        if (costPriceInput) costPriceInput.value = costPrice;
+        if (sellingPriceInput) sellingPriceInput.value = sellingPrice;
+        if (stockQtyInput) stockQtyInput.value = stockQty;
+        if (lowStockInput) lowStockInput.value = lowStock;
+
+        // Update visible displays
+        const costDisplay = variantRow.querySelector('.cost-price-display');
+        const sellDisplay = variantRow.querySelector('.sell-price-display');
+        if (costDisplay) costDisplay.textContent = '₦' + parseFloat(costPrice).toFixed(2);
+        if (sellDisplay) sellDisplay.textContent = '₦' + parseFloat(sellingPrice).toFixed(2);
+
+        // Close modal
+        closeEditVariantModal();
+        
+        showNotification('Variant details updated successfully!', 'success');
+      }
+
+      // Edit Modal Pricing Handlers
+      function setupEditPricingHandlers() {
+        const pricingTypeRadios = document.querySelectorAll('input[name="edit_pricing_type"]');
+
+        pricingTypeRadios.forEach(radio => {
+          radio.addEventListener('change', function() {
+            if (this.checked) {
+              editShowPricingFields(this.value);
+              editShowPricingDescription(this.value);
+            }
+          });
+        });
+
+        // Fixed Pricing handlers
+        document.getElementById('editFixedCostPrice')?.addEventListener('input', editCalculateProfitMargin);
+        document.getElementById('editSellingPrice')?.addEventListener('input', editCalculateProfitMargin);
+        document.getElementById('editTaxRate')?.addEventListener('change', editCalculateFinalPrice);
+        document.getElementById('editDiscount')?.addEventListener('input', editCalculateFinalPrice);
+
+        // Margin Pricing handlers
+        document.getElementById('editMarginCostPrice')?.addEventListener('input', editCalculateMarginPrice);
+        document.getElementById('editTargetMargin')?.addEventListener('input', editCalculateMarginPrice);
+        document.getElementById('editMarginTaxRate')?.addEventListener('change', editCalculateMarginPrice);
+
+        // Range Pricing handlers
+        document.getElementById('editRangeCostPrice')?.addEventListener('input', editCalculateRangeProfits);
+        document.getElementById('editMinPrice')?.addEventListener('input', function() {
+          editValidatePriceRange();
+          editCalculateRangeProfits();
+        });
+        document.getElementById('editMaxPrice')?.addEventListener('input', function() {
+          editValidatePriceRange();
+          editCalculateRangeProfits();
+        });
+      }
+
+      function editShowPricingFields(type) {
+        document.querySelectorAll('.pricing-fields').forEach(field => {
+          field.style.display = 'none';
+        });
+
+        switch(type) {
+          case 'fixed':
+            document.getElementById('editFixedFields').style.display = 'block';
+            document.getElementById('editSellingPrice').required = true;
+            break;
+          case 'manual':
+            document.getElementById('editManualFields').style.display = 'block';
+            document.getElementById('editSellingPrice').required = false;
+            break;
+          case 'margin':
+            document.getElementById('editMarginFields').style.display = 'block';
+            document.getElementById('editTargetMargin').required = true;
+            break;
+          case 'range':
+            document.getElementById('editRangeFields').style.display = 'block';
+            document.getElementById('editMinPrice').required = true;
+            document.getElementById('editMaxPrice').required = true;
+            break;
+        }
+      }
+
+      function editShowPricingDescription(type) {
+        const descContainer = document.getElementById('editPricingDescription');
+        document.querySelectorAll('#editPricingDescription .pricing-desc').forEach(desc => {
+          desc.style.display = 'none';
+        });
+
+        if (type) {
+          descContainer.style.display = 'block';
+          const targetDesc = document.getElementById('edit' + type.charAt(0).toUpperCase() + type.slice(1) + 'Desc');
+          if (targetDesc) targetDesc.style.display = 'block';
+        } else {
+          descContainer.style.display = 'none';
+        }
+      }
+
+      function editCalculateProfitMargin() {
+        const costPrice = parseFloat(document.getElementById('editFixedCostPrice').value) || 0;
+        const sellingPrice = parseFloat(document.getElementById('editSellingPrice').value) || 0;
+        
+        if (costPrice > 0 && sellingPrice > 0) {
+          const profit = sellingPrice - costPrice;
+          const margin = ((profit / costPrice) * 100).toFixed(2);
+          
+          document.getElementById('editProfitMargin').value = margin + '%';
+          document.getElementById('editPotentialProfit').value = profit.toFixed(2);
+        } else {
+          document.getElementById('editProfitMargin').value = '0%';
+          document.getElementById('editPotentialProfit').value = '0.00';
+        }
+        
+        // Also calculate final price
+        editCalculateFinalPrice();
+      }
+
+      function editCalculateFinalPrice() {
+        const sellingPrice = parseFloat(document.getElementById('editSellingPrice').value) || 0;
+        const taxRate = parseFloat(document.getElementById('editTaxRate').value) || 0;
+        const discount = parseFloat(document.getElementById('editDiscount').value) || 0;
+        
+        if (sellingPrice > 0) {
+          // Apply tax
+          let priceWithTax = sellingPrice * (1 + (taxRate / 100));
+          
+          // Apply discount
+          let finalPrice = priceWithTax * (1 - (discount / 100));
+          
+          document.getElementById('editFinalPrice').value = finalPrice.toFixed(2);
+        } else {
+          document.getElementById('editFinalPrice').value = '0.00';
+        }
+      }
+
+      function editCalculateMarginPrice() {
+        const costPrice = parseFloat(document.getElementById('editMarginCostPrice').value) || 0;
+        const targetMargin = parseFloat(document.getElementById('editTargetMargin').value) || 0;
+        const taxRate = parseFloat(document.getElementById('editMarginTaxRate').value) || 0;
+        
+        if (costPrice > 0 && targetMargin > 0) {
+          let calculatedSellingPrice = costPrice * (1 + (targetMargin / 100));
+          
+          // Apply tax if applicable
+          if (taxRate > 0) {
+            calculatedSellingPrice = calculatedSellingPrice * (1 + (taxRate / 100));
+          }
+          
+          const profit = calculatedSellingPrice - costPrice;
+          document.getElementById('editCalculatedPrice').value = calculatedSellingPrice.toFixed(2);
+          document.getElementById('editMarginProfit').value = profit.toFixed(2);
+        } else {
+          document.getElementById('editCalculatedPrice').value = '';
+          document.getElementById('editMarginProfit').value = '0.00';
+        }
+      }
+
+      function editCalculateRangeProfits() {
+        const costPrice = parseFloat(document.getElementById('editRangeCostPrice').value) || 0;
+        const minPrice = parseFloat(document.getElementById('editMinPrice').value) || 0;
+        const maxPrice = parseFloat(document.getElementById('editMaxPrice').value) || 0;
+        
+        if (costPrice > 0 && minPrice > 0 && maxPrice > 0) {
+          const minProfit = minPrice - costPrice;
+          const maxProfit = maxPrice - costPrice;
+          document.getElementById('editRangePotentialProfit').value = `${minProfit.toFixed(2)} to ${maxProfit.toFixed(2)}`;
+        } else {
+          document.getElementById('editRangePotentialProfit').value = '0.00 to 0.00';
+        }
+      }
+
+      function editValidatePriceRange() {
+        const minPrice = parseFloat(document.getElementById('editMinPrice').value) || 0;
+        const maxPrice = parseFloat(document.getElementById('editMaxPrice').value) || 0;
+        const costPrice = parseFloat(document.getElementById('editRangeCostPrice').value) || 0;
+
+        if (minPrice > 0 && maxPrice > 0 && minPrice >= maxPrice) {
+          showNotification('Minimum price must be less than maximum price', 'error');
+          return false;
+        }
+        return true;
+      }
+
+      // Close modal on Escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          const modal = document.getElementById('editVariantModalOverlay');
+          if (modal && modal.style.display === 'flex') {
+            closeEditVariantModal();
+          }
+        }
+      });
+
+      // Close modal on overlay click
+      document.addEventListener('click', function(e) {
+        const modal = document.getElementById('editVariantModalOverlay');
+        if (e.target === modal) {
+          closeEditVariantModal();
         }
       });
     </script>
