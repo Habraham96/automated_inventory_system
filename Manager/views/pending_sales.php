@@ -4,7 +4,7 @@
 		<!-- Required meta tags -->
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-		<title>Saved Carts - SalesPilot</title>
+		<title>Pending Sales - SalesPilot</title>
 		<!-- plugins:css -->
 		<link rel="stylesheet" href="../assets/vendors/feather/feather.css">
 		<link rel="stylesheet" href="../assets/vendors/mdi/css/materialdesignicons.min.css">
@@ -25,7 +25,6 @@
 		
 		<!-- Include Sidebar Styles -->
 		<?php include '../layouts/sidebar_styles.php'; ?>
-		<?php include '../layouts/preloader.php'; ?>
 		
 		<style>
 		/* Main panel positioning to avoid sidebar overlap */
@@ -92,114 +91,6 @@
 			border-bottom: 7px solid #ffffff;
 		}
 		
-		/* ESC key hint */
-		.esc-hint {
-			position: absolute;
-			top: 8px;
-			right: 12px;
-			font-size: 0.7rem;
-			color: #6c757d;
-			background: rgba(108, 117, 125, 0.1);
-			padding: 2px 6px;
-			border-radius: 4px;
-			font-weight: 500;
-		}
-		
-		.custom-date-wrapper {
-			position: relative;
-			display: flex;
-			flex-direction: column;
-			gap: 12px;
-			min-width: 160px;
-		}
-		
-		.custom-date-input {
-			border: 2px solid #e9ecef !important;
-			border-radius: 10px !important;
-			padding: 14px 16px !important;
-			font-size: 1rem !important;
-			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-			background: #ffffff !important;
-			color: #495057 !important;
-			box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1) !important;
-			position: relative;
-			min-width: 160px !important;
-			height: 48px !important;
-		}
-		
-		.custom-date-input:focus {
-			border-color: #007bff !important;
-			box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
-			transform: translateY(-2px) !important;
-			background: #f8f9fa !important;
-		}
-		
-		.custom-date-input:hover {
-			border-color: #007bff !important;
-			transform: translateY(-1px) !important;
-			box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15) !important;
-		}
-		
-		.date-label {
-			font-size: 0.8rem;
-			font-weight: 600;
-			color: #6c757d;
-			text-transform: uppercase;
-			letter-spacing: 0.6px;
-			margin-bottom: 6px;
-			display: flex;
-			align-items: center;
-			gap: 6px;
-		}
-		
-		.date-label i {
-			font-size: 1.1rem;
-			color: #007bff;
-		}
-		
-		/* Custom date picker icon styling */
-		.custom-date-input::-webkit-calendar-picker-indicator {
-			background-color: #007bff;
-			border-radius: 6px;
-			padding: 6px;
-			cursor: pointer;
-			transition: all 0.3s ease;
-			width: 20px;
-			height: 20px;
-		}
-		
-		.custom-date-input::-webkit-calendar-picker-indicator:hover {
-			background-color: #0056b3;
-			transform: scale(1.15);
-		}
-		
-		/* Range connector */
-		.date-range-connector {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			color: #6c757d;
-			font-weight: bold;
-			margin: 0 16px;
-			font-size: 1.3rem;
-			margin-top: 20px;
-		}
-		
-		/* Responsive adjustments */
-		@media (max-width: 768px) {
-			#customDateInputs {
-				padding: 16px 18px;
-				border-radius: 12px;
-				min-width: 340px;
-				margin-top: 6px;
-			}
-			
-			.custom-date-wrapper {
-				gap: 10px;
-				min-width: 140px;
-			}
-		}
-		
 		/* Table row hover and click effects */
 		.table tbody tr {
 			cursor: pointer;
@@ -217,8 +108,8 @@
 			border-left: 4px solid #2196F3;
 		}
 		
-		/* Activity Details Side Panel */
-		.activity-details-panel {
+		/* Pending Sale Details Side Panel */
+		.sale-details-panel {
 			position: fixed;
 			top: 0;
 			right: -100%;
@@ -231,7 +122,7 @@
 			overflow-y: auto;
 		}
 		
-		.activity-details-panel.active {
+		.sale-details-panel.active {
 			right: 0;
 		}
 		
@@ -254,7 +145,7 @@
 		}
 		
 		.panel-header {
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
 			color: white;
 			padding: 20px;
 			border-bottom: 1px solid #dee2e6;
@@ -295,7 +186,7 @@
 			padding: 20px;
 			background: #f8f9fa;
 			border-radius: 12px;
-			border-left: 4px solid #667eea;
+			border-left: 4px solid #28a745;
 		}
 		
 		.detail-label {
@@ -314,15 +205,7 @@
 			line-height: 1.5;
 		}
 		
-		.detail-value.activity-text {
-			background: white;
-			padding: 15px;
-			border-radius: 8px;
-			border: 1px solid #dee2e6;
-			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-		}
-		
-		.access-badge {
+		.status-badge {
 			display: inline-block;
 			padding: 6px 12px;
 			border-radius: 20px;
@@ -331,140 +214,55 @@
 			text-transform: capitalize;
 		}
 		
-		.access-badge.manager {
-			background: #e8f5e8;
-			color: #2e7d32;
-			border: 1px solid #4caf50;
+		.status-badge.pending {
+			background: #fff3cd;
+			color: #856404;
+			border: 1px solid #ffc107;
 		}
 		
-		.access-badge.staff {
-			background: #e3f2fd;
-			color: #1565c0;
-			border: 1px solid #2196f3;
+		.status-badge.processing {
+			background: #d1ecf1;
+			color: #0c5460;
+			border: 1px solid #17a2b8;
 		}
 		
-		.timestamp-info {
+		.status-badge.on-hold {
+			background: #f8d7da;
+			color: #721c24;
+			border: 1px solid #dc3545;
+		}
+		
+		.item-list {
+			background: white;
+			border-radius: 8px;
+			border: 1px solid #dee2e6;
+			padding: 15px;
+		}
+		
+		.item-row {
 			display: flex;
+			justify-content: between;
 			align-items: center;
-			gap: 8px;
-			color: #6c757d;
-			font-size: 0.9rem;
+			padding: 10px 0;
+			border-bottom: 1px solid #eee;
+		}
+		
+		.item-row:last-child {
+			border-bottom: none;
 		}
 		
 		@media (max-width: 768px) {
-			.activity-details-panel {
+			.sale-details-panel {
 				width: 100%;
 				right: -100%;
 			}
-		}
-			.custom-date-input {
-				padding: 12px 14px !important;
-				font-size: 0.95rem !important;
-				min-width: 140px !important;
-				height: 44px !important;
-			}
-			
-			.date-label {
-				font-size: 0.75rem;
-				gap: 5px;
-			}
-			
-			.date-label i {
-				font-size: 1rem;
-			}
-			
-			.date-range-connector {
-				margin: 0 12px;
-				font-size: 1.2rem;
-				margin-top: 18px;
-			}
-		}
-		
-		@media (max-width: 480px) {
-			#customDateInputs {
-				padding: 14px 16px;
-				min-width: 300px;
-			}
-			
-			.custom-date-wrapper {
-				min-width: 120px;
-			}
-			
-			.custom-date-input {
-				min-width: 120px !important;
-				height: 42px !important;
-			}
-			
-			.date-range-connector {
-				margin: 0 8px;
-				font-size: 1.1rem;
-			}
-		}
-		
-		/* Animation for overlay showing/hiding */
-		@keyframes overlaySlideIn {
-			from {
-				opacity: 0;
-				transform: translateY(-20px) scale(0.95);
-				backdrop-filter: blur(0px);
-			}
-			to {
-				opacity: 1;
-				transform: translateY(0) scale(1);
-				backdrop-filter: blur(8px);
-			}
-		}
-		
-		@keyframes overlaySlideOut {
-			from {
-				opacity: 1;
-				transform: translateY(0) scale(1);
-				backdrop-filter: blur(8px);
-			}
-			to {
-				opacity: 0;
-				transform: translateY(-20px) scale(0.95);
-				backdrop-filter: blur(0px);
-			}
-		}
-		
-		/* Legacy animations - keeping for compatibility */
-		@keyframes slideInDown {
-			from {
-				opacity: 0;
-				transform: translateY(-20px) scale(0.95);
-			}
-			to {
-				opacity: 1;
-				transform: translateY(0) scale(1);
-			}
-		}
-		
-		@keyframes slideOutUp {
-			from {
-				opacity: 1;
-				transform: translateY(0) scale(1);
-			}
-			to {
-				opacity: 0;
-				transform: translateY(-20px) scale(0.95);
-			}
-		}
-		
-		#customDateInputs.entering {
-			animation: slideInDown 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-		}
-		
-		#customDateInputs.leaving {
-			animation: slideOutUp 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
 		}
 		</style>
 		<!-- endinject -->
 		<link rel="shortcut icon" href="../assets/images/favicon.png" />
 	</head>
-	
 	<body class="with-welcome-text">
-		
+		<?php include '../layouts/preloader.php'; ?>
 		<div class="container-scroller">
 			<div class="container-fluid page-body-wrapper">
 				
@@ -479,39 +277,39 @@
 							<div class="col-12 grid-margin stretch-card">
 								<div class="card card-rounded">
 									<div class="card-body">
-										<h4 class="card-title">Activity Logs</h4>
-										<p class="card-description">Track all system activities and user access logs.</p>
+										<h4 class="card-title">Pending Sales</h4>
+										<p class="card-description">Monitor and manage all pending sales transactions.</p>
 										
 										<!-- Search and Filter Options -->
 										<div class="row mb-3 filter-container">
 											<div class="col-md-4">
 												<div class="input-group">
-													<input type="text" class="form-control" placeholder="Search activities..." id="searchActivities">
+													<input type="text" class="form-control" placeholder="Search sales..." id="searchSales">
 													<button class="btn btn-outline-secondary" type="button">
 														<i class="bi bi-search"></i>
 													</button>
 												</div>
 											</div>
 											<div class="col-md-8 d-flex justify-content-end align-items-center gap-2">
-												<!-- Access Type Filter -->
-												<select class="form-select" id="accessTypeFilter" style="max-width: 140px;">
-													<option value="">All Access Types</option>
-													<option value="Login">Manager</option>
-													<option value="Logout">Staff</option>						
+												<!-- Status Filter -->
+												<select class="form-select" id="statusFilter" style="max-width: 140px;">
+													<option value="">All Status</option>
+													<option value="Pending">Pending</option>
+													<option value="Processing">Processing</option>
+													<option value="On Hold">On Hold</option>						
 												</select>
 												
-												<!-- Staff Filter -->
-												<select class="form-select" id="staffFilter" style="max-width: 140px;">
-													<option value="">All Staff</option>
-													<option value="John Smith">John Smith</option>
-													<option value="Sarah Johnson">Sarah Johnson</option>
+												<!-- Customer Filter -->
+												<select class="form-select" id="customerFilter" style="max-width: 140px;">
+													<option value="">All Customers</option>
+													<option value="John Doe">John Doe</option>
+													<option value="Jane Smith">Jane Smith</option>
 													<option value="Michael Brown">Michael Brown</option>
-													<option value="Emily Davis">Emily Davis</option>
+													<option value="Sarah Johnson">Sarah Johnson</option>
 													<option value="David Wilson">David Wilson</option>
 													<option value="Lisa Anderson">Lisa Anderson</option>
 													<option value="Robert Taylor">Robert Taylor</option>
 													<option value="Jennifer Garcia">Jennifer Garcia</option>
-													<option value="System Admin">System Admin</option>
 												</select>
 												
 												<!-- Date Range Filter -->
@@ -560,86 +358,146 @@
 										<br>
 										
 										<div class="table-responsive">
-											<table class="table table-striped" id="table">
+											<table class="table table-striped" id="salesTable">
 												<thead>
 													<tr>
 														<th>S/N</th>
+														<th>Invoice</th>
 														<th>Date</th>
-														<th>Activity</th>
-														<th>Staff Name</th>
-														<th>Access Type</th>
+														<th>Customer</th>
+														<th>Amount</th>
+														<th>Status</th>
+														<th>Actions</th>
 													</tr>
 												</thead>
 												<tbody>
 													<tr>
 														<td>1</td>
-														<td>Nov 7, 2025 9:00:00 AM</td>
-														<td>User logged into system</td>
-														<td>John Smith</td>
-														<td>Manager</td>
+														<td>INV-P001</td>
+														<td>Nov 10, 2025</td>
+														<td>John Doe</td>
+														<td>₦24500.50</td>
+														<td><span class="badge bg-warning">Pending</span></td>
+														<td>
+															<button class="btn btn-sm btn-outline-success me-1" title="Complete Sale">
+																<i class="bi bi-check-circle"></i>
+															</button>
+															<button class="btn btn-sm btn-outline-primary" title="Edit">
+																<i class="bi bi-pencil"></i>
+															</button>
+														</td>
 													</tr>
 													<tr>
 														<td>2</td>
-														<td>Nov 7, 2025 8:50:12 AM</td>
-														<td>Added new product: Samsung Galaxy S24</td>
-														<td>Sarah Johnson</td>
-														<td>Staff</td>
+														<td>INV-P002</td>
+														<td>Nov 10, 2025</td>
+														<td>Jane Smith</td>
+														<td>₦18900.75</td>
+														<td><span class="badge bg-info">Processing</span></td>
+														<td>
+															<button class="btn btn-sm btn-outline-success me-1" title="Complete Sale">
+																<i class="bi bi-check-circle"></i>
+															</button>
+															<button class="btn btn-sm btn-outline-primary" title="Edit">
+																<i class="bi bi-pencil"></i>
+															</button>
+														</td>
 													</tr>
 													<tr>
 														<td>3</td>
-														<td>Nov 7, 2025 6:45:00 PM</td>
-														<td>Updated inventory for iPhone 15 Pro</td>
+														<td>INV-P003</td>
+														<td>Nov 9, 2025</td>
 														<td>Michael Brown</td>
-														<td>Staff</td>
+														<td>₦12500.99</td>
+														<td><span class="badge bg-warning">Pending</span></td>
+														<td>
+															<button class="btn btn-sm btn-outline-success me-1" title="Complete Sale">
+																<i class="bi bi-check-circle"></i>
+															</button>
+															<button class="btn btn-sm btn-outline-primary" title="Edit">
+																<i class="bi bi-pencil"></i>
+															</button>
+														</td>
 													</tr>
 													<tr>
 														<td>4</td>
-														<td>Nov 7, 2025 8:30:00 AM</td>
-														<td>Generated sales report</td>
-														<td>Emily Davis</td>
-														<td>Staff</td>
+														<td>INV-P004</td>
+														<td>Nov 9, 2025</td>
+														<td>Sarah Johnson</td>
+														<td>₦33400.25</td>
+														<td><span class="badge bg-danger">On Hold</span></td>
+														<td>
+															<button class="btn btn-sm btn-outline-success me-1" title="Complete Sale">
+																<i class="bi bi-check-circle"></i>
+															</button>
+															<button class="btn btn-sm btn-outline-primary" title="Edit">
+																<i class="bi bi-pencil"></i>
+															</button>
+														</td>
 													</tr>
 													<tr>
 														<td>5</td>
-														<td>Nov 7, 2025 6:45:00 PM</td>
-														<td>Deleted discontinued product: Nokia 3310</td>
+														<td>INV-P005</td>
+														<td>Nov 8, 2025</td>
 														<td>David Wilson</td>
-														<td>Staff</td>
+														<td>₦45600.80</td>
+														<td><span class="badge bg-info">Processing</span></td>
+														<td>
+															<button class="btn btn-sm btn-outline-success me-1" title="Complete Sale">
+																<i class="bi bi-check-circle"></i>
+															</button>
+															<button class="btn btn-sm btn-outline-primary" title="Edit">
+																<i class="bi bi-pencil"></i>
+															</button>
+														</td>
 													</tr>
 													<tr>
 														<td>6</td>
-														<td>Nov 7, 2025 6:33:22 AM</td>
-														<td>User logged out of system</td>
-														<td>John Smith</td>
-														<td>Manager</td>
+														<td>INV-P006</td>
+														<td>Nov 8, 2025</td>
+														<td>Lisa Anderson</td>
+														<td>₦27800.40</td>
+														<td><span class="badge bg-warning">Pending</span></td>
+														<td>
+															<button class="btn btn-sm btn-outline-success me-1" title="Complete Sale">
+																<i class="bi bi-check-circle"></i>
+															</button>
+															<button class="btn btn-sm btn-outline-primary" title="Edit">
+																<i class="bi bi-pencil"></i>
+															</button>
+														</td>
 													</tr>
 													<tr>
 														<td>7</td>
-														<td>Nov 7, 2025 5:44:20 AM</td>
-														<td>Processed sale transaction #TXN001234</td>
-														<td>Lisa Anderson</td>
-														<td>Staff</td>
+														<td>INV-P007</td>
+														<td>Nov 7, 2025</td>
+														<td>Robert Taylor</td>
+														<td>₦15600.75</td>
+														<td><span class="badge bg-warning">Pending</span></td>
+														<td>
+															<button class="btn btn-sm btn-outline-success me-1" title="Complete Sale">
+																<i class="bi bi-check-circle"></i>
+															</button>
+															<button class="btn btn-sm btn-outline-primary" title="Edit">
+																<i class="bi bi-pencil"></i>
+															</button>
+														</td>
 													</tr>
 													<tr>
 														<td>8</td>
-														<td>Nov 7, 2025 8:45:00 AM</td>
-														<td>Updated user permissions for staff member</td>
-														<td>Robert Taylor</td>
-														<td>Staff</td>
-													</tr>
-													<tr>
-														<td>9</td>
-														<td>Nov 7, 2025 6:45:00 PM</td>
-														<td>Exported inventory data to CSV</td>
+														<td>INV-P008</td>
+														<td>Nov 7, 2025</td>
 														<td>Jennifer Garcia</td>
-														<td>staff</td>
-													</tr>
-													<tr>
-														<td>10</td>
-														<td>Nov 7, 2025 6:45:00 PM</td>
-														<td>Backup database completed successfully</td>
-														<td>System Admin</td>
-														<td>Manager</td>
+														<td>₦38900.90</td>
+														<td><span class="badge bg-info">Processing</span></td>
+														<td>
+															<button class="btn btn-sm btn-outline-success me-1" title="Complete Sale">
+																<i class="bi bi-check-circle"></i>
+															</button>
+															<button class="btn btn-sm btn-outline-primary" title="Edit">
+																<i class="bi bi-pencil"></i>
+															</button>
+														</td>
 													</tr>
 												</tbody>
 											</table>
@@ -652,12 +510,12 @@
 					</div>
 					<!-- content-wrapper ends -->
 					
-					<!-- Activity Details Side Panel -->
+					<!-- Sale Details Side Panel -->
 					<div class="panel-overlay" id="panelOverlay"></div>
-					<div class="activity-details-panel" id="activityDetailsPanel">
+					<div class="sale-details-panel" id="saleDetailsPanel">
 						<div class="panel-header d-flex justify-content-between align-items-center">
 							<h5 class="panel-title">
-								<i class="bi bi-clipboard-data me-2"></i>Activity Details
+								<i class="bi bi-receipt me-2"></i>Sale Details
 							</h5>
 							<button type="button" class="btn-close-panel" id="closePanelBtn">
 								<i class="bi bi-x-lg"></i>
@@ -668,72 +526,67 @@
 							<!-- Basic Information -->
 							<div class="detail-section">
 								<label class="detail-label">
-									<i class="bi bi-hash me-1"></i>Log ID
+									<i class="bi bi-receipt-cutoff me-1"></i>Invoice Number
 								</label>
-								<div class="detail-value" id="detailLogId">#001</div>
+								<div class="detail-value" id="detailInvoice">INV-P001</div>
 							</div>
 							
 							<div class="detail-section">
 								<label class="detail-label">
-									<i class="bi bi-calendar-event me-1"></i>Date & Time
+									<i class="bi bi-calendar-event me-1"></i>Order Date
+								</label>
+								<div class="detail-value" id="detailDate">Nov 10, 2025</div>
+							</div>
+							
+							<div class="detail-section">
+								<label class="detail-label">
+									<i class="bi bi-person me-1"></i>Customer
+								</label>
+								<div class="detail-value" id="detailCustomer">John Doe</div>
+							</div>
+							
+							<div class="detail-section">
+								<label class="detail-label">
+									<i class="bi bi-currency-dollar me-1"></i>Total Amount
+								</label>
+								<div class="detail-value" id="detailAmount">₦24500.50</div>
+							</div>
+							
+							<div class="detail-section">
+								<label class="detail-label">
+									<i class="bi bi-info-circle me-1"></i>Status
 								</label>
 								<div class="detail-value">
-									<div class="timestamp-info">
-										<i class="bi bi-clock"></i>
-										<span id="detailDateTime">Nov 7, 2025 9:15:00 AM</span>
+									<span class="status-badge pending" id="detailStatus">Pending</span>
+								</div>
+							</div>
+							
+							<!-- Items List -->
+							<div class="detail-section">
+								<label class="detail-label">
+									<i class="bi bi-list-ul me-1"></i>Items Ordered
+								</label>
+								<div class="detail-value">
+									<div class="item-list" id="detailItems">
+										<!-- Items will be populated by JavaScript -->
 									</div>
 								</div>
 							</div>
 							
+							<!-- Payment Information -->
 							<div class="detail-section">
 								<label class="detail-label">
-									<i class="bi bi-activity me-1"></i>Activity Description
+									<i class="bi bi-credit-card me-1"></i>Payment Information
 								</label>
-								<div class="detail-value activity-text" id="detailActivity">
-									User logged into system
-								</div>
-							</div>
-							
-							<div class="detail-section">
-								<label class="detail-label">
-									<i class="bi bi-person me-1"></i>Staff Member
-								</label>
-								<div class="detail-value" id="detailStaffName">John Smith</div>
-							</div>
-							
-							<div class="detail-section">
-								<label class="detail-label">
-									<i class="bi bi-shield-check me-1"></i>Access Level
-								</label>
-								<div class="detail-value">
-									<span class="access-badge manager" id="detailAccessType">Manager</span>
-								</div>
-							</div>
-							
-							<!-- Additional Information -->
-							<div class="detail-section">
-								<label class="detail-label">
-									<i class="bi bi-info-circle me-1"></i>Additional Information
-								</label>
-								<div class="detail-value">
+								<div class="detail-value" id="detailPayment">
 									<div class="row">
 										<div class="col-6">
-											<small class="text-muted">Session ID:</small><br>
-											<span id="detailSessionId">SES_001234567</span>
-										</div>
-										<div class="col-6">
-											<small class="text-muted">IP Address:</small><br>
-											<span id="detailIpAddress">192.168.1.101</span>
-										</div>
-									</div>
-									<div class="row mt-2">
-										<div class="col-6">
-											<small class="text-muted">Browser:</small><br>
-											<span id="detailBrowser">Chrome 118.0</span>
+											<small class="text-muted">Method:</small><br>
+											<span>Credit Card</span>
 										</div>
 										<div class="col-6">
 											<small class="text-muted">Status:</small><br>
-											<span class="badge bg-success" id="detailStatus">Completed</span>
+											<span class="badge bg-warning">Pending</span>
 										</div>
 									</div>
 								</div>
@@ -761,8 +614,6 @@
 		<script src="../assets/vendors/progressbar.js/progressbar.min.js"></script>
 		<!-- End plugin js for this page -->
 		<!-- inject:js -->
-		<!-- <script src="../assets/js/off-canvas.js"></script> Commented out to avoid conflicts -->
-		<!-- <script src="../assets/js/template.js"></script> Commented out to avoid conflicts -->
 		
 		<!-- Include Sidebar Scripts -->
 		<?php include '../layouts/sidebar_scripts.php'; ?>
@@ -771,65 +622,90 @@
 		<script src="../assets/js/hoverable-collapse.js"></script>
 		<script src="../assets/js/todolist.js"></script>
 		
-		<!-- Sidebar Menu Behavior - Standard collapse behavior for single pages -->
-		<script>
-		document.addEventListener('DOMContentLoaded', function() {
-		  // Initialize Bootstrap dropdowns for profile menu
-		  var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
-		  var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-		    return new bootstrap.Dropdown(dropdownToggleEl);
-		  });
-		  
-		  // Profile dropdown specific handler
-		  var userDropdownToggle = document.getElementById('UserDropdown');
-		  if (userDropdownToggle) {
-		    console.log('Profile dropdown initialized');
-		    
-		    // Ensure dropdown is properly initialized
-		    var dropdown = bootstrap.Dropdown.getOrCreateInstance(userDropdownToggle);
-		    
-		    // Add click event listener
-		    userDropdownToggle.addEventListener('click', function(e) {
-		      e.preventDefault();
-		      console.log('Profile picture clicked');
-		      
-		      var dropdownMenu = this.nextElementSibling;
-		      if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
-		        // Toggle dropdown visibility
-		        if (dropdownMenu.classList.contains('show')) {
-		          dropdown.hide();
-		        } else {
-		          dropdown.show();
-		        }
-		      }
-		    });
-		  }
-		  
-          
-		});
-		</script>
+		<!-- Sidebar Menu Behavior with Profile Dropdown Fix removed (merged into main handler) -->
 		<!-- endinject -->
 		<!-- Custom js for this page-->
 		<script src="../assets/js/jquery.cookie.js" type="text/javascript"></script>
 		<script src="../assets/js/dashboard.js"></script>
 		<!-- End custom js for this page-->
 		
-		<!-- Activity Logs Search and Filter functionality -->
+		<!-- Pending Sales Search and Filter functionality (includes profile dropdown init) -->
 		<script>
 		document.addEventListener('DOMContentLoaded', function() {
+			// Initialize Bootstrap dropdowns for profile menu
+			var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
+			var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+			  return new bootstrap.Dropdown(dropdownToggleEl);
+			});
+			
+			// Profile dropdown specific handler
+			var userDropdownToggle = document.getElementById('UserDropdown');
+			if (userDropdownToggle) {
+			  console.log('Profile dropdown initialized');
+			  var dropdown = bootstrap.Dropdown.getOrCreateInstance(userDropdownToggle);
+			  userDropdownToggle.addEventListener('click', function(e) {
+			    e.preventDefault();
+			    var dropdownMenu = this.nextElementSibling;
+			    if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
+			      if (dropdownMenu.classList.contains('show')) {
+			        dropdown.hide();
+			      } else {
+			        dropdown.show();
+			      }
+			    }
+			  });
+			}
+
 			// Get DOM elements
-			const searchInput = document.getElementById('searchActivities');
-			const accessTypeFilter = document.getElementById('accessTypeFilter');
-			const staffFilter = document.getElementById('staffFilter');
+			const searchInput = document.getElementById('searchSales');
+			const statusFilter = document.getElementById('statusFilter');
+			const customerFilter = document.getElementById('customerFilter');
 			const dateFilter = document.getElementById('dateFilter');
 			const customDateInputs = document.getElementById('customDateInputs');
 			const startDateInput = document.getElementById('startDate');
 			const endDateInput = document.getElementById('endDate');
 			const applyFiltersBtn = document.getElementById('applyFilters');
 			const clearFiltersBtn = document.getElementById('clearFilters');
-			const table = document.getElementById('table');
+			const table = document.getElementById('salesTable');
 			const tableBody = table.querySelector('tbody');
 			const tableRows = Array.from(tableBody.querySelectorAll('tr'));
+
+			// Ensure sidebar parent menu arrows rotate correctly when their collapses open/close
+			try {
+				var sidebarCollapseTriggers = document.querySelectorAll('.sidebar .nav-link[data-bs-toggle="collapse"]');
+				sidebarCollapseTriggers.forEach(function(trigger) {
+					var targetSelector = trigger.getAttribute('data-bs-target') || trigger.getAttribute('href');
+					if (!targetSelector) return;
+					var collapseEl = document.querySelector(targetSelector);
+					if (!collapseEl) return;
+					// Set initial state based on whether the collapse is shown
+					var arrowEl = trigger.querySelector('.menu-arrow');
+					if (collapseEl.classList.contains('show')) {
+						trigger.classList.remove('collapsed');
+						trigger.setAttribute('aria-expanded', 'true');
+						if (arrowEl) arrowEl.classList.add('rotated');
+					} else {
+						trigger.classList.add('collapsed');
+						trigger.setAttribute('aria-expanded', 'false');
+						if (arrowEl) arrowEl.classList.remove('rotated');
+					}
+
+					// Listen for bootstrap collapse events to toggle classes
+					collapseEl.addEventListener('shown.bs.collapse', function() {
+						trigger.classList.remove('collapsed');
+						trigger.setAttribute('aria-expanded', 'true');
+						if (arrowEl) arrowEl.classList.add('rotated');
+					});
+
+					collapseEl.addEventListener('hidden.bs.collapse', function() {
+						trigger.classList.add('collapsed');
+						trigger.setAttribute('aria-expanded', 'false');
+						if (arrowEl) arrowEl.classList.remove('rotated');
+					});
+				});
+			} catch (err) {
+				console.warn('Sidebar arrow rotation init failed:', err);
+			}
 
 			// Set default dates for custom range
 			const today = new Date();
@@ -840,21 +716,9 @@
 			startDateInput.value = weekAgoStr;
 			endDateInput.value = todayStr;
 
-			// Show/hide custom date overlay based on date filter selection
-			function showCustomDateOverlay() {
-				const customDateInputs = document.getElementById('customDateInputs');
-				customDateInputs.classList.add('show');
-				
-				// Focus on start date for better UX
-				setTimeout(() => {
-					startDateInput.focus();
-				}, 200);
-			}
-			
-			function hideCustomDateOverlay() {
-				const customDateInputs = document.getElementById('customDateInputs');
-				customDateInputs.classList.remove('show');
-			}
+			// Show/hide custom date overlay (exposed globally for inline onclick)
+			window.showCustomDateOverlay = function() { customDateInputs.classList.add('show'); setTimeout(() => { if (startDateInput) startDateInput.focus(); }, 200); };
+			window.hideCustomDateOverlay = function() { customDateInputs.classList.remove('show'); };
 			
 			// Date filter change handler
 			dateFilter.addEventListener('change', function() {
@@ -863,20 +727,16 @@
 				} else {
 					hideCustomDateOverlay();
 				}
-				// Trigger search when date filter changes
 				performSearch();
 			});
 			
-			// ESC key handler for closing custom date overlay
+			// ESC key handler
 			document.addEventListener('keydown', function(e) {
-				if (e.key === 'Escape' || e.keyCode === 27) {
-					if (customDateInputs.classList.contains('show')) {
-						// Reset date filter to empty and hide overlay
-						dateFilter.value = '';
-						hideCustomDateOverlay();
-						performSearch();
-						e.preventDefault();
-					}
+				if (e.key === 'Escape' && customDateInputs.classList.contains('show')) {
+					dateFilter.value = '';
+					hideCustomDateOverlay();
+					performSearch();
+					e.preventDefault();
 				}
 			});
 			
@@ -896,36 +756,37 @@
 				return {
 					element: row,
 					sn: cells[0]?.textContent.trim() || '',
-					date: cells[1]?.textContent.trim() || '',
-					activity: cells[2]?.textContent.trim() || '',
-					staffName: cells[3]?.textContent.trim() || '',
-					accessType: cells[4]?.textContent.trim() || ''
+					invoice: cells[1]?.textContent.trim() || '',
+					date: cells[2]?.textContent.trim() || '',
+					customer: cells[3]?.textContent.trim() || '',
+					amount: cells[4]?.textContent.trim() || '',
+					status: cells[5]?.textContent.trim() || ''
 				};
 			});
 
-			// Search functionality
-			function performSearch() {
+			// Search functionality (exposed globally for inline onchange)
+			window.performSearch = function() {
 				const searchTerm = searchInput.value.toLowerCase();
-				const accessType = accessTypeFilter.value;
-				const staff = staffFilter.value;
+				const status = statusFilter.value;
+				const customer = customerFilter.value;
 				const dateRange = dateFilter.value;
 
 				const filteredData = originalData.filter(item => {
-					// Text search across activity and staff name
+					// Text search
 					const matchesSearch = searchTerm === '' || 
-						item.activity.toLowerCase().includes(searchTerm) ||
-						item.staffName.toLowerCase().includes(searchTerm);
+						item.invoice.toLowerCase().includes(searchTerm) ||
+						item.customer.toLowerCase().includes(searchTerm);
 
-					// Access type filter
-					const matchesAccessType = accessType === '' || item.accessType === accessType;
+					// Status filter
+					const matchesStatus = status === '' || item.status.includes(status);
 
-					// Staff filter
-					const matchesStaff = staff === '' || item.staffName === staff;
+					// Customer filter
+					const matchesCustomer = customer === '' || item.customer === customer;
 
-					// Date filter with enhanced logic
+					// Date filter
 					let matchesDate = true;
 					if (dateRange && dateRange !== '') {
-						const itemDate = new Date(item.date.split(' ')[0]); // Extract date part only
+						const itemDate = new Date(item.date.split(' ')[0]);
 						const currentDate = new Date();
 						
 						switch (dateRange) {
@@ -968,12 +829,6 @@
 									startDate.setHours(0, 0, 0, 0);
 									endDate.setHours(23, 59, 59, 999);
 									matchesDate = itemDate >= startDate && itemDate <= endDate;
-								} else if (startDateInput.value) {
-									startDate.setHours(0, 0, 0, 0);
-									matchesDate = itemDate >= startDate;
-								} else if (endDateInput.value) {
-									endDate.setHours(23, 59, 59, 999);
-									matchesDate = itemDate <= endDate;
 								}
 								break;
 								
@@ -982,7 +837,7 @@
 						}
 					}
 
-					return matchesSearch && matchesAccessType && matchesStaff && matchesDate;
+					return matchesSearch && matchesStatus && matchesCustomer && matchesDate;
 				});
 
 				// Clear table body
@@ -992,22 +847,20 @@
 				if (filteredData.length === 0) {
 					const noResultsRow = document.createElement('tr');
 					noResultsRow.innerHTML = `
-						<td colspan="5" class="text-center text-muted py-4">
+						<td colspan="7" class="text-center text-muted py-4">
 							<i class="bi bi-search"></i><br>
-							No activities found matching your criteria
+							No pending sales found matching your criteria
 						</td>
 					`;
 					tableBody.appendChild(noResultsRow);
 				} else {
 					filteredData.forEach((item, index) => {
-						// Update serial number for filtered results
 						const cells = item.element.querySelectorAll('td');
 						cells[0].textContent = index + 1;
 						tableBody.appendChild(item.element);
 					});
 				}
 
-				// Update results count
 				updateResultsCount(filteredData.length);
 			}
 
@@ -1024,25 +877,23 @@
 				}
 				
 				if (count === originalData.length) {
-					countElement.textContent = `Showing all ${count} activities`;
+					countElement.textContent = `Showing all ${count} pending sales`;
 				} else {
-					countElement.textContent = `Showing ${count} of ${originalData.length} activities`;
+					countElement.textContent = `Showing ${count} of ${originalData.length} pending sales`;
 				}
 			}
 
 			// Clear all filters
 			function clearAllFilters() {
 				searchInput.value = '';
-				accessTypeFilter.value = '';
-				staffFilter.value = '';
+				statusFilter.value = '';
+				customerFilter.value = '';
 				dateFilter.value = '';
 				startDateInput.value = weekAgoStr;
 				endDateInput.value = todayStr;
 				
-				// Hide custom date overlay properly
 				hideCustomDateOverlay();
 				
-				// Restore original table
 				tableBody.innerHTML = '';
 				originalData.forEach(item => {
 					tableBody.appendChild(item.element);
@@ -1053,9 +904,8 @@
 
 			// Event listeners
 			searchInput.addEventListener('input', performSearch);
-			accessTypeFilter.addEventListener('change', performSearch);
-			staffFilter.addEventListener('change', performSearch);
-			// dateFilter change listener is already added above
+			statusFilter.addEventListener('change', performSearch);
+			customerFilter.addEventListener('change', performSearch);
 			startDateInput.addEventListener('change', performSearch);
 			endDateInput.addEventListener('change', performSearch);
 			applyFiltersBtn.addEventListener('click', performSearch);
@@ -1072,130 +922,151 @@
 			// Initialize results count
 			updateResultsCount(originalData.length);
 
-			// Table row click functionality for activity details
-			const activityDetailsPanel = document.getElementById('activityDetailsPanel');
+			// Table row click functionality for sale details
+			const saleDetailsPanel = document.getElementById('saleDetailsPanel');
 			const panelOverlay = document.getElementById('panelOverlay');
 			const closePanelBtn = document.getElementById('closePanelBtn');
+			
+			// Sample sale details data
+			const saleDetails = {
+				'INV-P001': {
+					invoice: 'INV-P001',
+							date: 'Nov 10, 2025',
+					customer: 'John Doe',
+					amount: '$245.50',
+					status: 'pending',
+					items: [
+						{ name: 'Laptop Stand', qty: 1, price: 89.99, total: 89.99 },
+						{ name: 'Wireless Mouse', qty: 2, price: 25.50, total: 51.00 },
+						{ name: 'USB Hub', qty: 1, price: 104.51, total: 104.51 }
+					]
+				},
+				'INV-P002': {
+					invoice: 'INV-P002',
+							date: 'Nov 10, 2025',
+					customer: 'Jane Smith',
+					amount: '$189.75',
+					status: 'processing',
+					items: [
+						{ name: 'Gaming Keyboard', qty: 1, price: 125.00, total: 125.00 },
+						{ name: 'Mouse Pad', qty: 1, price: 64.75, total: 64.75 }
+					]
+				}
+				// Add more mock data as needed
+			};
 			
 			// Add click event to table rows
 			tableRows.forEach((row, index) => {
 				row.addEventListener('click', function(e) {
+					// Don't trigger if clicking on action buttons
+					if (e.target.closest('button')) return;
+					
 					// Remove clicked class from all rows
 					tableRows.forEach(r => r.classList.remove('clicked'));
 					
 					// Add clicked class to current row
 					this.classList.add('clicked');
 					
-					// Extract activity data from row
+					// Extract sale data from row
 					const cells = this.querySelectorAll('td');
-					const activityData = {
-						id: cells[0].textContent.trim(),
-						dateTime: cells[1].textContent.trim(),
-						activity: cells[2].textContent.trim(),
-						staffName: cells[3].textContent.trim(),
-						accessType: cells[4].textContent.trim().toLowerCase()
+					const invoiceNumber = cells[1].textContent.trim();
+					const saleData = saleDetails[invoiceNumber] || {
+						invoice: cells[1].textContent.trim(),
+						date: cells[2].textContent.trim(),
+						customer: cells[3].textContent.trim(),
+						amount: cells[4].textContent.trim(),
+						status: cells[5].textContent.toLowerCase().includes('pending') ? 'pending' : 
+								cells[5].textContent.toLowerCase().includes('processing') ? 'processing' : 'on-hold',
+						items: [
+							{ name: 'Sample Product', qty: 1, price: 100.00, total: 100.00 }
+						]
 					};
 					
-					// Populate panel with activity data
-					populateActivityPanel(activityData);
+					// Populate panel with sale data
+					populateSalePanel(saleData);
 					
 					// Show panel
-					showActivityPanel();
+					showSalePanel();
 				});
-				
-				// Add data attribute for styling
-				row.setAttribute('data-clickable', 'true');
 			});
 			
-			// Function to show activity panel
-			function showActivityPanel() {
-				activityDetailsPanel.classList.add('active');
+			// Function to show sale panel
+			function showSalePanel() {
+				saleDetailsPanel.classList.add('active');
 				panelOverlay.classList.add('active');
-				document.body.style.overflow = 'hidden'; // Prevent background scrolling
+				document.body.style.overflow = 'hidden';
 			}
 			
-			// Function to hide activity panel
-			function hideActivityPanel() {
-				activityDetailsPanel.classList.remove('active');
+			// Function to hide sale panel
+			function hideSalePanel() {
+				saleDetailsPanel.classList.remove('active');
 				panelOverlay.classList.remove('active');
-				document.body.style.overflow = ''; // Restore scrolling
+				document.body.style.overflow = '';
 				
-				// Remove clicked class from all rows
 				tableRows.forEach(r => r.classList.remove('clicked'));
 			}
 			
 			// Panel close event listeners
 			if (closePanelBtn) {
-				closePanelBtn.addEventListener('click', hideActivityPanel);
+				closePanelBtn.addEventListener('click', hideSalePanel);
 			}
 			
 			if (panelOverlay) {
-				panelOverlay.addEventListener('click', hideActivityPanel);
+				panelOverlay.addEventListener('click', hideSalePanel);
 			}
 			
 			// ESC key to close panel
 			document.addEventListener('keydown', function(e) {
-				if (e.key === 'Escape' && activityDetailsPanel.classList.contains('active')) {
-					hideActivityPanel();
+				if (e.key === 'Escape' && saleDetailsPanel.classList.contains('active')) {
+					hideSalePanel();
 				}
 			});
 			
-			// Function to populate activity panel
-			function populateActivityPanel(data) {
-				// Generate mock additional data based on activity type
-				const mockData = generateMockData(data);
+			// Function to populate sale panel
+			function populateSalePanel(data) {
+				document.getElementById('detailInvoice').textContent = data.invoice;
+				document.getElementById('detailDate').textContent = data.date;
+				document.getElementById('detailCustomer').textContent = data.customer;
+				document.getElementById('detailAmount').textContent = data.amount;
 				
-				document.getElementById('detailLogId').textContent = `#LOG${data.id.padStart(6, '0')}`;
-				document.getElementById('detailDateTime').textContent = data.dateTime;
-				document.getElementById('detailActivity').textContent = data.activity;
-				document.getElementById('detailStaffName').textContent = data.staffName;
+				// Set status with proper styling
+				const statusBadge = document.getElementById('detailStatus');
+				statusBadge.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+				statusBadge.className = `status-badge ${data.status}`;
 				
-				// Set access type with proper styling
-				const accessBadge = document.getElementById('detailAccessType');
-				accessBadge.textContent = data.accessType.charAt(0).toUpperCase() + data.accessType.slice(1);
-				accessBadge.className = `access-badge ${data.accessType}`;
+				// Populate items list
+				const itemsList = document.getElementById('detailItems');
+				itemsList.innerHTML = '';
 				
-				// Populate additional information
-				document.getElementById('detailSessionId').textContent = mockData.sessionId;
-				document.getElementById('detailIpAddress').textContent = mockData.ipAddress;
-				document.getElementById('detailBrowser').textContent = mockData.browser;
-				document.getElementById('detailStatus').textContent = mockData.status;
-				document.getElementById('detailStatus').className = `badge bg-${mockData.statusColor}`;
-			}
-			
-			// Function to generate mock additional data
-			function generateMockData(data) {
-				const sessions = ['SES_001234567', 'SES_002345678', 'SES_003456789'];
-				const ips = ['192.168.1.101', '192.168.1.102', '192.168.1.103', '10.0.0.25'];
-				const browsers = ['Chrome 118.0', 'Firefox 119.0', 'Safari 17.0', 'Edge 118.0'];
-				const statuses = [
-					{ text: 'Completed', color: 'success' },
-					{ text: 'In Progress', color: 'warning' },
-					{ text: 'Failed', color: 'danger' },
-					{ text: 'Pending', color: 'info' }
-				];
-				
-				const randomIndex = parseInt(data.id) % 4;
-				const status = statuses[randomIndex];
-				
-				return {
-					sessionId: sessions[randomIndex],
-					ipAddress: ips[randomIndex],
-					browser: browsers[randomIndex],
-					status: status.text,
-					statusColor: status.color
-				};
+				if (data.items && data.items.length > 0) {
+					data.items.forEach(item => {
+						const itemDiv = document.createElement('div');
+						itemDiv.className = 'item-row';
+						itemDiv.innerHTML = `
+							<div>
+								<strong>${item.name}</strong><br>
+								<small class="text-muted">Qty: ${item.qty} × $${item.price.toFixed(2)}</small>
+							</div>
+							<div class="text-end">
+								<strong>$${item.total.toFixed(2)}</strong>
+							</div>
+						`;
+						itemsList.appendChild(itemDiv);
+					});
+				} else {
+					itemsList.innerHTML = '<div class="text-muted text-center py-3">No items found</div>';
+				}
 			}
 
 			// Export functionality
 			document.querySelector('.btn-outline-success').addEventListener('click', function() {
 				const visibleRows = Array.from(tableBody.querySelectorAll('tr'));
-				let csvContent = 'S/N,Date,Activity,Staff Name,Access Type\n';
+				let csvContent = 'S/N,Invoice,Date,Customer,Amount,Status\n';
 				
 				visibleRows.forEach(row => {
 					const cells = row.querySelectorAll('td');
-					if (cells.length === 5) {
-						const rowData = Array.from(cells).map(cell => 
+					if (cells.length === 7) {
+						const rowData = Array.from(cells.slice(0, 6)).map(cell => 
 							'"' + cell.textContent.trim().replace(/"/g, '""') + '"'
 						).join(',');
 						csvContent += rowData + '\n';
@@ -1207,15 +1078,13 @@
 				const url = window.URL.createObjectURL(blob);
 				const link = document.createElement('a');
 				link.href = url;
-				link.download = 'activity_logs_' + new Date().toISOString().split('T')[0] + '.csv';
+				link.download = 'pending_sales_' + new Date().toISOString().split('T')[0] + '.csv';
 				document.body.appendChild(link);
 				link.click();
 				document.body.removeChild(link);
 				window.URL.revokeObjectURL(url);
 			});
 		});
-		
-				// Preloader handled via include '../layouts/preloader.php'
-			</script>
+		</script>
 	</body>
 </html>

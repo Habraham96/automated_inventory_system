@@ -28,15 +28,13 @@ if (!isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inventory | Sales</title>
     <link rel="stylesheet" href="style.css" />
+    <?php include 'include/head_fonts.php'; ?>
     <!-- Unicons -->
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
     <link rel="stylesheet" href="asset/css/welcome_page.css" />
   </head>
   <body>
-    <!-- Preloader -->
-    <div id="preloader" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;z-index:99999;transition:opacity 0.35s ease;">
-      <div class="spinner" style="width:72px;height:72px;border-radius:50%;border:8px solid rgba(125,42,232,0.12);border-top-color:#7d2ae8;animation:spin 1s linear infinite;"></div>
-    </div>
+    <?php include 'include/preloader.php'; ?>
 
     <!-- Header -->
     <header class="header">
@@ -200,13 +198,7 @@ if (!isset($_SESSION['user_id'])) {
       (function(){
         var css = '@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}';
         var s = document.createElement('style'); s.appendChild(document.createTextNode(css)); document.head.appendChild(s);
-        function hidePreloader(){
-          var p = document.getElementById('preloader');
-          if(!p) return;
-          p.style.opacity = '0';
-          setTimeout(function(){ if(p && p.parentNode) p.parentNode.removeChild(p); }, 420);
-        }
-        if (document.readyState === 'complete') hidePreloader(); else { window.addEventListener('load', hidePreloader); setTimeout(hidePreloader, 5000); }
+        // Root preloader handled via include 'include/preloader.php'
       })();
 
       // Account type selection logic (vertical list)

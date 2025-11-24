@@ -1,29 +1,3 @@
-</nav>
-<script>
-// Sidebar dropdown expand/collapse on single click
-document.addEventListener('DOMContentLoaded', function () {
-  var sidebar = document.getElementById('sidebar');
-  if (!sidebar) return;
-  sidebar.querySelectorAll('a.nav-link[data-bs-toggle="collapse"]').forEach(function (toggle) {
-    toggle.addEventListener('click', function (e) {
-      var target = document.querySelector(this.getAttribute('href'));
-      if (target) {
-        var bsCollapse = bootstrap.Collapse.getOrCreateInstance(target);
-        if (target.classList.contains('show')) {
-          bsCollapse.hide();
-        } else {
-          // Optionally close other open menus for exclusive expansion
-          sidebar.querySelectorAll('div.collapse.show').forEach(function (open) {
-            if (open !== target) bootstrap.Collapse.getOrCreateInstance(open).hide();
-          });
-          bsCollapse.show();
-        }
-        e.preventDefault();
-      }
-    });
-  });
-});
-</script>
 <!-- Fixed Logo Container -->
 <div class="fixed-logo-container">
   <div class="logo-hamburger-wrapper">
@@ -55,6 +29,8 @@ document.addEventListener('DOMContentLoaded', function () {
       <div class="collapse" id="ui-basic">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> <a class="nav-link" href="views/completed_sales.php">Completed Sales</a></li>
+          <li class="nav-item"> <a class="nav-link" href="views/pending_sales.php">Pending Sales</a></li>
+          <li class="nav-item"> <a class="nav-link" href="views/returns.php">Returns</a></li>
           <li class="nav-item"> <a class="nav-link" href="views/saved_carts.php">Saved Carts</a></li>
         </ul>
       </div>
@@ -125,28 +101,85 @@ document.addEventListener('DOMContentLoaded', function () {
       </a>
     </li>
     
-    <li class="nav-item">
+    <!-- <li class="nav-item">
       <a class="nav-link" href="views/settings.php">
        <i class="menu-icon bi bi-gear-wide"></i>
         <span class="menu-title">Settings</span>
       </a>
-    </li>
+    </li> -->
 
-    <li class="nav-item dropdown d-none d-lg-block user-dropdown">
-      <a class="nav-link" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-        <img class="img-xs rounded-circle" src="assets/images/faces/face8.jpg" alt="Profile image"> </a>
-      <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
-        <div class="dropdown-header text-center">
-          <img class="img-md rounded-circle" src="assets/images/faces/face8.jpg" alt="Profile image">
+    <li class="nav-item dropdown user-dropdown">
+      <a class="nav-link dropdown-toggle" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false" role="button" style="cursor: pointer; display: flex; align-items: center; padding: 15px 20px;">
+        <img class="img-xs rounded-circle" src="assets/images/faces/face8.jpg" alt="Profile image" style="width: 40px; height: 40px; object-fit: cover;"> 
+      </a>
+      <div class="dropdown-menu dropdown-menu-end navbar-dropdown" aria-labelledby="UserDropdown" style="min-width: 250px;">
+        <div class="dropdown-header text-center" style="padding: 20px;">
+          <img class="img-md rounded-circle" src="assets/images/faces/face8.jpg" alt="Profile image" style="width: 80px; height: 80px; object-fit: cover;">
           <p class="mb-1 mt-3 fw-semibold">Allen Moreno</p>
           <p class="fw-light text-muted mb-0">allenmoreno@gmail.com</p>
         </div>
-        <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> My Profile <span class="badge badge-pill badge-danger">1</span></a>
-        <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-message-text-outline text-primary me-2"></i> Messages</a>
-        <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-calendar-check-outline text-primary me-2"></i> Activity</a>
-        <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-help-circle-outline text-primary me-2"></i> FAQ</a>
-        <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-power text-primary me-2"></i>Sign Out</a>
+        <a class="dropdown-item" href="views/profile.php" style="padding: 10px 20px;"><i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> My Profile <span class="badge badge-pill badge-danger">1</span></a>
+        <a class="dropdown-item" href="views/settings.php" style="padding: 10px 20px;"><i class="dropdown-item-icon bi bi-gear-wide text-primary me-2"></i> System Preference</a>
+        <a class="dropdown-item" href="#" style="padding: 10px 20px;"><i class="dropdown-item-icon mdi mdi-message-text-outline text-primary me-2"></i> Messages</a>
+        <a class="dropdown-item" href="views/activity_logs.php" style="padding: 10px 20px;"><i class="dropdown-item-icon mdi mdi-calendar-check-outline text-primary me-2"></i> Activity</a>
+        <a class="dropdown-item" href="#" style="padding: 10px 20px;"><i class="dropdown-item-icon mdi mdi-help-circle-outline text-primary me-2"></i> FAQ</a>
+        <a class="dropdown-item" href="../index.php" style="padding: 10px 20px;"><i class="dropdown-item-icon mdi mdi-power text-primary me-2"></i>Sign Out</a>
       </div>
     </li>
   </ul>
 </nav>
+<script>
+// Robust sidebar expand/collapse: only one parent open at a time, single click toggles
+document.addEventListener('DOMContentLoaded', function () {
+  var sidebar = document.getElementById('sidebar');
+  if (sidebar) {
+    sidebar.querySelectorAll('a.nav-link[data-bs-toggle="collapse"]').forEach(function (toggle) {
+      toggle.addEventListener('click', function (e) {
+        e.preventDefault();
+        
+        var targetSelector = this.getAttribute('href');
+        if (!targetSelector || !targetSelector.startsWith('#')) return;
+        
+        var target = document.querySelector(targetSelector);
+        if (!target) return;
+        
+        // Close all other open submenus (not including the clicked one)
+        sidebar.querySelectorAll('div.collapse.show').forEach(function (openMenu) {
+          if (openMenu !== target) {
+            var collapseInstance = bootstrap.Collapse.getOrCreateInstance(openMenu);
+            collapseInstance.hide();
+          }
+        });
+        
+        // Toggle the clicked menu
+        var targetCollapse = bootstrap.Collapse.getOrCreateInstance(target);
+        targetCollapse.toggle();
+      });
+    });
+  }
+
+  // Profile dropdown close on click out or ESC
+  var userDropdown = document.getElementById('UserDropdown');
+  var dropdownMenu = document.querySelector('.dropdown-menu[aria-labelledby="UserDropdown"]');
+  function closeProfileDropdown() {
+    if (dropdownMenu && dropdownMenu.classList.contains('show')) {
+      var dropdownInstance = bootstrap.Dropdown.getInstance(userDropdown);
+      if (dropdownInstance) {
+        dropdownInstance.hide();
+      }
+    }
+  }
+  document.addEventListener('click', function(e) {
+    if (dropdownMenu && dropdownMenu.classList.contains('show')) {
+      if (!e.target.closest('.user-dropdown')) {
+        closeProfileDropdown();
+      }
+    }
+  });
+  document.addEventListener('keydown', function(e) {
+    if ((e.key === 'Escape' || e.keyCode === 27) && dropdownMenu && dropdownMenu.classList.contains('show')) {
+      closeProfileDropdown();
+    }
+  });
+});
+</script>

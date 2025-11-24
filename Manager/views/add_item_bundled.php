@@ -616,6 +616,7 @@ require_once '../../include/config.php';
     </style>
   </head>
   <body>
+    <?php include '../layouts/preloader.php'; ?>
     <!-- Modal Overlay -->
     <div class="modal-overlay"></div>
 

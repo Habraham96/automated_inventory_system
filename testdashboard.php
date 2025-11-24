@@ -210,6 +210,7 @@ while ($row = mysqli_fetch_assoc($cat_result)) {
     <link rel="icon" type="image/png" sizes="16x16" href="assets/images/dme.png">
     <title>Retails Management System Dashboard</title>
     <!-- Custom CSS -->
+    <?php include 'include/head_fonts.php'; ?>
     <link href="assets/libs/flot/css/float-chart.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link href="dist/css/style.min.css" rel="stylesheet">
