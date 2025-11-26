@@ -45,7 +45,7 @@ body.sidebar-collapsed .main-panel {
 /* Collapsed sidebar state */
 body.sidebar-collapsed .sidebar{
   width: 70px !important;
-  overflow: visible !important;
+  overflow: hidden;
 }
 body.sidebar-collapsed .sidebar .menu-title,
 body.sidebar-collapsed .sidebar .menu-arrow {
@@ -167,17 +167,12 @@ body.sidebar-collapsed .fixed-logo-container {
   margin-top: auto !important;
   border-top: 1px solid rgba(0,0,0,0.1);
   padding-top: 10px !important;
-  position: relative !important;
 }
 
 .user-dropdown .nav-link {
   padding: 15px 20px !important;
   cursor: pointer !important;
   transition: background-color 0.2s ease !important;
-  display: flex !important;
-  align-items: center !important;
-  -webkit-user-select: none;
-  user-select: none;
 }
 
 .user-dropdown .nav-link:hover {
@@ -194,7 +189,6 @@ body.sidebar-collapsed .fixed-logo-container {
   object-fit: cover !important;
   border: 2px solid #fff !important;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-  pointer-events: none !important;
 }
 
 .user-dropdown .img-md {
@@ -205,35 +199,19 @@ body.sidebar-collapsed .fixed-logo-container {
   box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
 }
 
-  /* Show dropdown as an overlay on top of the avatar (desktop & collapsed) */
-  .user-dropdown {
-    position: relative !important;
-  }
-
-  .user-dropdown .dropdown-menu {
-    position: absolute !important;
-    min-width: 260px !important;
-    max-width: 320px !important;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.18) !important;
-    border: 1px solid rgba(0,0,0,0.08) !important;
-    border-radius: 10px !important;
-    margin: 0 !important;
-    z-index: 1000 !important;
-    left: 8px !important;
-    top: 0 !important;
-    bottom: auto !important;
-    /* Reduce negative translate to lower dropdown closer to avatar */
-    transform: translateY(-100%) !important;
-    transform-origin: bottom left !important;
-    background: #fff !important;
-    display: none;
-    padding: 3px 0 !important;
-  }
-
-  /* When showing, make sure it overlays the avatar cleanly */
-  .user-dropdown .dropdown-menu.show {
-    display: block !important;
-  }
+.user-dropdown .dropdown-menu {
+  min-width: 250px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  border: 1px solid rgba(0,0,0,0.1) !important;
+  border-radius: 8px !important;
+  margin-top: 10px !important;
+  display: none;
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: 5px;
+  z-index: 1050;
+}
 
 .user-dropdown .dropdown-menu.show {
   display: block !important;
@@ -243,7 +221,6 @@ body.sidebar-collapsed .fixed-logo-container {
   padding: 10px 20px !important;
   transition: all 0.2s ease !important;
   cursor: pointer !important;
-  white-space: nowrap !important;
 }
 
 .user-dropdown .dropdown-item:hover {
@@ -264,17 +241,10 @@ body.sidebar-collapsed .user-dropdown .nav-link {
   justify-content: center !important;
 }
 
-body.sidebar-collapsed .user-dropdown .dropdown-menu {
-  left: 8px !important;
-  top: calc(100% + 6px) !important;
-  bottom: auto !important;
-}
-
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .user-dropdown {
     display: block !important;
-    position: relative !important;
   }
   
   .user-dropdown .nav-link {
@@ -289,20 +259,11 @@ body.sidebar-collapsed .user-dropdown .dropdown-menu {
   .user-dropdown .dropdown-menu {
     position: fixed !important;
     top: auto !important;
-    bottom: 70px !important;
+    bottom: 60px !important;
     left: 10px !important;
-    right: auto !important;
-    width: calc(100vw - 20px) !important;
-    max-width: calc(100vw - 20px) !important;
+    right: 10px !important;
+    width: calc(100% - 20px) !important;
     margin: 0 !important;
-    z-index: 99999 !important;
-  }
-}
-
-/* Tablet styles */
-@media (max-width: 1024px) and (min-width: 769px) {
-  .user-dropdown .dropdown-menu {
-    min-width: 240px !important;
   }
 }
 
@@ -311,10 +272,6 @@ body.sidebar-collapsed .user-dropdown .dropdown-menu {
   .user-dropdown .nav-link {
     -webkit-tap-highlight-color: rgba(0,0,0,0.1);
     tap-highlight-color: rgba(0,0,0,0.1);
-  }
-  
-  .user-dropdown .dropdown-menu {
-    touch-action: manipulation;
   }
 }
 

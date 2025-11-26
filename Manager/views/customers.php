@@ -102,31 +102,37 @@ document.addEventListener('DOMContentLoaded', function() {
       background-color: rgba(0, 0, 0, 0.7) !important;
     }
     
-    #addCustomerModal {
+    #addCustomerModal,
+    #editCustomerModal {
       z-index: 1060 !important;
     }
     
-    #addCustomerModal .modal-dialog {
+    #addCustomerModal .modal-dialog,
+    #editCustomerModal .modal-dialog {
       z-index: 1060 !important;
     }
     
-    #addCustomerModal .modal-content {
+    #addCustomerModal .modal-content,
+    #editCustomerModal .modal-content {
       background: white !important;
       z-index: 1060 !important;
     }
     
-    #addCustomerModal .modal-body {
+    #addCustomerModal .modal-body,
+    #editCustomerModal .modal-body {
       padding: 2rem;
     }
     
     /* Responsive modal sizing */
     @media (max-width: 576px) {
-      #addCustomerModal .modal-dialog {
+      #addCustomerModal .modal-dialog,
+      #editCustomerModal .modal-dialog {
         margin: 0.5rem;
         max-width: calc(100% - 1rem);
       }
       
-      #addCustomerModal .modal-body {
+      #addCustomerModal .modal-body,
+      #editCustomerModal .modal-body {
         padding: 1.5rem;
       }
     }
@@ -1184,54 +1190,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                       </div>
                     </div>
-                    
-                    <!-- Edit Customer Modal -->
-                    <div class="modal fade" id="editCustomerModal" tabindex="-1" aria-labelledby="editCustomerModalLabel" aria-hidden="true">
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h5 class="modal-title" id="editCustomerModalLabel">Edit Customer</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                          </div>
-                          <form id="editCustomerForm">
-                            <div class="modal-body">
-                              <input type="hidden" id="editCustomerId" name="editCustomerId">
-                              <div class="mb-3">
-                                <label for="editCustomerName" class="form-label">Customer Name</label>
-                                <input type="text" class="form-control" id="editCustomerName" name="editCustomerName" required>
-                              </div>
-                              <div class="mb-3">
-                                <label for="editCustomerEmail" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="editCustomerEmail" name="editCustomerEmail" required>
-                              </div>
-                              <div class="mb-3">
-                                <label for="editCustomerPhone" class="form-label">Phone</label>
-                                <input type="text" class="form-control" id="editCustomerPhone" name="editCustomerPhone" required>
-                              </div>
-                              <div class="mb-3">
-                                <label for="editCustomerAddress" class="form-label">Address</label>
-                                <textarea class="form-control" id="editCustomerAddress" name="editCustomerAddress" rows="3"></textarea>
-                              </div>
-                              <div class="mb-3">
-                                <label for="editCustomerStatus" class="form-label">Status</label>
-                                <select class="form-select" id="editCustomerStatus" name="editCustomerStatus" required>
-                                  <option value="Active">Active</option>
-                                  <option value="Inactive">Inactive</option>
-                                  <option value="Suspended">Suspended</option>
-                                </select>
-                              </div>
-                            </div>
-                            <div class="modal-footer">
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                              <button type="submit" class="btn btn-primary">
-                                <span class="spinner-border spinner-border-sm me-2 d-none" id="editCustomerSpinner"></span>
-                                Update Customer
-                              </button>
-                            </div>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -1277,6 +1235,102 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
               <button type="submit" class="btn btn-primary">Save Customer</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Edit Customer Modal - Placed outside container for proper z-index -->
+    <div class="modal fade" id="editCustomerModal" tabindex="-1" aria-labelledby="editCustomerModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editCustomerModalLabel">Edit Customer</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form id="editCustomerForm">
+            <div class="modal-body">
+              <input type="hidden" id="editCustomerId" name="editCustomerId">
+              <div class="mb-3">
+                <label for="editCustomerName" class="form-label">Customer Name</label>
+                <input type="text" class="form-control" id="editCustomerName" name="editCustomerName" required>
+              </div>
+              <div class="mb-3">
+                <label for="editCustomerEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="editCustomerEmail" name="editCustomerEmail" required>
+              </div>
+              <div class="mb-3">
+                <label for="editCustomerPhone" class="form-label">Phone</label>
+                <input type="text" class="form-control" id="editCustomerPhone" name="editCustomerPhone" required>
+              </div>
+              <div class="mb-3">
+                <label for="editCustomerAddress" class="form-label">Address</label>
+                <textarea class="form-control" id="editCustomerAddress" name="editCustomerAddress" rows="3"></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="editCustomerStatus" class="form-label">Status</label>
+                <select class="form-select" id="editCustomerStatus" name="editCustomerStatus" required>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                  <option value="Suspended">Suspended</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">
+                <span class="spinner-border spinner-border-sm me-2 d-none" id="editCustomerSpinner"></span>
+                Update Customer
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Edit Customer Modal - Placed outside container for proper z-index -->
+    <div class="modal fade" id="editCustomerModal" tabindex="-1" aria-labelledby="editCustomerModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editCustomerModalLabel">Edit Customer</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form id="editCustomerForm">
+            <div class="modal-body">
+              <input type="hidden" id="editCustomerId" name="editCustomerId">
+              <div class="mb-3">
+                <label for="editCustomerName" class="form-label">Customer Name</label>
+                <input type="text" class="form-control" id="editCustomerName" name="editCustomerName" required>
+              </div>
+              <div class="mb-3">
+                <label for="editCustomerEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="editCustomerEmail" name="editCustomerEmail" required>
+              </div>
+              <div class="mb-3">
+                <label for="editCustomerPhone" class="form-label">Phone</label>
+                <input type="text" class="form-control" id="editCustomerPhone" name="editCustomerPhone" required>
+              </div>
+              <div class="mb-3">
+                <label for="editCustomerAddress" class="form-label">Address</label>
+                <textarea class="form-control" id="editCustomerAddress" name="editCustomerAddress" rows="3"></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="editCustomerStatus" class="form-label">Status</label>
+                <select class="form-select" id="editCustomerStatus" name="editCustomerStatus" required>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                  <option value="Suspended">Suspended</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">
+                <span class="spinner-border spinner-border-sm me-2 d-none" id="editCustomerSpinner"></span>
+                Update Customer
+              </button>
             </div>
           </form>
         </div>

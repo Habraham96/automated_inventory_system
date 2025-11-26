@@ -346,10 +346,12 @@
     <!-- inject:js -->
     <script src="../assets/js/off-canvas.js"></script>
     <script src="../assets/js/template.js"></script>
-    <?php include '../layouts/sidebar_scripts.php'; ?>
     <script src="../assets/js/settings.js"></script>
     <script src="../assets/js/hoverable-collapse.js"></script>
     <script src="../assets/js/todolist.js"></script>
+
+    <!-- Include Sidebar Scripts -->
+    <?php include '../layouts/sidebar_scripts.php'; ?>
 
     <!-- DataTables (ensure jQuery from vendor.bundle.base.js is loaded first) -->
     <script src="../assets/vendors/datatables.net/jquery.dataTables.js"></script>
@@ -556,25 +558,6 @@
         // Close overlay with Escape key
         document.addEventListener('keydown', function(e) { 
           if (e.key === 'Escape') hideCustomDateOverlay(); 
-        });
-
-        // Fallback: delegated click handler to toggle sidebar collapses
-        document.addEventListener('click', function(e) {
-          try {
-            if (e.defaultPrevented) return;
-            var trigger = e.target.closest('.sidebar .nav-link[data-bs-toggle="collapse"]');
-            if (!trigger) return;
-            var selector = trigger.getAttribute('href') || trigger.getAttribute('data-bs-target') || trigger.dataset.bsTarget;
-            if (!selector) return;
-            var collapseEl = document.querySelector(selector);
-            if (!collapseEl) return;
-            var bs = bootstrap.Collapse.getOrCreateInstance(collapseEl, { toggle: false });
-            if (collapseEl.classList.contains('show')) bs.hide(); 
-            else bs.show();
-            e.preventDefault();
-          } catch (err) {
-            // silent fallback
-          }
         });
       });
     </script>

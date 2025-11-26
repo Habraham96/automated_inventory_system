@@ -1,7 +1,4 @@
 <!-- Fixed Logo Container -->
- <head>
-<link rel="stylesheet" href="layouts/sidebar_styles.php">
-</head>
 <div class="fixed-logo-container">
   <div class="logo-hamburger-wrapper">
     <button id="sidebarToggle" class="navbar-toggler navbar-toggler align-self-center" type="button" aria-label="Toggle sidebar" title="Toggle sidebar">
@@ -23,6 +20,15 @@
       </a>
     </li>
     <li class="nav-item nav-category">Menu</li>
+
+
+    <li class="nav-item">
+      <a class="nav-link" href="sell.php">
+        <i class="menu-icon bi bi-cart-fill"></i>
+        <span class="menu-title">Sell</span>
+      </a>
+    </li>
+
     <li class="nav-item">
       <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
         <i class="menu-icon bi bi-wallet-fill"></i>
@@ -128,6 +134,3 @@
     </li>
   </ul>
 </nav>
-<script>
-  <link rel="stylesheet" href="layouts/sidebar_styles.php">
-</script>
