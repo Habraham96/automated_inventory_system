@@ -314,7 +314,7 @@
                   <button type="button" class="quick-action-btn" id="addItemQuickAction" style="border: none; width: 100%; text-align: center;">
                     <i class="bi bi-box me-2"></i>Add Item
                   </button>
-                  <a href="#" class="quick-action-btn">
+                  <a href="views/sell.php" class="quick-action-btn">
                     <i class="bi bi-plus-circle me-2"></i>New Sale
                   </a>
                    <a href="views/staffs.php" class="quick-action-btn">

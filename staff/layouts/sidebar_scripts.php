@@ -94,101 +94,116 @@
 
 
 // Profile dropdown and other sidebar functionality
-document.addEventListener('DOMContentLoaded', function () {
-  var sidebar = document.getElementById('sidebar');
+(function() {
+  'use strict';
   
-  // Profile dropdown responsive handler
-  var userDropdownToggle = document.getElementById('UserDropdown');
-  if (userDropdownToggle) {
+  function initUserDropdown() {
+    var userDropdownToggle = document.getElementById('UserDropdown');
+    if (!userDropdownToggle) {
+      console.log('UserDropdown not found, retrying...');
+      return false;
+    }
+    
+    console.log('Initializing user dropdown...');
     var dropdownMenu = userDropdownToggle.nextElementSibling;
-    var isDropdownOpen = false;
     
-    // Function to show dropdown
-    function showDropdown() {
-      if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
-        dropdownMenu.classList.add('show');
-        userDropdownToggle.setAttribute('aria-expanded', 'true');
-        isDropdownOpen = true;
-        console.log('Dropdown opened');
+    if (!dropdownMenu || !dropdownMenu.classList.contains('dropdown-menu')) {
+      console.error('Dropdown menu not found after UserDropdown toggle');
+      return false;
+    }
+
+    // Check if Bootstrap is loaded
+    if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+      console.log('Bootstrap Dropdown available, initializing...');
+      
+      try {
+        // Get or create Bootstrap dropdown instance
+        var dropdown = bootstrap.Dropdown.getOrCreateInstance(userDropdownToggle);
+        console.log('Bootstrap Dropdown initialized successfully');
+        return true;
+      } catch (err) {
+        console.error('Bootstrap Dropdown initialization failed:', err);
       }
     }
     
-    // Function to hide dropdown
-    function hideDropdown() {
-      if (dropdownMenu && dropdownMenu.classList.contains('dropdown-menu')) {
-        dropdownMenu.classList.remove('show');
-        userDropdownToggle.setAttribute('aria-expanded', 'false');
-        isDropdownOpen = false;
-        console.log('Dropdown closed');
-      }
-    }
+    // Manual fallback if Bootstrap not available
+    console.log('Using manual dropdown fallback');
     
-    // Function to toggle dropdown
-    function toggleDropdown() {
-      if (isDropdownOpen) {
-        hideDropdown();
-      } else {
-        showDropdown();
-      }
-    }
-    
-    // Click handler
-    userDropdownToggle.addEventListener('click', function(e) {
+    function manualToggle(e) {
       e.preventDefault();
       e.stopPropagation();
-      toggleDropdown();
-    });
-    
-    // Touch handler for mobile devices (prevents double-tap zoom)
-    var touchStartTime = 0;
-    userDropdownToggle.addEventListener('touchstart', function(e) {
-      touchStartTime = Date.now();
-    }, { passive: true });
-    
-    userDropdownToggle.addEventListener('touchend', function(e) {
-      var touchDuration = Date.now() - touchStartTime;
-      // Only trigger if it's a quick tap (not a scroll)
-      if (touchDuration < 200) {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleDropdown();
-      }
-    });
-    
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(e) {
-      if (isDropdownOpen && !userDropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
-        hideDropdown();
-      }
-    });
-    
-    // Close dropdown when tapping outside on mobile
-    document.addEventListener('touchend', function(e) {
-      if (isDropdownOpen && !userDropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
-        hideDropdown();
-      }
-    });
-    
-    // Close dropdown on ESC key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && isDropdownOpen) {
-        hideDropdown();
-      }
-    });
-    
-    // Prevent dropdown from closing when clicking inside it
-    if (dropdownMenu) {
-      dropdownMenu.addEventListener('click', function(e) {
-        // Allow links to work but prevent immediate closing
-        if (e.target.tagName === 'A') {
-          // Let the link navigate, dropdown will close
-        } else {
-          e.stopPropagation();
+      
+      console.log('Manual toggle triggered');
+      
+      // Close any other open dropdowns first
+      document.querySelectorAll('.dropdown-menu.show').forEach(function(menu) {
+        if (menu !== dropdownMenu) {
+          menu.classList.remove('show');
         }
       });
+      
+      // Toggle this dropdown
+      var isShown = dropdownMenu.classList.toggle('show');
+      userDropdownToggle.setAttribute('aria-expanded', isShown ? 'true' : 'false');
+      
+      console.log('Dropdown is now:', isShown ? 'open' : 'closed');
     }
+
+    // Remove any existing listeners to prevent duplicates
+    var newToggle = userDropdownToggle.cloneNode(true);
+    userDropdownToggle.parentNode.replaceChild(newToggle, userDropdownToggle);
+    userDropdownToggle = document.getElementById('UserDropdown');
+    
+    // Add event listeners
+    userDropdownToggle.addEventListener('click', manualToggle);
+    userDropdownToggle.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      manualToggle(e);
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!userDropdownToggle.contains(e.target) && 
+          !dropdownMenu.contains(e.target) && 
+          dropdownMenu.classList.contains('show')) {
+        dropdownMenu.classList.remove('show');
+        userDropdownToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Close on ESC
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && dropdownMenu.classList.contains('show')) {
+        dropdownMenu.classList.remove('show');
+        userDropdownToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+    
+    return true;
   }
-});
+
+  // Try to initialize immediately if DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(initUserDropdown, 100);
+    });
+  } else {
+    setTimeout(initUserDropdown, 100);
+  }
+  
+  // Retry a few times in case Bootstrap loads late
+  var retryCount = 0;
+  var retryInterval = setInterval(function() {
+    if (initUserDropdown() || retryCount++ > 10) {
+      clearInterval(retryInterval);
+    }
+  }, 300);
+  
+  // Final attempt on window load
+  window.addEventListener('load', function() {
+    setTimeout(initUserDropdown, 200);
+  });
+})();
 // Global sidebar parent collapse handler: ensure single-open behavior and toggle on click
 document.addEventListener('DOMContentLoaded', function () {
   function initSidebarCollapses() {
@@ -199,12 +214,6 @@ document.addEventListener('DOMContentLoaded', function () {
       e.stopPropagation();
 
       var link = this;
-      // If sidebar is collapsed, expand it first so submenu is visible
-      var body = document.body;
-      if (body.classList.contains('sidebar-collapsed')) {
-        body.classList.remove('sidebar-collapsed');
-        try { localStorage.setItem('sidebarCollapsed', 'false'); } catch (err) {}
-      }
       // support href="#id" or data-bs-target
       var targetSelector = link.getAttribute('href') || link.getAttribute('data-bs-target') || link.dataset.bsTarget;
       if (!targetSelector) return;
@@ -242,14 +251,6 @@ document.addEventListener('DOMContentLoaded', function () {
       // remove possible duplicate handlers first
       link.removeEventListener('click', sidebarCollapseClick);
       link.addEventListener('click', sidebarCollapseClick);
-      // Add keyboard support: Enter or Space toggles the collapse
-      link.removeEventListener('keydown', function(){});
-      link.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
-          e.preventDefault();
-          sidebarCollapseClick.call(this, e);
-        }
-      });
     });
     // After collapse handlers are in place, try to apply active link styling
     try {

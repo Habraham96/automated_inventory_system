@@ -21,6 +21,12 @@
     </li>
     <li class="nav-item nav-category">Menu</li>
     <li class="nav-item">
+      <a class="nav-link" href="views/sell.php">
+        <i class="menu-icon bi bi-cart-fill"></i>
+        <span class="menu-title">Sell</span>
+      </a>
+    </li>
+    <li class="nav-item">
       <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
         <i class="menu-icon bi bi-wallet-fill"></i>
         <span class="menu-title">Sales</span>
