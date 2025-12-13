@@ -18,39 +18,52 @@
   <ul class="nav">
     <li class="nav-item">
       <a class="nav-link" href="index.php">
-        <i class="menu-icon bi bi-cart-fill"></i>
-        <span class="menu-title">Sell</span>
+        <i class="menu-icon bi bi-speedometer2"></i>
+        <span class="menu-title">Dashboard</span>
       </a>
     </li>
     
     <li class="nav-item nav-category">Menu</li>
     
     <li class="nav-item">
-      <a class="nav-link" data-bs-toggle="collapse" href="#sales-menu" aria-expanded="false" aria-controls="sales-menu">
-        <i class="menu-icon bi bi-wallet-fill"></i>
-        <span class="menu-title">Sales</span>
+      <a class="nav-link" href="brm.php">
+        <i class="menu-icon bi bi-people-fill"></i>
+        <span class="menu-title">B R M</span>
+      </a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-link" href="users.php">
+        <i class="menu-icon bi bi-person-badge-fill"></i>
+        <span class="menu-title">Users & Access</span>
+      </a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-link" data-bs-toggle="collapse" href="#billingSubmenu" aria-expanded="false" aria-controls="billingSubmenu">
+        <i class="menu-icon bi bi-credit-card-fill"></i>
+        <span class="menu-title">Billing & Subscription</span>
         <i class="menu-arrow"></i>
       </a>
-      <div class="collapse" id="sales-menu">
+      <div class="collapse" id="billingSubmenu">
         <ul class="nav flex-column sub-menu">
-          <li class="nav-item"> <a class="nav-link" href="completed_sales.php">Completed Sales</a></li>
-          <li class="nav-item"> <a class="nav-link" href="pending_sales.php">Pending Sales</a></li>
-          <li class="nav-item"> <a class="nav-link" href="returns.php">Returns</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="plans_pricing.php">Plans and Pricing</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="payment_methods.php">Payment Methods</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="auto_renewal.php">Auto-Renewal Settings</a>
+          </li>
         </ul>
       </div>
     </li>
     
     <li class="nav-item">
-      <a class="nav-link" href="saved_carts.php">
-        <i class="menu-icon bi bi-bookmark-fill"></i>
-        <span class="menu-title">Saved Carts</span>
-      </a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-link" href="customers.php">
-        <i class="menu-icon bi bi-people-fill"></i>
-        <span class="menu-title">Customers</span>
+      <a class="nav-link" href="system_config.php">
+        <i class="menu-icon bi bi-gear-fill"></i>
+        <span class="menu-title">System Configuration</span>
       </a>
     </li>
     

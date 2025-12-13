@@ -134,92 +134,7 @@
     .modal {
       z-index: 1055 !important;
     }
-    .modal-content {
-      border-radius: 15px !important;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4) !important;
-      border: none !important;
-      overflow: hidden !important;
-    }
-    .modal-header {
-      border-bottom: none !important;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-      color: white !important;
-      padding: 1.5rem 2rem !important;
-    }
-    .modal-footer {
-      border-top: 1px solid #dee2e6 !important;
-      background-color: #f8f9fa !important;
-      padding: 1.5rem 2rem !important;
-    }
-    .modal-body {
-      padding: 2rem !important;
-      background-color: #ffffff !important;
-    }
     
-    /* Item option styling */
-    .item-option {
-      transition: all 0.3s ease !important;
-      cursor: pointer !important;
-      border: 2px solid transparent !important;
-      margin-bottom: 0.75rem !important;
-      border-radius: 10px !important;
-    }
-    .item-option:hover {
-      background-color: #f8f9fa !important;
-      transform: translateX(5px) !important;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
-    }
-    .item-option.active {
-      background-color: #e3f2fd !important;
-      box-shadow: 0 3px 15px rgba(0,123,255,0.2) !important;
-    }
-    .item-option.active[data-type="standard"] {
-      border-color: #007bff !important;
-      background-color: #e3f2fd !important;
-    }
-    .item-option.active[data-type="variant"] {
-      border-color: #28a745 !important;
-      background-color: #d4edda !important;
-    }
-    .item-option.active[data-type="bundled"] {
-      border-color: #ffc107 !important;
-      background-color: #fff3cd !important;
-    }
-    
-    /* Item details animation */
-    .item-details {
-      opacity: 0 !important;
-      transition: opacity 0.3s ease !important;
-      display: none !important;
-    }
-    .item-details.active {
-      opacity: 1 !important;
-      display: block !important;
-    }
-    
-    /* Modal buttons */
-    .modal .btn {
-      border-radius: 8px !important;
-      font-weight: 500 !important;
-      transition: all 0.3s ease !important;
-    }
-    .modal .btn:hover {
-      transform: translateY(-1px) !important;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-    }
-    @media (max-width: 767px) {
-  .modal-dialog {
-    max-width: 98vw !important;
-    margin: 0 !important;
-  }
-  .modal-content {
-    border-radius: 8px !important;
-    padding: 0.5rem !important;
-  }
-  .modal-body {
-    padding: 1rem !important;
-  }
-}
     </style>
     <!-- endinject -->
     <link rel="shortcut icon" href="assets/images/favicon.png" />
@@ -246,7 +161,7 @@
             <!-- Dashboard Stats Row -->
              <div class="d-flex align-items-center justify-content-end gap-3 flex-wrap mb-3">
             
-                <div class="btn-group btn-group-sm" role="group" aria-label="Quick time filters">
+                <div class="d-flex gap-2" role="group" aria-label="Quick time filters">
                   <button type="button" class="btn btn-outline-primary timeframe-btn active" data-range="today">Today</button>
                   <button type="button" class="btn btn-outline-primary timeframe-btn" data-range="week">This Week</button>
                   <button type="button" class="btn btn-outline-primary timeframe-btn" data-range="month">This Month</button>
@@ -429,170 +344,118 @@
           </footer>
         </div>
       </div>
-    </div>
+    </div>    
+    
 
-    <!-- Modal for selecting item type -->
-		<div class="modal fade" id="itemTypeModal" tabindex="-1" aria-labelledby="itemTypeModalLabel" aria-hidden="true" style="z-index: 1055;">
-			<div class="modal-dialog modal-lg modal-dialog-centered">
-				<div class="modal-content" style="border: none; box-shadow: 0 10px  30px rgba(0, 0, 0, 0.3);">
-					<div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-bottom: none;">
-						<h5 class="modal-title" id="itemTypeModalLabel" style="font-weight: 600;">
+   
+		<div class="modal fade" id="itemTypeModal" tabindex="-1" aria-labelledby="itemTypeModalLabel" aria-hidden="true">
+      <div
+      class="modal-dialog modal-dialog-centered modal-dialog-scrollable"
+      style="max-width: 90%; width: 1500px; margin: 1.75rem auto; justify-content: center;">
+    <div class="modal-content" style="width: 100%; max-width: 90vh;height: auto;">
+					<div class="modal-header">
+						<h5 class="modal-title" id="itemTypeModalLabel">
 							<i class="bi bi-box-seam me-2"></i>Select Item Type
 						</h5>
 						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
-					<div class="modal-body" style="min-height: 400px; padding: 2rem;">
-						<div class="row">
+					<div class="modal-body">
+						<div class="row g-4">
 							<!-- Left Column - Item Type Options -->
-							<div class="col-md-4">
+							<div class="col-lg-5 col-md-5">
 								<div class="list-group">
-									<button type="button" class="list-group-item list-group-item-action d-flex align-items-center p-3 item-option active" 
-											data-type="standard" onclick="showItemDetails('standard')" style="border: 2px solid #007bff; background-color: #e3f2fd;">
-										<i class="bi bi-box-seam text-primary me-3" style="font-size: 1.5rem;"></i>
-										<div>
-											<h6 class="mb-0 text-primary">Standard Item</h6>
-											<small class="text-muted">Simple single product</small>
+									<button type="button" class="list-group-item list-group-item-action d-flex align-items-center p-4 item-option active" 
+											data-type="standard" onclick="showItemDetails('standard')">
+										<i class="bi bi-box-seam text-primary me-3"></i>
+										<div class="item-option-content">
+											<h6 class="mb-1 text-primary item-option-title">Standard Item</h6>
+											<small class="text-muted item-option-desc">Simple single product</small>
 										</div>
 									</button>
 									
-									<button type="button" class="list-group-item list-group-item-action d-flex align-items-center p-3 item-option" 
-											data-type="variant" onclick="showItemDetails('variant')" style="border: 2px solid transparent;">
-										<i class="bi bi-grid-3x3 text-success me-3" style="font-size: 1.5rem;"></i>
-										<div>
-											<h6 class="mb-0 text-success">Variant Item</h6>
-											<small class="text-muted">Multiple variations</small>
-										</div>
-									</button>
-									
-									<button type="button" class="list-group-item list-group-item-action d-flex align-items-center p-3 item-option" 
-											data-type="bundled" onclick="showItemDetails('bundled')" style="border: 2px solid transparent;">
-										<i class="bi bi-collection text-warning me-3" style="font-size: 1.5rem;"></i>
-										<div>
-											<h6 class="mb-0 text-warning">Bundled Item</h6>
-											<small class="text-muted">Package of products</small>
+									<button type="button" class="list-group-item list-group-item-action d-flex align-items-center p-4 item-option" 
+											data-type="variant" onclick="showItemDetails('variant')">
+										<i class="bi bi-grid-3x3 text-success me-3"></i>
+										<div class="item-option-content">
+											<h6 class="mb-1 text-success item-option-title">Variant Item</h6>
+											<small class="text-muted item-option-desc">Multiple variations</small>
 										</div>
 									</button>
 								</div>
 							</div>
 							
 							<!-- Right Column - Item Details -->
-							<div class="col-md-8">
-								<div class="item-details-container">
-									<!-- Standard Item Details -->
-									<div id="standard-details" class="item-details active" style="display: block; opacity: 1;">
-										<div class="d-flex align-items-start mb-3">
-											<i class="bi bi-box-seam text-primary me-3" style="font-size: 3rem;"></i>
-											<div>
-												<h4 class="text-primary mb-2">Standard Item</h4>
-												<p class="text-dark mb-3">Perfect for single products without variations. Simple to set up and manage.</p>
-											</div>
-										</div>
-										
-										<div class="mb-3">
-											<h6><strong>Best for:</strong></h6>
-											<ul class="text-muted mb-3">
-												<li>Products without variations (no size, color, or model options)</li>
-												<li>Single SKU items</li>
-												<li>Simple inventory tracking</li>
-												<li>Quick setup and management</li>
-											</ul>
-										</div>
-										
-										<div class="mb-4">
-											<h6><strong>Examples:</strong></h6>
-											<div class="d-flex flex-wrap gap-2">
-												<span class="badge bg-light text-dark">iPhone 13 Pro</span>
-												<span class="badge bg-light text-dark">Office Chair</span>
-												<span class="badge bg-light text-dark">Coffee Mug</span>
-												<span class="badge bg-light text-dark">Notebook</span>
-												<span class="badge bg-light text-dark">Power Bank</span>
-											</div>
-										</div>
-										
-										<button class="btn btn-primary" onclick="selectItemType('standard')" style="padding: 0.75rem 1.5rem;">
-											<i class="bi bi-plus-circle me-1"></i> Create Standard Item
-										</button>
+							<div class="col-lg-7 col-md-7">
+                <div class="item-details-container">
+                <!-- Standard Item Details -->
+							<div id="standard-details" class="item-details active">
+								<div class="d-flex align-items-start mb-4">
+									<i class="bi bi-box-seam text-primary me-3 detail-icon"></i>
+									<div>
+										<h4 class="text-primary mb-2 detail-title">Standard Item</h4>
+										<p class="text-dark mb-3 detail-description">Perfect for single products without variations. Simple to set up and manage.</p>
 									</div>
-									
-									<!-- Variant Item Details -->
-									<div id="variant-details" class="item-details" style="display: none; opacity: 0;">
-										<div class="d-flex align-items-start mb-3">
-											<i class="bi bi-grid-3x3 text-success me-3" style="font-size: 3rem;"></i>
-											<div>
-												<h4 class="text-success mb-2">Variant Item</h4>
-												<p class="text-dark mb-3">Ideal for products with multiple options like size, color, or style. Comprehensive variation management.</p>
-											</div>
-										</div>
-										
-										<div class="mb-3">
-											<h6><strong>Best for:</strong></h6>
-											<ul class="text-muted mb-3">
-												<li>Products with size variations (S, M, L, XL)</li>
-												<li>Items with color options</li>
-												<li>Different models of the same product</li>
-												<li>Complex inventory tracking by variation</li>
-											</ul>
-										</div>
-										
-										<div class="mb-4">
-											<h6><strong>Examples:</strong></h6>
-											<div class="d-flex flex-wrap gap-2">
-												<span class="badge bg-light text-dark">T-Shirts (S,M,L)</span>
-												<span class="badge bg-light text-dark">Shoes (Various Sizes)</span>
-												<span class="badge bg-light text-dark">Phone Cases (Colors)</span>
-												<span class="badge bg-light text-dark">Laptops (Models)</span>
-											</div>
-										</div>
-										
-										<button class="btn btn-success" onclick="selectItemType('variant')" style="padding: 0.75rem 1.5rem;">
-											<i class="bi bi-plus-circle me-1"></i> Create Variant Item
-										</button>
-									</div>
-									
-									<!-- Bundled Item Details -->
-									<div id="bundled-details" class="item-details" style="display: none; opacity: 0;">
-										<div class="d-flex align-items-start mb-3">
-											<i class="bi bi-collection text-warning me-3" style="font-size: 3rem;"></i>
-											<div>
-												<h4 class="text-warning mb-2">Bundled Item</h4>
-												<p class="text-dark mb-3">Perfect for selling multiple products together as a package deal. Automatic inventory deduction.</p>
-											</div>
-										</div>
-										
-										<div class="mb-3">
-											<h6><strong>Best for:</strong></h6>
-											<ul class="text-muted mb-3">
-												<li>Product packages and combo deals</li>
-												<li>Gift sets and starter kits</li>
-												<li>Promotional bundles</li>
-												<li>Items sold together at discount</li>
-											</ul>
-										</div>
-										
-										<div class="mb-4">
-											<h6><strong>Examples:</strong></h6>
-											<div class="d-flex flex-wrap gap-2">
-												<span class="badge bg-light text-dark">Laptop + Mouse + Bag</span>
-												<span class="badge bg-light text-dark">Skincare Set</span>
-												<span class="badge bg-light text-dark">Office Starter Kit</span>
-												<span class="badge bg-light text-dark">Gaming Bundle</span>
-											</div>
-										</div>
-										
-										<button class="btn btn-warning text-dark" onclick="selectItemType('bundled')" style="padding: 0.75rem 1.5rem;">
-											<i class="bi bi-plus-circle me-1"></i> Create Bundled Item
-										</button>
-									</div>
+								</div>
+								
+								<div class="mb-4">
+									<h6 class="detail-section-title"><strong>Best for:</strong></h6>
+									<ul class="text-muted mb-3 detail-list">
+										<li>Products without variations (no size, color, or model options)</li>
+										<li>Single SKU items</li>
+										<li>Simple inventory tracking</li>
+										<li>Quick setup and management</li>
+									</ul>
+								</div>
+								
+							<div class="mb-4">
+								<h6 class="detail-section-title"><strong>Examples:</strong></h6>
+								<div class="d-flex flex-wrap gap-2">
+									<span class="badge bg-light text-dark detail-badge">iPhone 13 Pro</span>
+									<span class="badge bg-light text-dark detail-badge">Office Chair</span>
+									<span class="badge bg-light text-dark detail-badge">Coffee Mug</span>
+									<span class="badge bg-light text-dark detail-badge">Notebook</span>
+									<span class="badge bg-light text-dark detail-badge">Power Bank</span>
 								</div>
 							</div>
 						</div>
+						
+						<!-- Variant Item Details -->
+						<div id="variant-details" class="item-details">
+							<div class="d-flex align-items-start mb-4">
+								<i class="bi bi-grid-3x3 text-success me-3 detail-icon"></i>
+								<div>
+									<h4 class="text-success mb-2 detail-title">Variant Item</h4>
+									<p class="text-dark mb-3 detail-description">Ideal for products with multiple options like size, color, or style. Comprehensive variation management.</p>
+								</div>
+							</div>
+							
+							<div class="mb-4">
+								<h6 class="detail-section-title"><strong>Best for:</strong></h6>
+								<ul class="text-muted mb-3 detail-list">
+									<li>Products with size variations (S, M, L, XL)</li>
+									<li>Items with color options</li>
+									<li>Different models of the same product</li>
+									<li>Complex inventory tracking by variation</li>
+								</ul>
+							</div>
+							
+							<div class="mb-4">
+								<h6 class="detail-section-title"><strong>Examples:</strong></h6>
+								<div class="d-flex flex-wrap gap-2">
+									<span class="badge bg-light text-dark detail-badge">T-Shirts (S,M,L)</span>
+									<span class="badge bg-light text-dark detail-badge">Shoes (Various Sizes)</span>
+									<span class="badge bg-light text-dark detail-badge">Phone Cases (Colors)</span>
+									<span class="badge bg-light text-dark detail-badge">Laptops (Models)</span>
+								</div>
+							</div>
+						</div>							</div>
+						</div>
 					</div>
-					<div class="modal-footer" style="border-top: 1px solid #dee2e6; background-color: #f8f9fa; padding: 1.5rem;">
-						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="padding: 0.75rem 1.5rem;">Cancel</button>
-						<button type="button" class="btn btn-primary" onclick="proceedWithItemType()" style="padding: 0.75rem 1.5rem;">
-							<i class="bi bi-arrow-right me-1"></i>Continue
-						</button>
-					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-primary" onclick="proceedWithItemType()">Continue</button>
+				</div>
 				</div>
 			</div>
 		</div>
@@ -639,69 +502,62 @@
           });
         }
       }
-    });
-    </script>
-    
-    <!-- Dashboard Time Filter JavaScript -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get all timeframe buttons
-        const timeframeButtons = document.querySelectorAll('.timeframe-btn');
-        
-        // Add click event listener to each button
-        timeframeButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                // Remove active class from all buttons
-                timeframeButtons.forEach(btn => {
-                    btn.classList.remove('active');
-                    btn.classList.add('btn-outline-primary');
-                    btn.classList.remove('btn-primary');
-                });
-                
-                // Add active class to clicked button
-                this.classList.add('active');
-                this.classList.remove('btn-outline-primary');
-                this.classList.add('btn-primary');
-                
-                // Get the selected time range
-                const selectedRange = this.getAttribute('data-range');
-                console.log('Selected time range:', selectedRange);
-                
-                // Here you can add functionality to update the dashboard data
-                // based on the selected time range
-                updateDashboardData(selectedRange);
-            });
-        });
-        
-        // Function to update dashboard data (placeholder)
-        function updateDashboardData(range) {
-            // This is where you would typically make an AJAX call
-            // to fetch new data based on the selected time range
-            
-            // For now, just show a loading indicator or update UI
-            console.log('Updating dashboard for range:', range);
-            
-            // Example: You could update the stat numbers here
-            // updateStatCards(range);
-        }
-        
-        // Optional: Function to update stat cards with new data
-        function updateStatCards(range) {
-            // Example implementation - you would replace with actual data
-            const statNumbers = document.querySelectorAll('.stat-number');
-            
-            // Simulate loading state
-            statNumbers.forEach(stat => {
-                stat.style.opacity = '0.5';
-            });
-            
-            // Simulate data update after a short delay
-            setTimeout(() => {
-                statNumbers.forEach(stat => {
-                    stat.style.opacity = '1';
-                });
-            }, 300);
-        }
+
+      // Dashboard Time Filter - Get all timeframe buttons
+      const timeframeButtons = document.querySelectorAll('.timeframe-btn');
+      
+      // Add click event listener to each button
+      timeframeButtons.forEach(button => {
+          button.addEventListener('click', function() {
+              // Remove active class from all buttons
+              timeframeButtons.forEach(btn => {
+                  btn.classList.remove('active');
+                  btn.classList.add('btn-outline-primary');
+                  btn.classList.remove('btn-primary');
+              });
+              
+              // Add active class to clicked button
+              this.classList.add('active');
+              this.classList.remove('btn-outline-primary');
+              this.classList.add('btn-primary');
+              
+              // Get the selected time range
+              const selectedRange = this.getAttribute('data-range');
+              console.log('Selected time range:', selectedRange);
+              
+              // Update dashboard data based on selected time range
+              updateDashboardData(selectedRange);
+          });
+      });
+      
+      // Function to update dashboard data (placeholder)
+      function updateDashboardData(range) {
+          // This is where you would typically make an AJAX call
+          // to fetch new data based on the selected time range
+          
+          console.log('Updating dashboard for range:', range);
+          
+          // Example: You could update the stat numbers here
+          // updateStatCards(range);
+      }
+      
+      // Optional: Function to update stat cards with new data
+      function updateStatCards(range) {
+          // Example implementation - you would replace with actual data
+          const statNumbers = document.querySelectorAll('.stat-number');
+          
+          // Simulate loading state
+          statNumbers.forEach(stat => {
+              stat.style.opacity = '0.5';
+          });
+          
+          // Simulate data update after a short delay
+          setTimeout(() => {
+              statNumbers.forEach(stat => {
+                  stat.style.opacity = '1';
+              });
+          }, 300);
+      }
     });
     
     // Function to show item details when clicking on options
@@ -715,7 +571,7 @@
         option.style.backgroundColor = '';
       });
       
-      // Add active class to clicked option and apply active styling
+      // Add active class to clicked option and apply active styling (standard and variant only)
       const selectedOption = document.querySelector(`[data-type="${type}"]`);
       if (selectedOption) {
         selectedOption.classList.add('active');
@@ -729,10 +585,6 @@
           case 'variant':
             selectedOption.style.border = '2px solid #28a745';
             selectedOption.style.backgroundColor = '#d4edda';
-            break;
-          case 'bundled':
-            selectedOption.style.border = '2px solid #ffc107';
-            selectedOption.style.backgroundColor = '#fff3cd';
             break;
         }
       }
@@ -787,9 +639,6 @@
               case 'variant':
                   window.location.href = 'views/add_item_variant.php';
                   break;
-              case 'bundled':
-                  window.location.href = 'views/add_item_bundled.php';
-                  break;
               default:
                   console.log('Unknown item type:', type);
           }
@@ -810,7 +659,6 @@
       }
     }
 
-    
     // Hide preloader after full page load
     window.addEventListener('load', function() {
       var preloader = document.getElementById('preloader');
