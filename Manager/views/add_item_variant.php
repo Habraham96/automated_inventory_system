@@ -1904,32 +1904,6 @@ require_once '../../include/config.php';
                       </div>
                     </div>
                     <div id="additionalPricingOptions" class="row mt-3">
-                <div class="col-md-4">
-                  <div class="form-group">
-                    <label for="taxRate" class="form-label">Tax Rate</label>
-                    <select class="form-select" id="taxRate" name="tax_rate">
-                      <option value="0">No Tax (0%)</option>
-                      <option value="5">VAT 5%</option>
-                      <option value="7.5">VAT 7.5%</option>
-                      <option value="10">VAT 10%</option>
-                      <option value="15">VAT 15%</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="form-group">
-                    <label for="discount" class="form-label">Discount (%)</label>
-                    <input type="number" class="form-control" id="discount" name="discount" placeholder="0" step="0.01" min="0" max="100" value="0">
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <div class="form-group">
-                    <label class="form-label">Final Price Preview</label>
-                    <div class="alert alert-info mb-0" role="alert" style="padding: 8px 12px;">
-                      <strong><span id="finalPrice">₦0.00</span></strong>
-                    </div>
-                  </div>
-                </div>
                 </div>
               </div>
             </div>
@@ -3803,43 +3777,6 @@ require_once '../../include/config.php';
                       </div>
                     </div>
                   </div>
-                  <div class="row">
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <label for="editTaxRate" class="form-label">Tax Rate</label>
-                        <select class="form-select" id="editTaxRate" name="tax_rate">
-                          <option value="0">No Tax (0%)</option>
-                          <option value="5">VAT 5%</option>
-                          <option value="7.5">VAT 7.5%</option>
-                          <option value="10">VAT 10%</option>
-                          <option value="15">VAT 15%</option>
-                        </select>
-                        <small class="form-text text-muted">Applicable tax percentage</small>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <label for="editDiscount" class="form-label">Discount</label>
-                        <div class="input-group">
-                          <input type="number" class="form-control" id="editDiscount" name="discount" placeholder="0" step="0.01" min="0" max="100">
-                          <span class="input-group-text">%</span>
-                        </div>
-                        <small class="form-text text-muted">Discount percentage (if any)</small>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-md-12">
-                      <div class="form-group">
-                        <label for="editFinalPrice" class="form-label">Final Price Review</label>
-                        <div class="input-group">
-                          <span class="input-group-text">₦</span>
-                          <input type="text" class="form-control" id="editFinalPrice" name="final_price" placeholder="0.00" readonly>
-                        </div>
-                        <small class="form-text text-muted">After tax and discount</small>
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 <!-- Manual Pricing Fields -->
@@ -3904,21 +3841,6 @@ require_once '../../include/config.php';
                       </div>
                     </div>
                   </div>
-                  <div class="row">
-                    <div class="col-md-12">
-                      <div class="form-group">
-                        <label for="editMarginTaxRate" class="form-label">Tax Rate</label>
-                        <select class="form-select" id="editMarginTaxRate" name="margin_tax_rate">
-                          <option value="0">No Tax (0%)</option>
-                          <option value="5">VAT 5%</option>
-                          <option value="7.5">VAT 7.5%</option>
-                          <option value="10">VAT 10%</option>
-                          <option value="15">VAT 15%</option>
-                        </select>
-                        <small class="form-text text-muted">Applicable tax percentage</small>
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 <!-- Range Pricing Fields -->
@@ -3958,20 +3880,7 @@ require_once '../../include/config.php';
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <label for="editRangeTaxRate" class="form-label">Tax Rate</label>
-                        <select class="form-select" id="editRangeTaxRate" name="range_tax_rate">
-                          <option value="0">No Tax (0%)</option>
-                          <option value="5">VAT 5%</option>
-                          <option value="7.5">VAT 7.5%</option>
-                          <option value="10">VAT 10%</option>
-                          <option value="15">VAT 15%</option>
-                        </select>
-                        <small class="form-text text-muted">Applicable tax percentage</small>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                       <div class="form-group">
                         <label for="editRangePotentialProfit" class="form-label">Potential Profit Range</label>
                         <div class="input-group">
@@ -4182,13 +4091,7 @@ require_once '../../include/config.php';
         document.getElementById('editStockQuantity').value = stockQtyInput ? stockQtyInput.value : '0';
         document.getElementById('editLowStockThreshold').value = lowStockInput ? lowStockInput.value : '0';
         
-        // Reset tax rate dropdowns
-        $('#editTaxRate').val('0').trigger('change');
-        $('#editMarginTaxRate').val('0').trigger('change');
-        $('#editRangeTaxRate').val('0').trigger('change');
-        document.getElementById('editDiscount').value = '0'; // TODO: Get from database when available
-
-        // Calculate initial profit margin and final price
+        // Calculate initial profit margin
         editCalculateProfitMargin();
 
         // Setup pricing handlers
@@ -4322,13 +4225,11 @@ require_once '../../include/config.php';
         // Fixed Pricing handlers
         document.getElementById('editFixedCostPrice')?.addEventListener('input', editCalculateProfitMargin);
         document.getElementById('editSellingPrice')?.addEventListener('input', editCalculateProfitMargin);
-        document.getElementById('editTaxRate')?.addEventListener('change', editCalculateFinalPrice);
-        document.getElementById('editDiscount')?.addEventListener('input', editCalculateFinalPrice);
+
 
         // Margin Pricing handlers
         document.getElementById('editMarginCostPrice')?.addEventListener('input', editCalculateMarginPrice);
         document.getElementById('editTargetMargin')?.addEventListener('input', editCalculateMarginPrice);
-        document.getElementById('editMarginTaxRate')?.addEventListener('change', editCalculateMarginPrice);
 
         // Range Pricing handlers
         document.getElementById('editRangeCostPrice')?.addEventListener('input', editCalculateRangeProfits);
@@ -4398,40 +4299,14 @@ require_once '../../include/config.php';
           document.getElementById('editPotentialProfit').value = '0.00';
         }
         
-        // Also calculate final price
-        editCalculateFinalPrice();
-      }
-
-      function editCalculateFinalPrice() {
-        const sellingPrice = parseFloat(document.getElementById('editSellingPrice').value) || 0;
-        const taxRate = parseFloat(document.getElementById('editTaxRate').value) || 0;
-        const discount = parseFloat(document.getElementById('editDiscount').value) || 0;
-        
-        if (sellingPrice > 0) {
-          // Apply tax
-          let priceWithTax = sellingPrice * (1 + (taxRate / 100));
-          
-          // Apply discount
-          let finalPrice = priceWithTax * (1 - (discount / 100));
-          
-          document.getElementById('editFinalPrice').value = finalPrice.toFixed(2);
-        } else {
-          document.getElementById('editFinalPrice').value = '0.00';
-        }
       }
 
       function editCalculateMarginPrice() {
         const costPrice = parseFloat(document.getElementById('editMarginCostPrice').value) || 0;
         const targetMargin = parseFloat(document.getElementById('editTargetMargin').value) || 0;
-        const taxRate = parseFloat(document.getElementById('editMarginTaxRate').value) || 0;
         
         if (costPrice > 0 && targetMargin > 0) {
           let calculatedSellingPrice = costPrice * (1 + (targetMargin / 100));
-          
-          // Apply tax if applicable
-          if (taxRate > 0) {
-            calculatedSellingPrice = calculatedSellingPrice * (1 + (taxRate / 100));
-          }
           
           const profit = calculatedSellingPrice - costPrice;
           document.getElementById('editCalculatedPrice').value = calculatedSellingPrice.toFixed(2);

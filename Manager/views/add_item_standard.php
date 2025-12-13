@@ -1321,38 +1321,12 @@ require_once '../../include/config.php';
                           </div>
 
                           <!-- Additional Pricing Options (Hidden for Manual Pricing) -->
-                          <div id="additionalPricingOptions" class="row">
-                            <div class="col-md-4">
-                              <div class="form-group">
-                                <label for="taxRate" class="form-label">Tax Rate</label>
-                                <select class="form-select" id="taxRate" name="tax_rate">
-                                  <option value="0">No Tax (0%)</option>
-                                  <option value="5">VAT 5%</option>
-                                  <option value="7.5">VAT 7.5%</option>
-                                  <option value="10">VAT 10%</option>
-                                  <option value="15">VAT 15%</option>
-                                </select>
-                              </div>
-                            </div>
-                            <div class="col-md-4">
-                              <div class="form-group">
-                                <label for="discount" class="form-label">Discount (%)</label>
-                                <input type="number" class="form-control" id="discount" name="discount" placeholder="0" step="0.01" min="0" max="100" value="0">
-                              </div>
-                            </div>
-                            <div class="col-md-4">
-                              <div class="form-group">
-                                <label class="form-label">Final Price Preview</label>
-                                <div class="alert alert-info mb-0" role="alert" style="padding: 8px 12px;">
-                                  <strong><span id="finalPrice">₦0.00</span></strong>
-                                </div>
-                              </div>
-                            </div>
+                           <div id="additionalPricingOptions" class="row">
                           </div>
 
 
                         </div>
-                      </div>
+                      </div> 
 
                       <!-- Section 3: Stock Details -->
                       <div class="card mb-4">
@@ -1521,32 +1495,10 @@ require_once '../../include/config.php';
         calculateFinalPrice(); 
       }
 
-      // Calculate final price with tax
-      function calculateFinalPrice() {
-        const sellingPrice = parseFloat(document.getElementById('sellingPrice').value) || 0;
-        const taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
-        const discount = parseFloat(document.getElementById('discount').value) || 0;
-        
-        let finalPrice = sellingPrice;
-        
-        // Apply discount
-        if (discount > 0) {
-          finalPrice = finalPrice - (finalPrice * (discount / 100));
-        }
-        
-        // Apply tax
-        if (taxRate > 0) {
-          finalPrice = finalPrice + (finalPrice * (taxRate / 100));
-        }
-        
-        document.getElementById('finalPrice').textContent = '₦' + finalPrice.toFixed(2);
-      }
-
       // Reset form
       function resetForm() {
         document.getElementById('addItemForm').reset();
         document.getElementById('profitMargin').value = '0%';
-        document.getElementById('finalPrice').textContent = '₦0.00';
         
         // Clear any potential profit field if it exists
         const potentialProfitField = document.getElementById('potentialProfit');
@@ -1680,8 +1632,6 @@ require_once '../../include/config.php';
         // Price calculation events
         document.getElementById('costPrice').addEventListener('input', calculateProfitMargin);
         document.getElementById('sellingPrice').addEventListener('input', calculateProfitMargin);
-        document.getElementById('taxRate').addEventListener('change', calculateFinalPrice);
-        document.getElementById('discount').addEventListener('input', calculateFinalPrice);
 
         // Enhanced image upload with preview
         document.getElementById('itemImage').addEventListener('change', function(e) {
@@ -1909,21 +1859,11 @@ require_once '../../include/config.php';
 
         // Show/hide additional pricing options based on type
         const additionalPricingOptions = document.getElementById('additionalPricingOptions');
-        const discountField = additionalPricingOptions.querySelector('.col-md-4:nth-child(2)');
-        const finalPriceField = additionalPricingOptions.querySelector('.col-md-4:nth-child(3)');
         
         if (type === 'manual') {
           additionalPricingOptions.style.display = 'none';
-        } else if (type === 'margin' || type === 'range') {
-          additionalPricingOptions.style.display = 'flex';
-          // Hide discount and final price preview for margin and range pricing
-          discountField.style.display = 'none';
-          finalPriceField.style.display = 'none';
         } else {
           additionalPricingOptions.style.display = 'flex';
-          // Show all fields for other pricing methods (fixed)
-          discountField.style.display = 'block';
-          finalPriceField.style.display = 'block';
         }
 
         // Show relevant fields based on type (use defensive checks to avoid runtime errors)
@@ -1943,13 +1883,7 @@ require_once '../../include/config.php';
             if (sellingPriceInputManual) {
               sellingPriceInputManual.required = false;
             }
-            // Reset tax, discount and final price for manual pricing (guarded)
-            const taxRateEl = document.getElementById('taxRate');
-            const discountEl = document.getElementById('discount');
-            const finalPriceEl = document.getElementById('finalPrice');
-            if (taxRateEl) taxRateEl.value = '0';
-            if (discountEl) discountEl.value = '0';
-            if (finalPriceEl) finalPriceEl.textContent = '₦0.00';
+            // No additional pricing options to reset for manual pricing
             break;
           }
           case 'margin': {
@@ -1957,11 +1891,6 @@ require_once '../../include/config.php';
             if (marginEl) marginEl.style.display = 'flex';
             const targetMarginEl = document.getElementById('targetMargin');
             if (targetMarginEl) targetMarginEl.required = true;
-            // Reset discount and final price for margin pricing
-            const discountEl2 = document.getElementById('discount');
-            const finalPriceEl2 = document.getElementById('finalPrice');
-            if (discountEl2) discountEl2.value = '0';
-            if (finalPriceEl2) finalPriceEl2.textContent = '₦0.00';
             break;
           }
           case 'range': {
@@ -1971,11 +1900,6 @@ require_once '../../include/config.php';
             const maxPriceEl = document.getElementById('maxPrice');
             if (minPriceEl) minPriceEl.required = true;
             if (maxPriceEl) maxPriceEl.required = true;
-            // Reset discount and final price for range pricing
-            const discountEl3 = document.getElementById('discount');
-            const finalPriceEl3 = document.getElementById('finalPrice');
-            if (discountEl3) discountEl3.value = '0';
-            if (finalPriceEl3) finalPriceEl3.textContent = '₦0.00';
             break;
           }
         }
@@ -2251,14 +2175,6 @@ require_once '../../include/config.php';
               newTag: true
             }
           }
-        });
-
-        // Initialize tax rate with Select2
-        $('#taxRate').select2({
-          theme: 'bootstrap',
-          width: '100%',
-          placeholder: 'Select an option',
-          dropdownParent: $('body')
         });
 
         // Initialize category with tags support (allows creating new options)

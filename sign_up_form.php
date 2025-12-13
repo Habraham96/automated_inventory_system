@@ -222,9 +222,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </section>
     <script>
     // Root preloader handled via include 'include/preloader.php'
-    </script>
-    // ...existing code...
-        // Nigerian States and LGAs
+    
+        // Nigerian States and LGAs (fallback data)
         const stateLGAs = {
           "Abia": ["Aba North","Aba South","Arochukwu","Bende","Ikwuano","Isiala Ngwa North","Isiala Ngwa South","Isuikwuato","Obi Ngwa","Ohafia","Osisioma","Ugwunagbo","Ukwa East","Ukwa West","Umuahia North","Umuahia South","Umu Nneochi"],
           "Adamawa": ["Demsa","Fufore","Ganye","Gayuk","Gombi","Grie","Hong","Jada","Lamurde","Madagali","Maiha","Mayo Belwa","Michika","Mubi North","Mubi South","Numan","Shelleng","Song","Toungo","Yola North","Yola South"],
@@ -266,23 +265,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         };
 
         document.addEventListener('DOMContentLoaded', function() {
-          const stateSelect = document.getElementById('stateSelect');
-          const lgaSelect = document.getElementById('lgaSelect');
-          if(stateSelect && lgaSelect) {
-            stateSelect.addEventListener('change', function() {
-              const state = this.value;
-              lgaSelect.innerHTML = '<option value="">Select Local Government Area</option>';
-              if(stateLGAs[state]) {
-                stateLGAs[state].forEach(function(lga) {
-                  const opt = document.createElement('option');
-                  opt.value = lga;
-                  opt.textContent = lga;
-                  lgaSelect.appendChild(opt);
-                });
-              }
-            });
-          }
-
           // Handle business logo file upload
           const businessLogoInput = document.getElementById('businessLogo');
           const logoPlaceholder = document.getElementById('logoPlaceholder');
@@ -320,32 +302,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           }
         });
 
-        // AJAX for LGAs
-    document.addEventListener('DOMContentLoaded', function() {
-      const stateSelect = document.getElementById('stateSelect');
-      const lgaSelect = document.getElementById('lgaSelect');
-      if(stateSelect && lgaSelect) {
-        stateSelect.addEventListener('change', function() {
-          const state = this.value;
-          lgaSelect.innerHTML = '<option value="">Loading...</option>';
-          if(state) {
-            fetch('get_lgas.php?state=' + encodeURIComponent(state))
-              .then(res => res.json())
-              .then(lgas => {
-                lgaSelect.innerHTML = '<option value="">Select Local Government Area</option>';
-                lgas.forEach(function(lga) {
-                  const opt = document.createElement('option');
-                  opt.value = lga;
-                  opt.textContent = lga;
-                  lgaSelect.appendChild(opt);
+        // State/LGA selection handler with AJAX and fallback
+        const stateSelect = document.getElementById('stateSelect');
+        const lgaSelect = document.getElementById('lgaSelect');
+        if(stateSelect && lgaSelect) {
+          stateSelect.addEventListener('change', function() {
+            const state = this.value;
+            lgaSelect.innerHTML = '<option value="">Loading...</option>';
+            if(state) {
+              fetch('get_lgas.php?state=' + encodeURIComponent(state))
+                .then(res => res.json())
+                .then(lgas => {
+                  lgaSelect.innerHTML = '<option value="">Select Local Government Area</option>';
+                  lgas.forEach(function(lga) {
+                    const opt = document.createElement('option');
+                    opt.value = lga;
+                    opt.textContent = lga;
+                    lgaSelect.appendChild(opt);
+                  });
+                })
+                .catch(err => {
+                  // Fallback to client-side data if AJAX fails
+                  console.error('AJAX failed, using fallback:', err);
+                  lgaSelect.innerHTML = '<option value="">Select Local Government Area</option>';
+                  if(stateLGAs[state]) {
+                    stateLGAs[state].forEach(function(lga) {
+                      const opt = document.createElement('option');
+                      opt.value = lga;
+                      opt.textContent = lga;
+                      lgaSelect.appendChild(opt);
+                    });
+                  }
                 });
-              });
-          } else {
-            lgaSelect.innerHTML = '<option value="">Select Local Government Area</option>';
-          }
-        });
-      }
-    });
+            } else {
+              lgaSelect.innerHTML = '<option value="">Select Local Government Area</option>';
+            }
+          });
+        }
 
         const home = document.querySelector(".home");
         const formContainer = document.querySelector(".form_container");

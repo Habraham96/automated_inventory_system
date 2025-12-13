@@ -608,8 +608,38 @@
             hideCustomDateOverlay();
           }
         });
+        
+        // Initialize Bootstrap dropdown for user avatar
+        setTimeout(function() {
+          var userDropdown = document.getElementById('UserDropdown');
+          var dropdownMenu = document.querySelector('.dropdown-menu[aria-labelledby="UserDropdown"]');
+          if (userDropdown && dropdownMenu && typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+            try { 
+              new bootstrap.Dropdown(userDropdown, { autoClose: true, boundary: 'viewport' }); 
+            } catch (error) { 
+              console.error('Dropdown initialization error:', error); 
+            }
+          }
+          
+          // Initialize sidebar collapse behavior
+          var sidebar = document.getElementById('sidebar');
+          if (sidebar) {
+            sidebar.querySelectorAll('a.nav-link[data-bs-toggle="collapse"]').forEach(function (toggle) {
+              toggle.addEventListener('click', function (e) {
+                e.preventDefault();
+                var target = document.querySelector(this.getAttribute('href'));
+                if (target && typeof bootstrap !== 'undefined' && bootstrap.Collapse) {
+                  sidebar.querySelectorAll('div.collapse.show').forEach(function (m) { 
+                    if (m !== target) bootstrap.Collapse.getOrCreateInstance(m).hide(); 
+                  });
+                  bootstrap.Collapse.getOrCreateInstance(target).toggle();
+                }
+              });
+            });
+          }
+        }, 500);
       });
     </script>
-    
+
   </body>
 </html>

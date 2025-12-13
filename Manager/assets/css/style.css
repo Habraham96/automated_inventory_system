@@ -32190,8 +32190,9 @@ nav.sidebar.sidebar-offcanvas {
   transform: translateY(-1px);
 }
 
-#itemTypeModal .modal-dialog {
+/* #itemTypeModal .modal-dialog {
   max-width: 800px;
+  margin: 0 auto;
 }
 
 #itemTypeModal .modal-body {
@@ -32204,7 +32205,7 @@ nav.sidebar.sidebar-offcanvas {
 
 #itemTypeModal .modal-footer {
   border-top: 2px solid #e9ecef;
-}
+} */
 
 /* Badge styling for examples */
 .bg-primary-subtle {
