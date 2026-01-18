@@ -66,11 +66,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
   }
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inventory | Sales</title>
+    <?php include 'include/responsive.php'; ?>
     <link rel="stylesheet" href="style.css" />
     <?php include 'include/head_fonts.php'; ?>
     <!-- Unicons -->
@@ -104,8 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
         <div class="tabs-container" style="margin-top: 40px;">
           <div class="tabs-nav" style="display: flex; justify-content: center; gap: 16px; margin-bottom: 32px; flex-wrap: wrap;">
             <button class="tab-btn active" data-tab="monthly" type="button">Monthly</button>
-            <button class="tab-btn" data-tab="3months" type="button">3 Months</button>
-            <button class="tab-btn" data-tab="6months" type="button">6 Months</button>
+            <button class="tab-btn" data-tab="months3" type="button">3 Months</button>
+            <button class="tab-btn" data-tab="months6" type="button">6 Months</button>
             <button class="tab-btn" data-tab="annual" type="button">Annual</button>
           </div>
           
@@ -156,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             </div>
             
             <!-- 3 Months Tab -->
-            <div class="tab-content" id="3months">
+            <div class="tab-content" id="months3">
               <div class="plan-table" style="display: flex; gap: 24px; justify-content: center; align-items: stretch; margin-bottom: 32px; flex-wrap: wrap;">
                 
                 <!-- Basic 3 Months -->
@@ -196,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             </div>
             
             <!-- 6 Months Tab -->
-            <div class="tab-content" id="6months">
+            <div class="tab-content" id="months6">
               <div class="plan-table" style="display: flex; gap: 24px; justify-content: center; align-items: stretch; margin-bottom: 32px; flex-wrap: wrap;">
                 
                 <!-- Basic 6 Months -->
@@ -491,41 +494,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
     </style>
     <script>
       // Root preloader handled via include 'include/preloader.php'
-    </script>
+    
       // Highlight plan card on click
       document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM Content Loaded - Initializing tabs');
+        
         // Add plan_name getter for AJAX verification
         window.getSelectedPlanName = function() {
           var selectedCard = document.querySelector('.plan-card.selected');
           return selectedCard ? selectedCard.getAttribute('data-plan-name') : '';
         };
         
+        const hiddenInput = document.getElementById('selectedPlan');
+        
         // Tab switching functionality
         const tabBtns = document.querySelectorAll('.tab-btn');
         const tabContents = document.querySelectorAll('.tab-content');
         
-        tabBtns.forEach(btn => {
-          btn.addEventListener('click', function() {
-            const tabId = this.getAttribute('data-tab');
-            
-            // Remove active class from all tabs and contents
-            tabBtns.forEach(b => b.classList.remove('active'));
-            tabContents.forEach(c => c.classList.remove('active'));
-            
-            // Add active class to clicked tab and corresponding content
-            this.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-            
-            // Clear any previously selected plan cards and hidden input
-            document.querySelectorAll('.plan-card').forEach(card => {
-              card.classList.remove('selected');
-            });
-            if (hiddenInput) {
-              hiddenInput.value = '';
-            }
+        console.log('Found', tabBtns.length, 'tab buttons');
+        console.log('Found', tabContents.length, 'tab contents');
+        
+        // List all tab content IDs
+        tabContents.forEach(content => {
+          console.log('Tab content ID:', content.id);
+        });
+        
+        // Tab click handler
+        function switchTab(tabId) {
+          console.log('Switching to tab:', tabId);
+          
+          // Remove active from all
+          tabBtns.forEach(b => b.classList.remove('active'));
+          tabContents.forEach(c => {
+            c.classList.remove('active');
+            console.log('Removed active from:', c.id);
+          });
+          
+          // Find and activate the target
+          const targetBtn = document.querySelector('[data-tab="' + tabId + '"]');
+          const targetContent = document.getElementById(tabId);
+          
+          if (targetBtn) {
+            targetBtn.classList.add('active');
+            console.log('Activated button for:', tabId);
+          }
+          
+          if (targetContent) {
+            targetContent.classList.add('active');
+            console.log('Activated content:', tabId);
+            console.log('Content display:', window.getComputedStyle(targetContent).display);
+          } else {
+            console.error('Could not find content with ID:', tabId);
+          }
+          
+          // Clear selected plans
+          document.querySelectorAll('.plan-card').forEach(card => {
+            card.classList.remove('selected');
+          });
+          if (hiddenInput) {
+            hiddenInput.value = '';
+          }
+        }
+        
+        // Attach click listeners
+        tabBtns.forEach((btn) => {
+          const tabId = btn.getAttribute('data-tab');
+          console.log('Attaching listener to button with data-tab:', tabId);
+          
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const clickedTabId = this.getAttribute('data-tab');
+            console.log('Button clicked for tab:', clickedTabId);
+            switchTab(clickedTabId);
           });
         });
-        const hiddenInput = document.getElementById('selectedPlan');
         
         // Function to select a plan card
         function selectPlanCard(card) {
@@ -569,11 +612,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             features: [
               '7 days full access',
               'Single Manager Account',
-              'Up to 2 agent/employer accounts',
+              'Single account',
               'All basic features included',
-              'Email support',
-              'Mobile app access',
-              'No credit card required',
+              'No credit card/payments required',
               'Upgrade anytime'
             ]
           },
@@ -583,10 +624,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             desc: 'Ideal for small businesses',
             features: [
               'Single Manager Account',
-              'Allows Only 1 agent/employer account',
-              'Basic inventory management',
-              'Email support',
-              'Mobile app access',
+              'Allows only Two(2) staff accounts',
+              'Inventory management',
               'Flexible monthly billing',
               'Cancel anytime'
             ]
@@ -596,12 +635,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             price: '₦10,000/month',
             desc: 'Perfect for growing businesses',
             features: [
-              'Allows Two(2) Managers Account',
-              'Up to Three(3) agent/employer accounts',
-              'Advanced inventory management',
-              'Customizable reports',
-              'Email & phone support',
-              'Mobile app access',
+              'Single Manager Account',
+              'Allows up to Four(4) staff accounts',
+              'Inventory management',
+              'Allows Two(2) branches',
               'Flexible monthly billing',
               'Cancel anytime'
             ]
@@ -612,13 +649,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             desc: 'Best for established businesses',
             features: [
               'Up to Three(3) Managers Account',
-              'Up to Ten(10) agent/employer accounts',
-              'All inventory features',
+              'Allows up to Ten(10) staff accounts',
+              'Inventory management features',
+              'Allows up to Three(3) branches',
               'Advanced analytics & reporting',
-              'Dedicated account manager',
-              'Priority support 24/7',
-              'Mobile app access',
-              'Custom integrations',
               'Flexible monthly billing',
               'Cancel anytime'
             ]
@@ -629,10 +663,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             desc: 'Ideal for small businesses',
             features: [
               'Single Manager Account',
-              'Allows Only 1 agent/employer account',
-              'Basic inventory management',
-              'Email support',
-              'Mobile app access',
+              'Allows only Two(2) staff accounts',
+              'Inventory management',
+              'Cancel anytime',
               'Save 10% compared to monthly billing'
             ]
           },
@@ -642,10 +675,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             desc: 'Ideal for small businesses',
             features: [
               'Single Manager Account',
-              'Allows Only 1 agent/employer account',
-              'Basic inventory management',
-              'Priority email support',
-              'Mobile app access',
+              'Allows only Two(2) staff accounts',
+              'Inventory management',
+              'Cancel anytime',
               'Save 15% compared to monthly billing'
             ]
           },
@@ -655,10 +687,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             desc: 'Ideal for small businesses',
             features: [
               'Single Manager Account',
-              'Allows Only 1 agent/employer account',
-              'Basic inventory management',
-              'Priority support',
-              'Mobile app access',
+              'Allows only Two(2) staff accounts',
+              'Inventory management',
+              'Cancel anytime',
               'Save 20% compared to monthly billing',
               'Best value for money'
             ]
@@ -668,12 +699,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             price: '₦27,000',
             desc: 'Perfect for growing businesses',
             features: [
-              'Allows Two(2) Managers Account',
-              'Up to Three(3) agent/employer accounts',
-              'Advanced inventory management',
-              'Customizable reports',
-              'Email & phone support',
-              'Mobile app access',
+              'Single Manager Account',
+              'Allows up to Four(4) staff accounts',
+              'Inventory management',
+              'Allows Two(2) branches',
+              'Cancel anytime'
               'Save 10% compared to monthly billing'
             ]
           },
@@ -682,12 +712,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             price: '₦51,000',
             desc: 'Perfect for growing businesses',
             features: [
-              'Allows Two(2) Managers Account',
-              'Up to Three(3) agent/employer accounts',
-              'Advanced inventory management',
-              'Customizable reports',
-              'Priority support',
-              'Mobile app access',
+              'Single Manager Account',
+              'Allows up to Four(4) staff accounts',
+              'Inventory management',
+              'Allows Two(2) branches',
+              'Cancel anytime',
               'Save 15% compared to monthly billing'
             ]
           },
@@ -696,13 +725,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             price: '₦96,000',
             desc: 'Perfect for growing businesses',
             features: [
-              'Allows Two(2) Managers Account',
-              'Up to Three(3) agent/employer accounts',
-              'Advanced inventory management',
-              'Customizable reports',
-              'Priority support 24/7',
-              'Mobile app access',
-              'Advanced analytics',
+              'Single Manager Account',
+              'Allows up to Four(4) staff accounts',
+              'Inventory management',
+              'Allows Two(2) branches',
+              'Cancel anytime',
               'Save 20% compared to monthly billing',
               'Best value for growing teams'
             ]
@@ -713,13 +740,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             desc: 'Best for established businesses',
             features: [
               'Up to Three(3) Managers Account',
-              'Up to Ten(10) agent/employer accounts',
-              'All inventory features',
+              'Allows up to Ten(10) staff accounts',
+              'Inventory management features',
+              'Allows up to Three(3) branches',
               'Advanced analytics & reporting',
-              'Dedicated account manager',
-              'Priority support 24/7',
-              'Mobile app access',
-              'Custom integrations',
+              'Cancel anytime'
               'Save 10% compared to monthly billing'
             ]
           },
@@ -729,14 +754,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             desc: 'Best for established businesses',
             features: [
               'Up to Three(3) Managers Account',
-              'Up to Ten(10) agent/employer accounts',
-              'All inventory features',
+              'Allows up to Ten(10) staff accounts',
+              'Inventory management features',
+              'Allows up to Three(3) branches',
               'Advanced analytics & reporting',
-              'Dedicated account manager',
-              'Priority support 24/7',
-              'Mobile app access',
-              'Custom integrations',
-              'API access',
+              'Cancel anytime'
               'Save 15% compared to monthly billing'
             ]
           },
@@ -746,15 +768,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['plan'])) {
             desc: 'Best for established businesses',
             features: [
               'Up to Three(3) Managers Account',
-              'Up to Ten(10) agent/employer accounts',
-              'All inventory features',
+              'Allows up to Ten(10) staff accounts',
+              'Inventory management features',
+              'Allows up to Three(3) branches',
               'Advanced analytics & reporting',
-              'Dedicated account manager',
-              'Priority support 24/7',
-              'Mobile app access',
-              'Custom integrations',
-              'API access',
-              'White-label options',
+              'Cancel anytime'
               'Save 20% compared to monthly billing',
               'Best value for enterprise teams'
             ]

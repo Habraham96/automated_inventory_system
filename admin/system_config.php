@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>System Configuration - SalesPilot</title>
+    <?php include '../include/responsive.php'; ?>
     <link rel="stylesheet" href="../Manager/assets/vendors/feather/feather.css">
     <link rel="stylesheet" href="../Manager/assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="../Manager/assets/vendors/ti-icons/css/themify-icons.css">
@@ -191,7 +192,7 @@
                   </div>
                   <div class="config-item">
                     <label for="businessEmail">Business Email</label>
-                    <input type="email" class="form-control" id="businessEmail" value="admin@salespilot.com">
+                    <input type="email" class="form-control" id="businessEmail" value="info.salespilots@gmail.com">
                     <small>Primary contact email for your business</small>
                   </div>
                   <div class="config-item">

@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Sell - SalesPilot</title>
+    <?php include '../include/responsive.php'; ?>
     
     <!-- plugins:css -->
     <link rel="stylesheet" href="../Manager/assets/vendors/feather/feather.css">
@@ -48,7 +49,7 @@
         </div>
         
         
-        <!-- Include Sidebar Content -->
+        <!-- Include Sidebar Content-->
         <?php include 'layouts/sidebar_content.php'; ?>
         
         <!-- partial -->
@@ -325,7 +326,7 @@
                           </div>
                         </div>
                         
-                        <div class="cart-items">
+                        <div class="cart-items" id="cartItems">
                           <div class="cart-empty">
                             <i class="bi bi-cart-x cart-empty-icon"></i>
                             <p>Your cart is empty</p>
@@ -337,10 +338,29 @@
                           <button class="cart-action-btn" id="addDiscountBtn">
                             <i class="bi bi-percent"></i> Add Discount
                           </button>
+                          <!-- Discount modal will be used (see modal markup later) -->
                           
+                          <div class="cart-subtotals">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                              <span>Subtotal:</span>
+                              <span id="cartSubtotal">₦0.00</span>
+                            </div>
+                            <div id="cartDiscountRow" style="display:none; justify-content:space-between; margin-bottom:6px;">
+                              <span>Discount:</span>
+                              <span id="cartDiscountAmount">-₦0.00</span>
+                            </div>
+                          </div>
+
                           <div class="cart-total">
                             <span>Total:</span>
-                            <span>₦0.00</span>
+                            <span id="cartTotal">₦0.00</span>
+                          </div>
+
+                          <div style="display:flex; gap:8px; align-items:center;">
+                            <div class="cart-discount-info" id="cartDiscountInfo">
+                              <!-- Discount info shown here when applied -->
+                            </div>
+                            <button class="cart-action-btn" id="removeDiscountBtn" style="display:none; padding:8px 10px;">Remove Discount</button>
                           </div>
                           
                           <!-- Cart Actions -->
@@ -520,6 +540,29 @@
               </button>
             </div>
           </div>
+      
+          <!-- Discount Modal -->
+          <div class="modal-overlay" id="discountModal">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3 class="modal-title">Apply Discount</h3>
+                <button class="modal-close" id="closeDiscountModal">&times;</button>
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                  <label class="form-label">Search Discounts</label>
+                  <input type="text" class="form-control" id="discountModalSearchInput" placeholder="Search or filter discounts...">
+                </div>
+
+                <div id="discountList" style="max-height:320px; overflow-y:auto;">
+                  <!-- discount items will be rendered here -->
+                </div>
+
+                <hr>
+                <!-- Custom discount removed; use presets or 'Remove discount' button in cart -->
+              </div>
+            </div>
+          </div>
           
           <!-- Receipt Modal -->
           <div class="receipt-modal" id="receiptModal">
@@ -679,8 +722,8 @@
     <script src="../Manager/assets/js/todolist.js"></script>
     <!-- endinject -->
     
-    <!-- Include Sidebar Scripts -->
-    <?php include 'layouts/sidebar_scripts.php'; ?>
+    <!-- Include Sidebar Scripts (use manager sidebar scripts) -->
+    <?php include '../Manager/layouts/sidebar_scripts.php'; ?>
     
     <!-- Dropdown and Sidebar Menu Script -->
     <script>
@@ -796,6 +839,46 @@
         return { id: c.id, name: c.name, phone: c.phone || '', type: 'regular' };
       }));
       
+      // Discount state (copied from manager sell page)
+      let appliedDiscount = null; // {type: 'percent'|'fixed', value: number, label: string}
+      const discountOptions = [
+        { id: 'd5', type: 'percent', value: 5, label: '5% Off' },
+        { id: 'd10', type: 'percent', value: 10, label: '10% Off' },
+        { id: 'd15', type: 'percent', value: 15, label: '15% Off' },
+        { id: 'd20', type: 'percent', value: 20, label: '20% Off' },
+        { id: 'f500', type: 'fixed', value: 500, label: '₦500 Off' },
+        { id: 'f1000', type: 'fixed', value: 1000, label: '₦1,000 Off' }
+      ];
+
+      function renderDiscountList(filtered) {
+        const list = filtered || discountOptions;
+        const discountListEl = document.getElementById('discountList');
+        if (!discountListEl) return;
+        discountListEl.innerHTML = '';
+
+        list.forEach(function(opt) {
+          const row = document.createElement('div');
+          row.className = 'customer-list-item';
+          row.style.display = 'flex';
+          row.style.justifyContent = 'space-between';
+          row.style.alignItems = 'center';
+          row.style.cursor = 'pointer';
+          row.innerHTML = `
+            <div>
+              <div style="font-weight:600">${opt.label}</div>
+              <div style="font-size:12px;color:#6c757d">${opt.type === 'percent' ? opt.value + '%' : '₦' + opt.value.toLocaleString()}</div>
+            </div>
+            <div><button class="cart-action-btn" style="padding:6px 10px">Apply</button></div>
+          `;
+          row.addEventListener('click', function() {
+            applyDiscount(opt);
+            const discountModal = document.getElementById('discountModal');
+            if (discountModal) discountModal.classList.remove('active');
+          });
+          discountListEl.appendChild(row);
+        });
+      }
+      
       // Add Customer Button - Toggle Dropdown
       const addCustomerBtn = document.getElementById('addCustomerBtn');
       addCustomerBtn.addEventListener('click', function(e) {
@@ -824,6 +907,70 @@
         });
         renderCustomerDropdown(filtered);
       });
+
+      // Discount modal elements & handlers
+      const addDiscountBtn = document.getElementById('addDiscountBtn');
+      const discountModal = document.getElementById('discountModal');
+      const discountModalSearchInput = document.getElementById('discountModalSearchInput');
+      const closeDiscountModal = document.getElementById('closeDiscountModal');
+      const removeDiscountBtn = document.getElementById('removeDiscountBtn');
+      const cartDiscountInfo = document.getElementById('cartDiscountInfo');
+
+      if (addDiscountBtn) {
+        addDiscountBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (!discountModal) return;
+          discountModal.classList.add('active');
+          if (discountModalSearchInput) discountModalSearchInput.value = '';
+          renderDiscountList();
+          if (discountModalSearchInput) discountModalSearchInput.focus();
+        });
+      }
+
+      if (closeDiscountModal) {
+        closeDiscountModal.addEventListener('click', function() {
+          if (discountModal) discountModal.classList.remove('active');
+        });
+      }
+
+      if (discountModal) {
+        discountModal.addEventListener('click', function(e) {
+          if (e.target === discountModal) discountModal.classList.remove('active');
+        });
+      }
+
+      if (discountModalSearchInput) {
+        discountModalSearchInput.addEventListener('input', function() {
+          const q = this.value.toLowerCase();
+          const filtered = discountOptions.filter(function(d) {
+            return d.label.toLowerCase().includes(q) || (d.type === 'fixed' && ('₦' + d.value).includes(q));
+          });
+          renderDiscountList(filtered);
+        });
+      }
+
+      if (removeDiscountBtn) {
+        removeDiscountBtn.addEventListener('click', function() {
+          if (!appliedDiscount) return;
+          appliedDiscount = null;
+          updateCartUI();
+        });
+      }
+
+      function applyDiscount(d) {
+        appliedDiscount = d;
+        updateCartUI();
+        if (appliedDiscount) {
+          if (cartDiscountInfo) {
+            cartDiscountInfo.style.display = 'block';
+            cartDiscountInfo.textContent = 'Discount applied: ' + appliedDiscount.label;
+          }
+          if (removeDiscountBtn) removeDiscountBtn.style.display = 'inline-block';
+        } else {
+          if (cartDiscountInfo) { cartDiscountInfo.style.display = 'none'; cartDiscountInfo.textContent = ''; }
+          if (removeDiscountBtn) removeDiscountBtn.style.display = 'none';
+        }
+      }
       
       // Render customer dropdown list
       function renderCustomerDropdown(customers) {
@@ -1284,14 +1431,19 @@
         modal.classList.remove('active');
       });
       
-      // Update cart UI
+      // Update cart UI (with discount support)
       function updateCartUI() {
-        const cartItemsContainer = document.querySelector('.cart-items');
-        const cartTotalElement = document.querySelector('.cart-total span:last-child');
-        
+        const cartItemsContainer = document.getElementById('cartItems') || document.querySelector('.cart-items');
+        const cartTotalElement = document.getElementById('cartTotal') || document.querySelector('.cart-total span:last-child');
+        const cartSubtotalElement = document.getElementById('cartSubtotal');
+        const cartDiscountAmountEl = document.getElementById('cartDiscountAmount');
+        const cartDiscountRow = document.getElementById('cartDiscountRow');
+        const cartDiscountInfo = document.getElementById('cartDiscountInfo');
+        const removeDiscountBtn = document.getElementById('removeDiscountBtn');
+
         // Clear existing items
         cartItemsContainer.innerHTML = '';
-        
+
         if (cartItems.length === 0) {
           cartItemsContainer.innerHTML = `
             <div class="cart-empty">
@@ -1300,16 +1452,21 @@
               <small>Add items to get started</small>
             </div>
           `;
-          cartTotalElement.textContent = '₦0.00';
+          if (cartSubtotalElement) cartSubtotalElement.textContent = '₦0.00';
+          if (cartDiscountAmountEl) cartDiscountAmountEl.textContent = '-₦0.00';
+          if (cartTotalElement) cartTotalElement.textContent = '₦0.00';
+          appliedDiscount = null;
+          if (cartDiscountInfo) { cartDiscountInfo.style.display = 'none'; cartDiscountInfo.textContent = ''; }
+          if (cartDiscountRow) cartDiscountRow.style.display = 'none';
+          if (removeDiscountBtn) removeDiscountBtn.style.display = 'none';
           return;
         }
-        
-        // Add cart items
-        let total = 0;
+
+        let subtotal = 0;
         cartItems.forEach(function(item, index) {
           const itemTotal = item.price * item.quantity;
-          total += itemTotal;
-          
+          subtotal += itemTotal;
+
           const cartItemHTML = `
             <div class="cart-item">
               <div class="cart-item-info">
@@ -1323,11 +1480,42 @@
           `;
           cartItemsContainer.insertAdjacentHTML('beforeend', cartItemHTML);
         });
-        
-        // Update total
-        cartTotalElement.textContent = '₦' + total.toLocaleString();
-        
-        // Add remove functionality
+
+        // Calculate discount if applied
+        let discountAmount = 0;
+        if (appliedDiscount) {
+          if (appliedDiscount.type === 'percent') {
+            discountAmount = subtotal * (appliedDiscount.value / 100);
+          } else {
+            discountAmount = appliedDiscount.value;
+          }
+        }
+
+        // Ensure discount does not exceed subtotal
+        discountAmount = Math.min(discountAmount, subtotal);
+
+        const totalAfter = Math.max(0, subtotal - discountAmount);
+
+        // Update UI: show subtotal, discount amount and total
+        if (cartSubtotalElement) cartSubtotalElement.textContent = '₦' + subtotal.toLocaleString();
+        if (cartTotalElement) cartTotalElement.textContent = '₦' + totalAfter.toLocaleString();
+        if (appliedDiscount && discountAmount > 0) {
+          if (cartDiscountInfo) {
+            cartDiscountInfo.style.display = 'block';
+            const formatted = '₦' + Math.round(discountAmount).toLocaleString();
+            cartDiscountInfo.textContent = `Discount (${appliedDiscount.label}): -${formatted}`;
+          }
+          if (cartDiscountRow) {
+            cartDiscountRow.style.display = 'flex';
+            if (cartDiscountAmountEl) cartDiscountAmountEl.textContent = '-' + ('₦' + Math.round(discountAmount).toLocaleString());
+          }
+          if (removeDiscountBtn) removeDiscountBtn.style.display = 'inline-block';
+        } else {
+          if (cartDiscountInfo) { cartDiscountInfo.style.display = 'none'; cartDiscountInfo.textContent = ''; }
+          if (cartDiscountRow) cartDiscountRow.style.display = 'none';
+          if (removeDiscountBtn) removeDiscountBtn.style.display = 'none';
+        }
+
         document.querySelectorAll('.cart-item-remove').forEach(function(btn) {
           btn.addEventListener('click', function() {
             const index = parseInt(this.dataset.index);

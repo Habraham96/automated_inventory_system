@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>brm - SalesPilot</title>
+    <?php include '../include/responsive.php'; ?>
     <link rel="stylesheet" href="../Manager/assets/vendors/feather/feather.css">
     <link rel="stylesheet" href="../Manager/assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="../Manager/assets/vendors/ti-icons/css/themify-icons.css">
@@ -389,6 +390,28 @@
         text-transform: uppercase;
         letter-spacing: 0.6px;
       }
+      
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      @keyframes slideInRight {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
     </style>
   </head>
   <body class="with-welcome-text">
@@ -403,7 +426,7 @@
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   <h3 class="mb-2"><i class="bi bi-people-fill me-2"></i>Business Relationship Management</h3>
-                  <p class="mb-0">Manage leads, contacts, and customer interactions</p>
+                  <p class="mb-0">Manage BRMs, contacts, and customer interactions</p>
                 </div>
                 <button class="btn btn-light" onclick="openAddBRMPanel()">
                   <i class="bi bi-person-plus-fill me-2"></i>Add New BRM
@@ -415,60 +438,14 @@
             <div class="row mb-4">
               <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
                 <div class="stats-card">
-                  <div class="stats-value text-primary">42</div>
-                  <div class="stats-label">New Leads</div>
+                  <div class="stats-value text-primary" id="totalBRMs">42</div>
+                  <div class="stats-label">All BRMs</div>
                 </div>
               </div>
-              <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
-                <div class="stats-card">
-                  <div class="stats-value" style="color: #ffc107;">28</div>
-                  <div class="stats-label">Contacted</div>
-                </div>
-              </div>
-              <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
-                <div class="stats-card">
-                  <div class="stats-value" style="color: #17a2b8;">15</div>
-                  <div class="stats-label">Qualified</div>
-                </div>
-              </div>
-              <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
-                <div class="stats-card">
-                  <div class="stats-value text-success">23</div>
-                  <div class="stats-label">Converted</div>
-                </div>
-              </div>
+              
             </div>
             
-            <!-- brm Tabs -->
-            <div class="brm-tabs">
-              <ul class="nav nav-pills" id="brmTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link active" id="all-tab" data-bs-toggle="pill" data-bs-target="#all" type="button">
-                    <i class="bi bi-grid-fill me-2"></i>All Leads
-                  </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="new-tab" data-bs-toggle="pill" data-bs-target="#new" type="button">
-                    <i class="bi bi-star-fill me-2"></i>New
-                  </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="contacted-tab" data-bs-toggle="pill" data-bs-target="#contacted" type="button">
-                    <i class="bi bi-telephone-fill me-2"></i>Contacted
-                  </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="qualified-tab" data-bs-toggle="pill" data-bs-target="#qualified" type="button">
-                    <i class="bi bi-check-circle-fill me-2"></i>Qualified
-                  </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                  <button class="nav-link" id="converted-tab" data-bs-toggle="pill" data-bs-target="#converted" type="button">
-                    <i class="bi bi-trophy-fill me-2"></i>Converted
-                  </button>
-                </li>
-              </ul>
-            </div>
+            
             
             <!-- Search & Filter Section -->
             <div class="search-filter-section">
@@ -476,7 +453,7 @@
                 <div class="col-md-5">
                   <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search leads by name, company, or email...">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search BRMs by name, company, or email...">
                   </div>
                 </div>
                 <div class="col-md-2">
@@ -492,8 +469,8 @@
                   <select class="form-select" id="sortFilter">
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
-                    <option value="value-high">Highest Value</option>
-                    <option value="value-low">Lowest Value</option>
+                    <option value="value-high">Highest Customer</option>
+                    <option value="value-low">Lowest Customer</option>
                   </select>
                 </div>
                 <div class="col-md-3">
@@ -513,16 +490,16 @@
             <div class="tab-content" id="brmTabsContent">
               <div class="tab-pane fade show active" id="all" role="tabpanel">
                 <div class="leads-grid" id="leadsGrid">
-                  <!-- Lead Card 1 -->
-                  <div class="lead-card new" onclick="showLeadDetails(1)">
+                  <!-- BRM Card 1 -->
+                  <div class="lead-card new" data-brm-id="1" onclick="showLeadDetails(1)">
                     <div class="lead-avatar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                       AM
                     </div>
                     <div class="lead-name">Alice Martinez</div>
                     <div class="lead-company">Tech Innovations Ltd</div>
-                          <span class="lead-status status-new">New Lead</span>
-                          <small class="d-block mt-1 text-muted">Referral: <span class="fw-semibold">REF-ALC001</span></small>
-                    <div class="lead-info">
+                          <small class="d-block mt-1 text-muted">Referral code: <span class="fw-semibold">REF-ALC001</span></small>
+                          <br>
+                          <div class="lead-info">
                       <div class="lead-info-item">
                         <i class="bi bi-envelope-fill"></i>
                         <span>alice.martinez@techinnovations.com</span>
@@ -535,184 +512,101 @@
                         <i class="bi bi-tag-fill"></i>
                         <span>Website</span>
                       </div>
+                      <span>Customers: 15</span>
                     </div>
-                    <div class="lead-value">₦2,500,000</div>
+
                     <div class="lead-actions">
-                      <button class="lead-action-btn" onclick="event.stopPropagation(); contactLead(1)">
-                        <i class="bi bi-telephone-fill"></i> Contact
-                      </button>
-                      <button class="lead-action-btn" onclick="event.stopPropagation(); updateLeadStatus(1)">
-                        <i class="bi bi-arrow-right-circle-fill"></i> Move
-                      </button>
+                      <button class="lead-action-btn" onclick="event.stopPropagation(); adminControl(1)"><i class="bi bi-shield-lock-fill"></i> Admin Control</button>
                     </div>
                   </div>
                   
-                  <!-- Lead Card 2 -->
-                  <div class="lead-card contacted" onclick="showLeadDetails(2)">
-                    <div class="lead-avatar" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                      BC
-                    </div>
+                  <!-- BRM Card 2 -->
+                  <div class="lead-card contacted" data-brm-id="2" onclick="showLeadDetails(2)">
+                    <div class="lead-avatar" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">BC</div>
                     <div class="lead-name">Benjamin Clark</div>
                     <div class="lead-company">Global Solutions Inc</div>
-                    <span class="lead-status status-contacted">Contacted</span>
+                    <small class="d-block mt-1 text-muted">Referral code: <span class="fw-semibold">REF-BEN123</span></small>
+                    <br>
                     <div class="lead-info">
-                      <div class="lead-info-item">
-                        <i class="bi bi-envelope-fill"></i>
-                        <span>ben.clark@globalsolutions.com</span>
-                      </div>
-                      <div class="lead-info-item">
-                        <i class="bi bi-telephone-fill"></i>
-                        <span>+234 802 234 5678</span>
-                      </div>
-                      <div class="lead-info-item">
-                        <i class="bi bi-tag-fill"></i>
-                          <span>Referral</span>
-                      </div>
+                      <div class="lead-info-item"><i class="bi bi-envelope-fill"></i><span>ben.clark@globalsolutions.com</span></div>
+                      <div class="lead-info-item"><i class="bi bi-telephone-fill"></i><span>+234 802 234 5678</span></div>
+                      <div class="lead-info-item"><i class="bi bi-tag-fill"></i><span>Referral</span></div>
+                      <span>Customers: 8</span>
                     </div>
-                    <div class="lead-value">₦4,200,000</div>
-                      <small class="d-block mt-1 text-muted">Referral Code: <span class="fw-semibold">REF-BEN123</span></small>
                     <div class="lead-actions">
-                      <button class="lead-action-btn" onclick="event.stopPropagation(); contactLead(2)">
-                        <i class="bi bi-chat-dots-fill"></i> Follow Up
-                      </button>
-                      <button class="lead-action-btn" onclick="event.stopPropagation(); updateLeadStatus(2)">
-                        <i class="bi bi-arrow-right-circle-fill"></i> Move
-                      </button>
+                      <button class="lead-action-btn" onclick="event.stopPropagation(); adminControl(2)"><i class="bi bi-shield-lock-fill"></i> Admin Control</button>
                     </div>
                   </div>
                   
-                  <!-- Lead Card 3 -->
-                  <div class="lead-card qualified" onclick="showLeadDetails(3)">
-                    <div class="lead-avatar" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                      CD
-                    </div>
+                  <!-- BRM Card 3 -->
+                  <div class="lead-card qualified" data-brm-id="3" onclick="showLeadDetails(3)">
+                    <div class="lead-avatar" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">CD</div>
                     <div class="lead-name">Catherine Davis</div>
                     <div class="lead-company">Retail Masters Co</div>
-                    <span class="lead-status status-qualified">Qualified</span>
+                    <small class="d-block mt-1 text-muted">Referral code: <span class="fw-semibold">-</span></small>
+                    <br>
                     <div class="lead-info">
-                      <div class="lead-info-item">
-                        <i class="bi bi-envelope-fill"></i>
-                        <span>catherine.d@retailmasters.com</span>
-                      </div>
-                      <div class="lead-info-item">
-                        <i class="bi bi-telephone-fill"></i>
-                        <span>+234 803 345 6789</span>
-                      </div>
-                      <div class="lead-info-item">
-                        <i class="bi bi-tag-fill"></i>
-                        <span>Social Media</span>
-                      </div>
+                      <div class="lead-info-item"><i class="bi bi-envelope-fill"></i><span>catherine.d@retailmasters.com</span></div>
+                      <div class="lead-info-item"><i class="bi bi-telephone-fill"></i><span>+234 803 345 6789</span></div>
+                      <div class="lead-info-item"><i class="bi bi-tag-fill"></i><span>Social Media</span></div>
+                      <span>Customers: 12</span>
                     </div>
-                    <div class="lead-value">₦6,800,000</div>
-                      <small class="d-block mt-1 text-muted">Referral Code: <span class="fw-semibold">-</span></small>
                     <div class="lead-actions">
-                      <button class="lead-action-btn" onclick="event.stopPropagation(); contactLead(3)">
-                        <i class="bi bi-calendar-check-fill"></i> Schedule
-                      </button>
-                      <button class="lead-action-btn" onclick="event.stopPropagation(); updateLeadStatus(3)">
-                        <i class="bi bi-arrow-right-circle-fill"></i> Convert
-                      </button>
+                      <button class="lead-action-btn" onclick="event.stopPropagation(); adminControl(3)"><i class="bi bi-shield-lock-fill"></i> Admin Control</button>
                     </div>
                   </div>
                   
-                  <!-- Lead Card 4 -->
-                  <div class="lead-card converted" onclick="showLeadDetails(4)">
-                    <div class="lead-avatar" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                      DE
-                    </div>
+                  <!-- BRM Card 4 -->
+                  <div class="lead-card converted" data-brm-id="4" onclick="showLeadDetails(4)">
+                    <div class="lead-avatar" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">DE</div>
                     <div class="lead-name">David Edwards</div>
                     <div class="lead-company">Enterprise Systems</div>
-                    <span class="lead-status status-converted">Converted</span>
+                    <small class="d-block mt-1 text-muted">Referral code: <span class="fw-semibold">-</span></small>
+                    <br>
                     <div class="lead-info">
-                      <div class="lead-info-item">
-                        <i class="bi bi-envelope-fill"></i>
-                        <span>d.edwards@enterprisesys.com</span>
-                      </div>
-                      <div class="lead-info-item">
-                        <i class="bi bi-telephone-fill"></i>
-                        <span>+234 804 456 7890</span>
-                      </div>
-                      <div class="lead-info-item">
-                        <i class="bi bi-tag-fill"></i>
-                        <span>Event</span>
-                      </div>
+                      <div class="lead-info-item"><i class="bi bi-envelope-fill"></i><span>d.edwards@enterprisesys.com</span></div>
+                      <div class="lead-info-item"><i class="bi bi-telephone-fill"></i><span>+234 804 456 7890</span></div>
+                      <div class="lead-info-item"><i class="bi bi-tag-fill"></i><span>Event</span></div>
+                      <span>Customers: 21</span>
                     </div>
-                    <div class="lead-value">₦8,500,000</div>
-                      <small class="d-block mt-1 text-muted">Referral Code: <span class="fw-semibold">-</span></small>
                     <div class="lead-actions">
-                      <button class="lead-action-btn" onclick="event.stopPropagation(); contactLead(4)">
-                        <i class="bi bi-file-text-fill"></i> View Deal
-                      </button>
-                      <button class="lead-action-btn" onclick="event.stopPropagation(); updateLeadStatus(4)">
-                        <i class="bi bi-star-fill"></i> Archive
-                      </button>
+                      <button class="lead-action-btn" onclick="event.stopPropagation(); adminControl(4)"><i class="bi bi-shield-lock-fill"></i> Admin Control</button>
                     </div>
                   </div>
                   
-                  <!-- Lead Card 5 -->
-                  <div class="lead-card new" onclick="showLeadDetails(5)">
-                    <div class="lead-avatar" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                      EF
-                    </div>
+                  <!-- BRM Card 5 -->
+                  <div class="lead-card new" data-brm-id="5" onclick="showLeadDetails(5)">
+                    <div class="lead-avatar" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">EF</div>
                     <div class="lead-name">Emma Foster</div>
                     <div class="lead-company">Digital Marketing Pro</div>
-                    <span class="lead-status status-new">New Lead</span>
+                    <small class="d-block mt-1 text-muted">Referral code: <span class="fw-semibold">-</span></small>
+                    <br>
                     <div class="lead-info">
-                      <div class="lead-info-item">
-                        <i class="bi bi-envelope-fill"></i>
-                        <span>emma.foster@digitalmarketing.com</span>
-                      </div>
-                      <div class="lead-info-item">
-                        <i class="bi bi-telephone-fill"></i>
-                        <span>+234 805 567 8901</span>
-                      </div>
-                      <div class="lead-info-item">
-                        <i class="bi bi-tag-fill"></i>
-                        <span>Website</span>
-                      </div>
+                      <div class="lead-info-item"><i class="bi bi-envelope-fill"></i><span>emma.foster@digitalmarketing.com</span></div>
+                      <div class="lead-info-item"><i class="bi bi-telephone-fill"></i><span>+234 805 567 8901</span></div>
+                      <div class="lead-info-item"><i class="bi bi-tag-fill"></i><span>Website</span></div>
+                      <span>Customers: 5</span>
                     </div>
-                    <div class="lead-value">₦3,200,000</div>
-                      <small class="d-block mt-1 text-muted">Referral Code: <span class="fw-semibold">-</span></small>
                     <div class="lead-actions">
-                      <button class="lead-action-btn" onclick="event.stopPropagation(); contactLead(5)">
-                        <i class="bi bi-telephone-fill"></i> Contact
-                      </button>
-                      <button class="lead-action-btn" onclick="event.stopPropagation(); updateLeadStatus(5)">
-                        <i class="bi bi-arrow-right-circle-fill"></i> Move
-                      </button>
+                      <button class="lead-action-btn" onclick="event.stopPropagation(); adminControl(5)"><i class="bi bi-shield-lock-fill"></i> Admin Control</button>
                     </div>
                   </div>
                   
-                  <!-- Lead Card 6 -->
-                  <div class="lead-card contacted" onclick="showLeadDetails(6)">
-                    <div class="lead-avatar" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
-                      FG
-                    </div>
+                  <!-- BRM Card 6 -->
+                  <div class="lead-card contacted" data-brm-id="6" onclick="showLeadDetails(6)">
+                    <div class="lead-avatar" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">FG</div>
                     <div class="lead-name">Frank Garcia</div>
                     <div class="lead-company">Wholesale Traders</div>
-                    <span class="lead-status status-contacted">Contacted</span>
+                    <small class="d-block mt-1 text-muted">Referral code: <span class="fw-semibold">-</span></small>
+                    <br>
                     <div class="lead-info">
-                      <div class="lead-info-item">
-                        <i class="bi bi-envelope-fill"></i>
-                        <span>frank.garcia@wholesaletraders.com</span>
-                      </div>
-                      <div class="lead-info-item">
-                        <i class="bi bi-telephone-fill"></i>
-                        <span>+234 806 678 9012</span>
-                      </div>
-                      <div class="lead-info-item">
-                        <i class="bi bi-tag-fill"></i>
-                        <span>Referral</span>
-                      </div>
+                      <div class="lead-info-item"><i class="bi bi-envelope-fill"></i><span>frank.garcia@wholesaletraders.com</span></div>
+                      <div class="lead-info-item"><i class="bi bi-telephone-fill"></i><span>+234 806 678 9012</span></div>
+                      <div class="lead-info-item"><i class="bi bi-tag-fill"></i><span>Referral</span></div>
+                      <span>Customers: 9</span>
                     </div>
-                    <div class="lead-value">₦5,100,000</div>
                     <div class="lead-actions">
-                      <button class="lead-action-btn" onclick="event.stopPropagation(); contactLead(6)">
-                        <i class="bi bi-chat-dots-fill"></i> Follow Up
-                      </button>
-                      <button class="lead-action-btn" onclick="event.stopPropagation(); updateLeadStatus(6)">
-                        <i class="bi bi-arrow-right-circle-fill"></i> Move
-                      </button>
+                      <button class="lead-action-btn" onclick="event.stopPropagation(); adminControl(6)"><i class="bi bi-shield-lock-fill"></i> Admin Control</button>
                     </div>
                   </div>
                 </div>
@@ -734,40 +628,56 @@
     <!-- Side Panel -->
     <div class="side-panel" id="leadDetailsPanel">
       <div class="side-panel-header">
-        <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>Lead Details</h5>
+        <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>BRM Details</h5>
         <button type="button" class="btn-close" onclick="closeSidePanel()"></button>
       </div>
       <div class="side-panel-body">
         <div class="text-center mb-4">
-          <div class="lead-avatar mx-auto" style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          <div class="lead-avatar mx-auto" id="detailAvatar" style="width: 80px; height: 80px; font-size: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
             AM
           </div>
-          <h5 class="mt-3">Alice Martinez</h5>
-          <p class="text-muted mb-1">Tech Innovations Ltd</p>
-          <span class="lead-status status-new">New Lead</span>
+          <h5 class="mt-3" id="detailName">Alice Martinez</h5>
+          <p class="text-muted mb-1" id="detailCompany">Tech Innovations Ltd</p>
+          <span class="lead-status status-new" id="detailStatus">New BRM</span>
         </div>
         
         <div class="detail-section">
           <h6><i class="bi bi-person-badge me-2"></i>Contact Information</h6>
           <div class="detail-row">
             <span class="detail-label">Email:</span>
-            <span class="detail-value">alice.martinez@techinnovations.com</span>
+            <span class="detail-value" id="detailEmail">alice.martinez@techinnovations.com</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Phone:</span>
-            <span class="detail-value">+234 801 123 4567</span>
+            <span class="detail-value" id="detailPhone">+234 801 123 4567</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Source:</span>
-            <span class="detail-value">Website</span>
+            <span class="detail-value" id="detailSource">Website</span>
           </div>
             <div class="detail-row">
               <span class="detail-label">Referral Code:</span>
               <span class="detail-value" id="detailReferralCode">REF-ALC001</span>
             </div>
           <div class="detail-row">
-            <span class="detail-label">Lead Value:</span>
-            <span class="detail-value text-success fw-bold">₦2,500,000</span>
+            <span class="detail-label">BRM Value:</span>
+            <span class="detail-value text-success fw-bold" id="detailBRMValue">₦2,500,000</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Industry:</span>
+            <span class="detail-value" id="detailIndustry">Technology</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Location:</span>
+            <span class="detail-value" id="detailLocation">Lagos, Nigeria</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Customers:</span>
+            <span class="detail-value" id="detailCustomers">15</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Notes:</span>
+            <span class="detail-value" id="detailNotes">-</span>
           </div>
         </div>
         
@@ -822,13 +732,13 @@
         
         <div class="d-grid gap-2">
           <button class="btn btn-primary" onclick="contactLead()">
-            <i class="bi bi-telephone-fill me-2"></i>Contact Lead
+            <i class="bi bi-telephone-fill me-2"></i>Contact BRM
           </button>
           <button class="btn btn-outline-primary" onclick="updateLeadStatus()">
-            <i class="bi bi-arrow-right-circle-fill me-2"></i>Update Status
+            <i class="bi bi-arrow-right-circle-fill me-2"></i>Update BRM Status
           </button>
           <button class="btn btn-outline-secondary" onclick="editLead()">
-            <i class="bi bi-pencil-fill me-2"></i>Edit Lead
+            <i class="bi bi-pencil-fill me-2"></i>Edit BRM
           </button>
         </div>
       </div>
@@ -865,7 +775,22 @@
               <input type="tel" class="form-control" id="brmPhone" required>
             </div>
             <div class="col-md-6">
-              <label class="form-label fw-semibold">Lead Source *</label>
+              <label class="form-label fw-semibold">Username *</label>
+              <input type="text" class="form-control" id="brmUsername" placeholder="e.g., john.doe" required>
+              <small class="text-muted">Used for login authentication</small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Default Password *</label>
+              <div class="input-group">
+                <input type="text" class="form-control" id="brmPassword" placeholder="Enter default password" required>
+                <button type="button" class="btn btn-outline-secondary" onclick="generateDefaultPassword()" title="Auto-generate password">
+                  <i class="bi bi-key-fill"></i>
+                </button>
+              </div>
+              <small class="text-muted">BRM will be required to change on first login</small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Source *</label>
               <select class="form-select" id="brmSource" required>
                 <option value="">Select Source</option>
                 <option value="Website">Website</option>
@@ -876,22 +801,21 @@
                 <option value="Partnership">Partnership</option>
               </select>
             </div>
-            <div class="col-md-6">
+            <!-- <div class="col-md-6">
               <label class="form-label fw-semibold">Lead Value (₦)</label>
               <input type="number" class="form-control" id="brmValue" placeholder="0.00">
-            </div>
+            </div> -->
             <div class="col-md-6">
               <label class="form-label fw-semibold">Industry</label>
               <input type="text" class="form-control" id="brmIndustry" placeholder="e.g., Technology">
             </div>
             <div class="col-md-6">
-              <label class="form-label fw-semibold">Company Size</label>
-              <select class="form-select" id="brmCompanySize">
-                <option value="">Select Size</option>
-                <option value="1-10">1-10 employees</option>
-                <option value="11-50">11-50 employees</option>
-                <option value="51-100">51-100 employees</option>
-                <option value="100+">100+ employees</option>
+              <label class="form-label fw-semibold">Gender</label>
+              <select class="form-select" id="brmGender">
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
               </select>
             </div>
             <div class="col-12">
@@ -908,7 +832,7 @@
             </div>
             <div class="col-12">
               <label class="form-label fw-semibold">Notes</label>
-              <textarea class="form-control" id="brmNotes" rows="4" placeholder="Additional information about this lead..."></textarea>
+              <textarea class="form-control" id="brmNotes" rows="4" placeholder="Additional information about this BRM..."></textarea>
             </div>
           </div>
           
@@ -967,20 +891,74 @@
       }, 500);
       
       // Search functionality
-      document.getElementById('searchInput').addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const leadCards = document.querySelectorAll('.lead-card');
-        leadCards.forEach(card => {
-          const text = card.textContent.toLowerCase();
-          card.style.display = text.includes(searchTerm) ? '' : 'none';
+      const searchEl = document.getElementById('searchInput');
+      if (searchEl) {
+        searchEl.addEventListener('input', function(e) {
+          const searchTerm = e.target.value.toLowerCase();
+          const leadCards = document.querySelectorAll('.lead-card');
+          leadCards.forEach(card => {
+            const text = card.textContent.toLowerCase();
+            card.style.display = text.includes(searchTerm) ? '' : 'none';
+          });
+          // update BRM count after filtering
+          if (typeof updateTotalBRMs === 'function') updateTotalBRMs();
         });
-      });
+      }
+
+      // initialize BRM count on load
+      if (typeof updateTotalBRMs === 'function') updateTotalBRMs();
     });
+
+    // Update the All BRMs card with the number of visible BRM cards
+    function updateTotalBRMs() {
+      const cards = Array.from(document.querySelectorAll('.lead-card'));
+      const visible = cards.filter(c => c.style.display !== 'none').length;
+      const el = document.getElementById('totalBRMs');
+      if (el) el.textContent = visible;
+    }
     
     function showLeadDetails(leadId) {
+      // locate the card element (we added data-brm-id attributes)
+      const card = document.querySelector(`.lead-card[data-brm-id="${leadId}"]`);
+      if (card) {
+        // extract values from card DOM
+        const name = (card.querySelector('.lead-name') && card.querySelector('.lead-name').textContent) || '';
+        const company = (card.querySelector('.lead-company') && card.querySelector('.lead-company').textContent) || '';
+        const status = (card.querySelector('.lead-status') && card.querySelector('.lead-status').textContent) || '';
+        const email = (card.querySelector('.lead-info-item:nth-of-type(1) span') && card.querySelector('.lead-info-item:nth-of-type(1) span').textContent) || '';
+        const phone = (card.querySelector('.lead-info-item:nth-of-type(2) span') && card.querySelector('.lead-info-item:nth-of-type(2) span').textContent) || '';
+        const source = (card.querySelector('.lead-info-item:nth-of-type(3) span') && card.querySelector('.lead-info-item:nth-of-type(3) span').textContent) || '';
+        const referral = (card.querySelector('.fw-semibold') && card.querySelector('.fw-semibold').textContent) || '-';
+        const customersText = (card.querySelector('.lead-info') && card.querySelector('.lead-info').textContent) || '';
+        // attempt to extract customer count from text like 'Customers: 15'
+        let customers = '-';
+        const m = customersText.match(/Customers:\s*(\d+)/i);
+        if (m) customers = m[1];
+
+        // avatar initials
+        const initialsEl = card.querySelector('.lead-avatar');
+        const initials = initialsEl ? initialsEl.textContent.trim() : '';
+
+        // populate panel fields
+        const elName = document.getElementById('detailName'); if (elName) elName.textContent = name || '-';
+        const elCompany = document.getElementById('detailCompany'); if (elCompany) elCompany.textContent = company || '-';
+        const elStatus = document.getElementById('detailStatus'); if (elStatus) elStatus.textContent = status || '-';
+        const elEmail = document.getElementById('detailEmail'); if (elEmail) elEmail.textContent = email || '-';
+        const elPhone = document.getElementById('detailPhone'); if (elPhone) elPhone.textContent = phone || '-';
+        const elSource = document.getElementById('detailSource'); if (elSource) elSource.textContent = source || '-';
+        const elReferral = document.getElementById('detailReferralCode'); if (elReferral) elReferral.textContent = referral || '-';
+        const elCustomers = document.getElementById('detailCustomers'); if (elCustomers) elCustomers.textContent = customers;
+        const elAvatar = document.getElementById('detailAvatar'); if (elAvatar) elAvatar.textContent = initials || (name.split(' ').map(n=>n[0]).join('').substr(0,2));
+
+        // optional fields (if we had data attributes for industry, value, location, notes)
+        const elValue = document.getElementById('detailBRMValue'); if (elValue) elValue.textContent = card.dataset.value || elValue.textContent || '-';
+        const elIndustry = document.getElementById('detailIndustry'); if (elIndustry) elIndustry.textContent = card.dataset.industry || elIndustry.textContent || '-';
+        const elLocation = document.getElementById('detailLocation'); if (elLocation) elLocation.textContent = card.dataset.location || elLocation.textContent || '-';
+        const elNotes = document.getElementById('detailNotes'); if (elNotes) elNotes.textContent = card.dataset.notes || elNotes.textContent || '-';
+      }
+
       const panel = document.getElementById('leadDetailsPanel');
       const overlay = document.getElementById('sidePanelOverlay');
-      
       panel.classList.add('active');
       overlay.classList.add('active');
       document.body.style.overflow = 'hidden';
@@ -1009,6 +987,40 @@
       console.log('Edit lead:', leadId);
       // Implementation for edit functionality
     }
+
+    // Admin control entrypoint for card-level admin actions
+    function adminControl(leadId) {
+      // locate the card and extract useful fields, then navigate to admin_brm_control.php with data in querystring
+      const card = document.querySelector(`.lead-card[data-brm-id="${leadId}"]`);
+      if (!card) { console.warn('BRM card not found:', leadId); return; }
+      const name = (card.querySelector('.lead-name') && card.querySelector('.lead-name').textContent.trim()) || '';
+      const company = (card.querySelector('.lead-company') && card.querySelector('.lead-company').textContent.trim()) || '';
+      const status = (card.querySelector('.lead-status') && card.querySelector('.lead-status').textContent.trim()) || '';
+      const email = (card.querySelector('.lead-info-item:nth-of-type(1) span') && card.querySelector('.lead-info-item:nth-of-type(1) span').textContent.trim()) || '';
+      const phone = (card.querySelector('.lead-info-item:nth-of-type(2) span') && card.querySelector('.lead-info-item:nth-of-type(2) span').textContent.trim()) || '';
+      const source = (card.querySelector('.lead-info-item:nth-of-type(3) span') && card.querySelector('.lead-info-item:nth-of-type(3) span').textContent.trim()) || '';
+      const referral = (card.querySelector('.fw-semibold') && card.querySelector('.fw-semibold').textContent.trim()) || '';
+      const customersText = (card.querySelector('.lead-info') && card.querySelector('.lead-info').textContent) || '';
+      let customers = '';
+      const m = customersText.match(/Customers:\s*(\d+)/i);
+      if (m) customers = m[1];
+
+      // assemble query params (keep it reasonably small)
+      const params = new URLSearchParams();
+      params.set('brm_id', String(leadId));
+      if (name) params.set('name', name);
+      if (company) params.set('company', company);
+      if (status) params.set('status', status);
+      if (email) params.set('email', email);
+      if (phone) params.set('phone', phone);
+      if (source) params.set('source', source);
+      if (referral) params.set('referral', referral);
+      if (customers) params.set('customers', customers);
+
+      // navigate to admin_brm_control.php in same folder
+      const url = 'admin_brm_control.php?' + params.toString();
+      window.location.href = url;
+    }
     
     function openAddBRMPanel() {
       // generate a default referral code when opening
@@ -1035,27 +1047,165 @@
           company: document.getElementById('brmCompany').value,
           email: document.getElementById('brmEmail').value,
           phone: document.getElementById('brmPhone').value,
+          username: document.getElementById('brmUsername').value,
+          password: document.getElementById('brmPassword').value,
           source: document.getElementById('brmSource').value,
-          value: document.getElementById('brmValue').value,
           industry: document.getElementById('brmIndustry').value,
-          companySize: document.getElementById('brmCompanySize').value,
           location: document.getElementById('brmLocation').value,
           notes: document.getElementById('brmNotes').value,
-          referralCode: document.getElementById('brmReferralCode').value || ''
+          referralCode: document.getElementById('brmReferralCode').value || '',
+          gender: document.getElementById('brmGender').value || ''
         };
 
+        // Validate username and password
+        if (!brm.username.trim()) {
+          alert('Please enter a username for the BRM.');
+          document.getElementById('brmUsername').focus();
+          return;
+        }
+        
+        if (!brm.password.trim()) {
+          alert('Please enter a default password for the BRM.');
+          document.getElementById('brmPassword').focus();
+          return;
+        }
+        
+        if (brm.password.length < 8) {
+          alert('Password must be at least 8 characters long.');
+          document.getElementById('brmPassword').focus();
+          return;
+        }
+
+        // Generate unique ID for the new BRM
+        const timestamp = Date.now();
+        const newBRMId = timestamp;
+        
+        // Generate initials for avatar
+        const nameParts = brm.name.split(' ');
+        const initials = nameParts.length >= 2 
+          ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase()
+          : nameParts[0].substring(0, 2).toUpperCase();
+        
+        // Generate random gradient for avatar
+        const gradients = [
+          'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+          'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+          'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+          'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+          'linear-gradient(135deg, #30cfd0 0%, #330867 100%)'
+        ];
+        const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
+        
+        // Create new BRM card element
+        const leadsGrid = document.getElementById('leadsGrid');
+        const newCard = document.createElement('div');
+        newCard.className = 'lead-card new';
+        newCard.setAttribute('data-brm-id', newBRMId);
+        newCard.setAttribute('data-value', brm.value || '₦0');
+        newCard.setAttribute('data-industry', brm.industry || '-');
+        newCard.setAttribute('data-location', brm.location || '-');
+        newCard.setAttribute('data-notes', brm.notes || '-');
+        newCard.onclick = function() { showLeadDetails(newBRMId); };
+        
+        newCard.innerHTML = `
+          <div class="lead-avatar" style="background: ${randomGradient};">
+            ${initials}
+          </div>
+          <div class="lead-name">${brm.name}</div>
+          <div class="lead-company">${brm.company}</div>
+          <small class="d-block mt-1 text-muted">Referral code: <span class="fw-semibold">${brm.referralCode || '-'}</span></small>
+          <br>
+          <div class="lead-info">
+            <div class="lead-info-item">
+              <i class="bi bi-envelope-fill"></i>
+              <span>${brm.email}</span>
+            </div>
+            <div class="lead-info-item">
+              <i class="bi bi-telephone-fill"></i>
+              <span>${brm.phone}</span>
+            </div>
+            <div class="lead-info-item">
+              <i class="bi bi-tag-fill"></i>
+              <span>${brm.source}</span>
+            </div>
+            <span>Customers: 0</span>
+          </div>
+          <div class="lead-actions">
+            <button class="lead-action-btn" onclick="event.stopPropagation(); adminControl(${newBRMId})">
+              <i class="bi bi-shield-lock-fill"></i> Admin Control
+            </button>
+          </div>
+        `;
+        
+        // Insert at the beginning of the grid
+        if (leadsGrid.firstChild) {
+          leadsGrid.insertBefore(newCard, leadsGrid.firstChild);
+        } else {
+          leadsGrid.appendChild(newCard);
+        }
+        
+        // Add smooth scroll and highlight effect
+        newCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        newCard.style.animation = 'fadeInUp 0.5s ease';
+        
+        // Add temporary highlight
+        setTimeout(() => {
+          newCard.style.boxShadow = '0 0 0 4px rgba(13, 110, 253, 0.3)';
+          setTimeout(() => {
+            newCard.style.boxShadow = '';
+          }, 2000);
+        }, 100);
+        
+        // Update total BRM count
+        if (typeof updateTotalBRMs === 'function') updateTotalBRMs();
+        
+        // Show success notification
+        showNotification('BRM Created Successfully!', `${brm.name} has been added with referral code: ${brm.referralCode}`, 'success');
+        
         console.log('Save new BRM', brm);
-        alert('BRM contact created successfully!\nReferral Code: ' + brm.referralCode);
-
-        // Update UI placeholders: set detail panel referral code for demo
-        var detailRef = document.getElementById('detailReferralCode');
-        if (detailRef) detailRef.textContent = brm.referralCode || '-';
-
+        
         // TODO: send `brm` to server via AJAX / form submission
         closeAddBRMPanel();
       } else {
         form.reportValidity();
       }
+    }
+    
+    // Notification function for BRM creation
+    function showNotification(title, message, type) {
+      const alertClass = type === 'success' ? 'alert-success' : 
+                       type === 'danger' ? 'alert-danger' :
+                       type === 'warning' ? 'alert-warning' :
+                       type === 'info' ? 'alert-info' : 'alert-primary';
+      
+      const icon = type === 'success' ? 'bi-check-circle-fill' : 
+                  type === 'danger' ? 'bi-exclamation-circle-fill' :
+                  type === 'warning' ? 'bi-exclamation-triangle-fill' :
+                  type === 'info' ? 'bi-info-circle-fill' : 'bi-bell-fill';
+      
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = `alert ${alertClass} alert-dismissible fade show`;
+      notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 350px; max-width: 500px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); animation: slideInRight 0.3s ease;';
+      notification.innerHTML = `
+        <div class="d-flex align-items-center">
+          <i class="bi ${icon} me-3" style="font-size: 1.8rem;"></i>
+          <div class="flex-grow-1">
+            <strong class="d-block mb-1">${title}</strong>
+            <small>${message}</small>
+          </div>
+          <button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Auto-dismiss after 5 seconds
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 150);
+      }, 5000);
     }
 
     // Utility to generate a short referral code
@@ -1064,6 +1214,16 @@
       var out = 'REF-';
       for (var i = 0; i < 6; i++) out += chars.charAt(Math.floor(Math.random() * chars.length));
       return out;
+    }
+
+    // Generate default password
+    function generateDefaultPassword() {
+      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+      let password = '';
+      for (let i = 0; i < 12; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      document.getElementById('brmPassword').value = password;
     }
     
     function exportLeads() {

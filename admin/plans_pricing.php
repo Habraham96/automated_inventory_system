@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Plans & Pricing - SalesPilot</title>
+    <?php include '../include/responsive.php'; ?>
     <link rel="stylesheet" href="../Manager/assets/vendors/feather/feather.css">
     <link rel="stylesheet" href="../Manager/assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="../Manager/assets/vendors/ti-icons/css/themify-icons.css">
@@ -345,16 +346,14 @@
                     <div class="plan-price">
                       <span class="currency">₦</span>0
                     </div>
-                    <div class="plan-period">14 days free trial</div>
+                    <div class="plan-period">30 days free trial</div>
                   </div>
                   
                   <ul class="plan-features">
-                    <li><i class="bi bi-check-circle-fill"></i>5 Products</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Up to 500 Products</li>
                     <li><i class="bi bi-check-circle-fill"></i>Basic Reports</li>
                     <li><i class="bi bi-check-circle-fill"></i>1 User Account</li>
                     <li><i class="bi bi-check-circle-fill"></i>Email Support</li>
-                    <li class="disabled"><i class="bi bi-x-circle-fill"></i>Advanced Analytics</li>
-                    <li class="disabled"><i class="bi bi-x-circle-fill"></i>API Access</li>
                   </ul>
                   
                   <div class="plan-stats">
@@ -398,12 +397,11 @@
                   </div>
                   
                   <ul class="plan-features">
-                    <li><i class="bi bi-check-circle-fill"></i>50 Products</li>
-                    <li><i class="bi bi-check-circle-fill"></i>Standard Reports</li>
-                    <li><i class="bi bi-check-circle-fill"></i>3 User Accounts</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Up to 500 Products</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Basic Reports</li>
+                    <li><i class="bi bi-check-circle-fill"></i>2 User Accounts</li>
                     <li><i class="bi bi-check-circle-fill"></i>Email Support</li>
-                    <li><i class="bi bi-check-circle-fill"></i>Mobile App Access</li>
-                    <li class="disabled"><i class="bi bi-x-circle-fill"></i>API Access</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Single Manager Account</li>
                   </ul>
                   
                   <div class="plan-stats">
@@ -447,12 +445,11 @@
                   </div>
                   
                   <ul class="plan-features">
-                    <li><i class="bi bi-check-circle-fill"></i>200 Products</li>
-                    <li><i class="bi bi-check-circle-fill"></i>Advanced Reports</li>
-                    <li><i class="bi bi-check-circle-fill"></i>10 User Accounts</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Unlimited Products</li>
+                    <li><i class="bi bi-check-circle-fill"></i>4 User Accounts</li>
                     <li><i class="bi bi-check-circle-fill"></i>Priority Support</li>
-                    <li><i class="bi bi-check-circle-fill"></i>Mobile App Access</li>
-                    <li><i class="bi bi-check-circle-fill"></i>Basic API Access</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Multi-location support(2-branches) </li>
+                    <li><i class="bi bi-check-circle-fill"></i>Custom Receipts</li>
                   </ul>
                   
                   <div class="plan-stats">
@@ -490,18 +487,18 @@
                   
                   <div class="plan-pricing">
                     <div class="plan-price">
-                      <span class="currency">₦</span>15,000
+                      <span class="currency">₦</span>20,000
                     </div>
                     <div class="plan-period">per month</div>
                   </div>
                   
                   <ul class="plan-features">
-                    <li><i class="bi bi-check-circle-fill"></i>Unlimited Products</li>
-                    <li><i class="bi bi-check-circle-fill"></i>Premium Reports</li>
-                    <li><i class="bi bi-check-circle-fill"></i>Unlimited Users</li>
-                    <li><i class="bi bi-check-circle-fill"></i>24/7 Phone Support</li>
-                    <li><i class="bi bi-check-circle-fill"></i>Mobile App Access</li>
-                    <li><i class="bi bi-check-circle-fill"></i>Full API Access</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Everything in standard</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Up to 10 Users</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Multi-location support(3-branches) </li>
+                    <li><i class="bi bi-check-circle-fill"></i>Dedicated Support</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Supports Up to 3 Manager accounts</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Advanced Analytics and Reporting</li>
                   </ul>
                   
                   <div class="plan-stats">

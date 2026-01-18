@@ -101,6 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inventory | Sales</title>
+    <?php include 'include/responsive.php'; ?>
     <link rel="stylesheet" href="style.css" />
     <?php include 'include/head_fonts.php'; ?>
     <!-- Unicons -->
@@ -157,7 +158,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </section>
     <script>
       // Root preloader handled via include 'include/preloader.php'
-    </script>
       document.addEventListener('DOMContentLoaded', function() {
         var proceedBtn = document.getElementById('proceedEmailBtn');
         var flashModal = document.getElementById('flashModal');

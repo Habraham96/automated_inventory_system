@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Saved Carts - SalesPilot</title>
+    <?php include '../include/responsive.php'; ?>
     <link rel="stylesheet" href="../Manager/assets/vendors/feather/feather.css">
     <link rel="stylesheet" href="../Manager/assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="../Manager/assets/vendors/ti-icons/css/themify-icons.css">

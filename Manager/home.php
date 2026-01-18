@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>SalesPilot - Dashboard</title>
+    <?php include '../include/responsive.php'; ?>
     <!-- plugins:css -->
     <link rel="stylesheet" href="assets/vendors/feather/feather.css">
     <link rel="stylesheet" href="assets/vendors/mdi/css/materialdesignicons.min.css">
@@ -143,123 +144,10 @@
     
     <div class="container-scroller">
       <div class="container-fluid page-body-wrapper">
-<<<<<<< HEAD
-        <!-- partial:partials/_sidebar.html -->
-        <nav class="sidebar sidebar-offcanvas" id="sidebar">
-          <ul class="nav">
-            <li class="nav-item">
-              <a class="nav-link" href="index.php">
-                <i class="menu-icon bi bi-house-door-fill"></i>
-                <span class="menu-title">Home</span>
-              </a>
-            </li>
-            <li class="nav-item nav-category">Dropdown</li>
-            <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-                <!-- <i class="menu-icon mdi mdi-floor-plan"></i> -->
-                <i class="menu-icon bi bi-wallet-fill"></i>
-                <span class="menu-title">Sales</span>
-                <i class="menu-arrow"></i>
-              </a>
-              <div class="collapse" id="ui-basic">
-                <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="pages/completed_sales.html">Completed Sales</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="pages/saved_carts.html">Saved Carts</a></li>
-                  <!-- <li class="nav-item"> <a class="nav-link" href="pages/ui-features/typography.html">Typography</a></li> -->
-                </ul>
-              </div>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="collapse" href="#form-elements" aria-expanded="false" aria-controls="form-elements">
-                <i class="menu-icon mdi mdi-card-text-outline"></i>
-                <span class="menu-title">Reports</span>
-                <i class="menu-arrow"></i>
-              </a>
-              <div class="collapse" id="form-elements">
-                <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"><a class="nav-link" href="pages/sales_summary.html">Sales Summary</a></li>
-                  <li class="nav-item"><a class="nav-link" href="pages/sales_by_staff.html">Sales by Staff</a></li>
-                  <li class="nav-item"><a class="nav-link" href="pages/sales_by_item.html">Sales by Item</a></li>
-                  <li class="nav-item"><a class="nav-link" href="pages/sales_by_category.html">Sales by Category</a></li>
-                  <li class="nav-item"><a class="nav-link" href="pages/inventory_valuation.html">Inventory Valuation</a></li>
-                  <li class="nav-item"><a class="nav-link" href="pages/taxes.html">Taxes</a></li>
-                  <li class="nav-item"><a class="nav-link" href="pages/discount.html">Discount</a></li>
-                </ul>
-              </div>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="pages/customers.html">
-                <i class="menu-icon bi bi-people-fill"></i>
-                <span class="menu-title">Customers</span>
-              </a>
-              
-             <li class="nav-item">
-              <a class="nav-link" href="pages/staffs.html">
-                <i class="menu-icon bi bi-person-workspace"></i>
-                <span class="menu-title">Staffs</span>
-              </a>
-
-              <li class="nav-item">
-              <a class="nav-link" href="pages/activity_logs.html">
-                <i class="menu-icon bi bi-activity"></i>
-                <span class="menu-title">Activity Logs</span>
-              </a>
-
-            <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="collapse" href="#icons" aria-expanded="false" aria-controls="icons">
-               <i class="menu-icon bi bi-shop-window"></i>
-                <span class="menu-title">Inventory</span>
-                <i class="menu-arrow"></i>
-              </a>
-              <div class="collapse" id="icons">
-                <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="pages/all_items.html">All items</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="pages/categories.html">Categories</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="pages/stock_history.html">Stock History</a></li>
-                </ul>
-              </div>
-            
-            <li class="nav-item">
-              <a class="nav-link" href="pages/suppliers.html">
-                <i class="menu-icon bi bi-truck"></i>
-                <span class="menu-title">Suppliers</span>
-              </a>
-              <li class="nav-item">
-              <a class="nav-link" href="pages/settings.html">
-               <i class="menu-icon bi bi-gear-wide"></i>
-                <span class="menu-title">Settings</span>
-              </a>
-            </li>
-              <li class="nav-item dropdown d-none d-lg-block user-dropdown">
-              <a class="nav-link" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                <img class="img-xs rounded-circle" src="assets/images/faces/face8.jpg" alt="Profile image"> </a>
-              <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
-                <div class="dropdown-header text-center">
-                  <img class="img-md rounded-circle" src="assets/images/faces/face8.jpg" alt="Profile image">
-                  <p class="mb-1 mt-3 fw-semibold">Allen Moreno</p>
-                  <p class="fw-light text-muted mb-0">allenmoreno@gmail.com</p>
-                </div>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-account-outline text-primary me-2"></i> My Profile <span class="badge badge-pill badge-danger">1</span></a>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-message-text-outline text-primary me-2"></i> Messages</a>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-calendar-check-outline text-primary me-2"></i> Activity</a>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-help-circle-outline text-primary me-2"></i> FAQ</a>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-power text-primary me-2"></i>Sign Out</a>
-              </div>
-            </li>
-            
-                <!-- <i class="menu-icon mdi mdi-file-document"></i>
-                <span class="menu-title">Documentation</span> -->
-              </a>
-            </li>
-          </ul>
-        </nav>
-        <!-- partial -->
-=======
         <!-- Include Sidebar Content -->
         <?php include 'layouts/sidebar_content.php'; ?>
         
         <!-- Main Dashboard Content Area -->
->>>>>>> temporary
         <div class="main-panel">
           <div class="content-wrapper">
             

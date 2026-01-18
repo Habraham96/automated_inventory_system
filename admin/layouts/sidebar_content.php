@@ -26,16 +26,30 @@
     <li class="nav-item nav-category">Menu</li>
     
     <li class="nav-item">
-      <a class="nav-link" href="brm.php">
+      <a class="nav-link" data-bs-toggle="collapse" href="#brmSubmenu" aria-expanded="false" aria-controls="brmSubmenu">
         <i class="menu-icon bi bi-people-fill"></i>
-        <span class="menu-title">B R M</span>
+        <span class="menu-title">BRM</span>
+        <i class="menu-arrow"></i>
       </a>
+      <div class="collapse" id="brmSubmenu">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item">
+            <a class="nav-link" href="brm.php">All BRM</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="brm_performance.php">BRM Performance</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="brm_commissions.php">BRM Commissions</a>
+          </li>
+        </ul>
+      </div>
     </li>
     
     <li class="nav-item">
-      <a class="nav-link" href="users.php">
+      <a class="nav-link" href="customers.php">
         <i class="menu-icon bi bi-person-badge-fill"></i>
-        <span class="menu-title">Users & Access</span>
+        <span class="menu-title">Customers</span>
       </a>
     </li>
     

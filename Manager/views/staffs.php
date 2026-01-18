@@ -36,6 +36,7 @@ try {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Staffs - SalesPilot</title>
+    <?php include '../../include/responsive.php'; ?>
     
     <!-- plugins:css -->
     <link rel="stylesheet" href="../assets/vendors/feather/feather.css">

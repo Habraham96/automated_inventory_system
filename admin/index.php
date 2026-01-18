@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Admin Dashboard - SalesPilot</title>
+    <?php include '../include/responsive.php'; ?>
     <link rel="stylesheet" href="../Manager/assets/vendors/feather/feather.css">
     <link rel="stylesheet" href="../Manager/assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="../Manager/assets/vendors/ti-icons/css/themify-icons.css">
@@ -248,11 +249,11 @@
               <div class="col-md-4 mb-4">
                 <div class="quick-actions">
                   <h5 class="mb-3"><i class="bi bi-lightning-charge-fill me-2"></i>Quick Actions</h5>
-                  <a href="users.php" class="quick-action-btn">
+                  <a href="customers.php" class="quick-action-btn">
                     <div class="quick-action-icon" style="background: rgba(13, 110, 253, 0.1); color: #0d6efd;">
                       <i class="bi bi-person-plus-fill"></i>
                     </div>
-                    <span>View Users</span>
+                    <span>View Customers</span>
                   </a>
                   <a href="brm.php" class="quick-action-btn">
                     <div class="quick-action-icon" style="background: rgba(25, 135, 84, 0.1); color: #198754;">
@@ -266,7 +267,7 @@
                     </div>
                     <span>View Analytics</span>
                   </a>
-                  <a href="#" class="quick-action-btn">
+                  <a href="system_config.php" class="quick-action-btn">
                     <div class="quick-action-icon" style="background: rgba(220, 53, 69, 0.1); color: #dc3545;">
                       <i class="bi bi-gear-fill"></i>
                     </div>
