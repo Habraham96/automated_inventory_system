@@ -399,7 +399,7 @@
                       <i class="bi bi-check-circle-fill"></i>
                     </div>
                     <div class="activity-content">
-                      <h6>Lead Converted</h6>
+                      <h6>Subscribed</h6>
                       <p>John Doe accepted subscription plan</p>
                     </div>
                     <div class="activity-time">2 hours ago</div>
@@ -410,7 +410,7 @@
                       <i class="bi bi-person-plus-fill"></i>
                     </div>
                     <div class="activity-content">
-                      <h6>New Lead Added</h6>
+                      <h6>New Customer Added</h6>
                       <p>Sarah Johnson - Tech Solutions Ltd</p>
                     </div>
                     <div class="activity-time">5 hours ago</div>
@@ -433,7 +433,7 @@
                     </div>
                     <div class="activity-content">
                       <h6>Commission Earned</h6>
-                      <p>₦25,000 commission from new subscription</p>
+                      <p>₦5,000 commission from new subscription</p>
                     </div>
                     <div class="activity-time">2 days ago</div>
                   </li>

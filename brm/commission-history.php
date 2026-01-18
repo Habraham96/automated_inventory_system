@@ -347,9 +347,7 @@
                     <th>Date</th>
                     <th>Transaction ID</th>
                     <th>Amount</th>
-                    <th>Method</th>
                     <th>Status</th>
-                    <th>Reference</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -359,9 +357,7 @@
                     <td>Jan 5, 2026</td>
                     <td><code>TXN-2026-001</code></td>
                     <td><strong>₦75,000</strong></td>
-                    <td><span class="method-badge">Bank Transfer</span></td>
                     <td><span class="status-badge completed">Completed</span></td>
-                    <td>Dec 2025 Commission</td>
                     <td><button class="view-receipt-btn"><i class="bi bi-file-text"></i> Receipt</button></td>
                   </tr>
                   
@@ -370,9 +366,7 @@
                     <td>Dec 5, 2025</td>
                     <td><code>TXN-2025-012</code></td>
                     <td><strong>₦60,000</strong></td>
-                    <td><span class="method-badge">Bank Transfer</span></td>
                     <td><span class="status-badge completed">Completed</span></td>
-                    <td>Nov 2025 Commission</td>
                     <td><button class="view-receipt-btn"><i class="bi bi-file-text"></i> Receipt</button></td>
                   </tr>
                   
@@ -381,9 +375,7 @@
                     <td>Nov 5, 2025</td>
                     <td><code>TXN-2025-011</code></td>
                     <td><strong>₦50,000</strong></td>
-                    <td><span class="method-badge">Bank Transfer</span></td>
                     <td><span class="status-badge completed">Completed</span></td>
-                    <td>Oct 2025 Commission</td>
                     <td><button class="view-receipt-btn"><i class="bi bi-file-text"></i> Receipt</button></td>
                   </tr>
                   
@@ -392,9 +384,7 @@
                     <td>Oct 5, 2025</td>
                     <td><code>TXN-2025-010</code></td>
                     <td><strong>₦45,000</strong></td>
-                    <td><span class="method-badge">Bank Transfer</span></td>
                     <td><span class="status-badge completed">Completed</span></td>
-                    <td>Sep 2025 Commission</td>
                     <td><button class="view-receipt-btn"><i class="bi bi-file-text"></i> Receipt</button></td>
                   </tr>
                   
@@ -403,9 +393,7 @@
                     <td>Sep 5, 2025</td>
                     <td><code>TXN-2025-009</code></td>
                     <td><strong>₦40,000</strong></td>
-                    <td><span class="method-badge">Bank Transfer</span></td>
                     <td><span class="status-badge completed">Completed</span></td>
-                    <td>Aug 2025 Commission</td>
                     <td><button class="view-receipt-btn"><i class="bi bi-file-text"></i> Receipt</button></td>
                   </tr>
                   
@@ -414,9 +402,7 @@
                     <td>Aug 5, 2025</td>
                     <td><code>TXN-2025-008</code></td>
                     <td><strong>₦30,000</strong></td>
-                    <td><span class="method-badge">Bank Transfer</span></td>
                     <td><span class="status-badge completed">Completed</span></td>
-                    <td>Jul 2025 Commission</td>
                     <td><button class="view-receipt-btn"><i class="bi bi-file-text"></i> Receipt</button></td>
                   </tr>
                 </tbody>

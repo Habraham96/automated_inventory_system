@@ -498,24 +498,22 @@
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th>Date</th>
                     <th>Customer</th>
                     <th>Plan</th>
                     <th>Amount</th>
                     <th>Status</th>
-                    <th>Payment Date</th>
+                    <th>Earned Date</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody id="commissionTableBody">
-                  <tr class="comm-row" data-status="pending" data-month="2026-01">
+                  <tr class="comm-row" data-status="paid" data-month="2026-01">
                     <td>1</td>
-                    <td>Jan 10, 2026</td>
                     <td>Tech Solutions Ltd</td>
                     <td>Enterprise Plan</td>
                     <td><strong>₦45,000</strong></td>
-                    <td><span class="status-badge pending">Pending</span></td>
-                    <td>-</td>
+                    <td><span class="status-badge paid">Paid</span></td>
+                    <td>Jan 10, 2026</td>
                     <td>
                       <button class="view-details-btn" data-comm-id="1">
                         <i class="bi bi-caret-right-fill view-arrow"></i>Details
@@ -523,14 +521,13 @@
                     </td>
                   </tr>
                   
-                  <tr class="comm-row" data-status="pending" data-month="2026-01">
+                  <tr class="comm-row" data-status="paid" data-month="2026-01">
                     <td>2</td>
-                    <td>Jan 8, 2026</td>
                     <td>Retail Express</td>
                     <td>Professional Plan</td>
                     <td><strong>₦40,000</strong></td>
-                    <td><span class="status-badge pending">Pending</span></td>
-                    <td>-</td>
+                    <td><span class="status-badge paid">Paid</span></td>
+                    <td>Jan 10, 2026</td>
                     <td>
                       <button class="view-details-btn" data-comm-id="2">
                         <i class="bi bi-caret-right-fill view-arrow"></i>Details
@@ -540,7 +537,6 @@
                   
                   <tr class="comm-row" data-status="paid" data-month="2025-12">
                     <td>3</td>
-                    <td>Dec 28, 2025</td>
                     <td>Fashion Hub Nigeria</td>
                     <td>Business Plan</td>
                     <td><strong>₦35,000</strong></td>
@@ -555,7 +551,6 @@
                   
                   <tr class="comm-row" data-status="paid" data-month="2025-12">
                     <td>4</td>
-                    <td>Dec 20, 2025</td>
                     <td>Auto Parts Co</td>
                     <td>Professional Plan</td>
                     <td><strong>₦40,000</strong></td>
@@ -568,14 +563,13 @@
                     </td>
                   </tr>
                   
-                  <tr class="comm-row" data-status="processing" data-month="2025-12">
+                  <tr class="comm-row" data-status="paid" data-month="2025-12">
                     <td>5</td>
-                    <td>Dec 15, 2025</td>
                     <td>Lagos Tech Hub</td>
                     <td>Enterprise Plan</td>
                     <td><strong>₦65,000</strong></td>
-                    <td><span class="status-badge processing">Processing</span></td>
-                    <td>-</td>
+                    <td><span class="status-badge paid">Paid</span></td>
+                    <td>Jan 10, 2026</td>
                     <td>
                       <button class="view-details-btn" data-comm-id="5">
                         <i class="bi bi-caret-right-fill view-arrow"></i>Details
@@ -585,7 +579,6 @@
                   
                   <tr class="comm-row" data-status="paid" data-month="2025-11">
                     <td>6</td>
-                    <td>Nov 25, 2025</td>
                     <td>Global Supplies Inc</td>
                     <td>Business Plan</td>
                     <td><strong>₦35,000</strong></td>
@@ -600,7 +593,6 @@
                   
                   <tr class="comm-row" data-status="paid" data-month="2025-11">
                     <td>7</td>
-                    <td>Nov 18, 2025</td>
                     <td>Mega Mart Nigeria</td>
                     <td>Professional Plan</td>
                     <td><strong>₦40,000</strong></td>
@@ -615,7 +607,6 @@
                   
                   <tr class="comm-row" data-status="paid" data-month="2025-10">
                     <td>8</td>
-                    <td>Oct 30, 2025</td>
                     <td>Coastal Ventures</td>
                     <td>Enterprise Plan</td>
                     <td><strong>₦50,000</strong></td>
